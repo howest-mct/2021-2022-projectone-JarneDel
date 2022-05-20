@@ -1,0 +1,298 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;900&display=swap');
+@-webkit-keyframes move-left {
+  0% {
+    -webkit-transform: none;
+    transform: none;
+  }
+  65% {
+    -webkit-transform: translateX(-80px);
+    transform: translateX(-80px);
+  }
+  100% {
+    -webkit-transform: translateX(-80px);
+    transform: translateX(-80px);
+  }
+}
+
+@keyframes move-left {
+  0% {
+    -webkit-transform: none;
+    transform: none;
+  }
+  65% {
+    -webkit-transform: translateX(-80px);
+    transform: translateX(-80px);
+  }
+  100% {
+    -webkit-transform: translateX(-80px);
+    transform: translateX(-80px);
+  }
+}
+@-webkit-keyframes move-right {
+  0% {
+    -webkit-transform: none;
+    transform: none;
+  }
+  65% {
+    -webkit-transform: translateX(80px);
+    transform: translateX(80px);
+  }
+  100% {
+    -webkit-transform: translateX(80px);
+    transform: translateX(80px);
+  }
+}
+@keyframes move-right {
+  0% {
+    -webkit-transform: none;
+    transform: none;
+  }
+  65% {
+    -webkit-transform: translateX(80px);
+    transform: translateX(80px);
+  }
+  100% {
+    -webkit-transform: translateX(80px);
+    transform: translateX(80px);
+  }
+}
+@-webkit-keyframes width-to-zero {
+  0% {
+    width: 50px;
+  }
+  100% {
+    width: 11px;
+  }
+}
+@keyframes width-to-zero {
+  0% {
+    width: 50px;
+  }
+  100% {
+    width: 11px;
+  }
+}
+@-webkit-keyframes move-up {
+  100% {
+    bottom: 100.75px;
+  }
+}
+@keyframes move-up {
+  100% {
+    bottom: 100.75px;
+  }
+}
+@-webkit-keyframes move-down {
+  100% {
+    top: 100.75px;
+  }
+}
+@keyframes move-down {
+  100% {
+    top: 100.75px;
+  }
+}
+
+body,
+html {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #aecad8;
+  transition: all 0.14s ease-in;
+}
+
+/* body.u-active {
+  background: #f3f7f9;
+} */
+
+.o-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+}
+
+.c-power-btn {
+  margin: auto;
+  /* margin-top: 20px; */
+  background: #38434a;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  font-family: Roboto;
+  font-weight: 800;
+  font-size: 1.9em;
+  height: 65px;
+  letter-spacing: 0.2px;
+  line-height: 65px;
+  text-align: center;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  width: 150px;
+  transition: none;
+}
+.c-power-btn:hover {
+  background: #414e56;
+}
+.c-power-btn:active {
+  box-shadow: inset 0px 4px 10px 0px #2d363b;
+  transition: background 0.14s ease-in;
+}
+
+/* opmaak van de bulb */
+.c-fancy-bulb {
+  position: relative;
+}
+.c-fancy-bulb__streaks,
+.c-fancy-bulb__streaks:after,
+.c-fancy-bulb__streaks:before {
+  position: absolute;
+  background: #ffdb55;
+  border-radius: 5.5px;
+  height: 11px;
+  z-index: 5000;
+}
+
+.c-fancy-bulb__streaks:after,
+.c-fancy-bulb__streaks:before {
+  content: '';
+  display: block;
+}
+
+.c-fancy-bulb__streaks:before {
+  bottom: 65px;
+}
+
+.c-fancy-bulb__streaks:after {
+  top: 65px;
+}
+
+.c-fancy-bulb__streaks--left {
+  right: 217px;
+  top: 89.5px;
+}
+.c-fancy-bulb__streaks--left:before,
+.c-fancy-bulb__streaks--left:after {
+  left: 15px;
+}
+
+.c-fancy-bulb__streaks--right {
+  left: 217px;
+  top: 89.5px;
+}
+
+.c-fancy-bulb__streaks--right:before,
+.c-fancy-bulb__streaks--right:after {
+  right: 15px;
+}
+
+.c-fancy-bulb__streaks--left:before,
+.c-fancy-bulb__streaks--righ:after {
+  -webkit-transform: rotate(34deg);
+  transform: rotate(34deg);
+}
+
+.c-fancy-bulb__streaks--left:after,
+.c-fancy-bulb__streaks--righ:before {
+  -webkit-transform: rotate(-34deg);
+  transform: rotate(-34deg);
+}
+
+.c-fancy-bulb__light {
+  -webkit-transform: translate(50%, 50%) scale(0);
+  transform: translate(50%, 50%) scale(0);
+  opacity: 0;
+  fill: #ffdb55;
+}
+
+.c-room {
+  display: flex;
+  flex-direction: column;
+  background: #a3bcc9;
+  padding: 1em;
+  margin: 0 0.5em;
+}
+.c-room__name {
+  font-family: Roboto;
+  font-size: 1.25em;
+  font-weight: 100;
+  text-align: center;
+  margin-bottom: 12px;
+  color: #38434a;
+}
+.c-room__icon {
+  margin-bottom: 20px;
+}
+.c-room__control {
+}
+
+.c-room--wait .c-fancy-bulb__light {
+  opacity: 1;
+  -webkit-transform: translate(0) scale(1);
+  transform: translate(0) scale(1);
+  transition: all 0.14s ease-in;
+  fill: rgb(248, 238, 203);
+}
+
+.c-room--on .c-fancy-bulb__light {
+  opacity: 1;
+  -webkit-transform: translate(0) scale(1);
+  transform: translate(0) scale(1);
+  transition: all 0.14s ease-in;
+  fill: #ffdb55;
+}
+
+.c-room--on .c-fancy-bulb__streaks--left {
+  -webkit-animation: move-left 0.38s ease-out, width-to-zero 0.38s ease-out;
+  animation: move-left 0.38s ease-out, width-to-zero 0.38s ease-out;
+  -webkit-animation-delay: 0.14s;
+  animation-delay: 0.14s;
+}
+
+.c-room--on .c-fancy-bulb__streaks--left:before {
+  -webkit-animation: width-to-zero 0.38s ease-out, move-up 0.38s ease-out;
+  animation: width-to-zero 0.38s ease-out, move-up 0.38s ease-out;
+  -webkit-animation-delay: 0.14s;
+  animation-delay: 0.14s;
+}
+.c-room--on .c-fancy-bulb__streaks--left:after {
+  -webkit-animation: width-to-zero 0.38s ease-out, move-down 0.38s ease-out;
+  animation: width-to-zero 0.38s ease-out, move-down 0.38s ease-out;
+  -webkit-animation-delay: 0.14s;
+  animation-delay: 0.14s;
+}
+
+.c-room--on .c-fancy-bulb__streaks--right {
+  -webkit-animation: move-right 0.38s ease-out, width-to-zero 0.38s ease-out;
+  animation: move-right 0.38s ease-out, width-to-zero 0.38s ease-out;
+  -webkit-animation-delay: 0.14s;
+  animation-delay: 0.14s;
+}
+
+.c-room--on .c-fancy-bulb__streaks--right:before {
+  -webkit-animation: width-to-zero 0.38s ease-out, move-up 0.38s ease-out;
+  animation: width-to-zero 0.38s ease-out, move-up 0.38s ease-out;
+  -webkit-animation-delay: 0.14s;
+  animation-delay: 0.14s;
+}
+.c-room--on .c-fancy-bulb__streaks--right:after {
+  -webkit-animation: width-to-zero 0.38s ease-out, move-down 0.38s ease-out;
+  animation: width-to-zero 0.38s ease-out, move-down 0.38s ease-out;
+  -webkit-animation-delay: 0.14s;
+  animation-delay: 0.14s;
+}
+
+.c-room--on .c-power-btn {
+  background: #58c48d;
+}
+.c-room--on .c-power-btn:active {
+  box-shadow: inset 0px 6px 8px -1px #41b77b;
+}
