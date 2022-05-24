@@ -1,4 +1,4 @@
-# Project One - Name of the project
+# Project One - AirInsight
 
 **De inhoud van dit document schrijf je volledig in het Engels**
 
