@@ -11,4 +11,4 @@ except KeyboardInterrupt:
     pass
 finally:
     pms.cleanup()
-    GPIO.cleanup
+    GPIO.cleanup()
