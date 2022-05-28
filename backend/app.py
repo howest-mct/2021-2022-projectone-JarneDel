@@ -31,7 +31,7 @@ app.config["SECRET_KEY"] = "3fan6od4@PG$BfGH"
 socketio = SocketIO(
     app, cors_allowed_origins="*", logger=False, engineio_logger=False, ping_timeout=1
 )
-
+sensor_active = False
 CORS(app)
 
 
@@ -48,25 +48,27 @@ trans_pin_mhz = 26
 
 # region Main Thread
 def main_thread():
-
+    global sensor_active
     while True:
+        if not sensor_active:
+            sensor_active = True
+            val = read_mhz19b()
+            time.sleep(1)
+            list_data, dict_data = read_pms()
+            print(dict_data)
+            time.sleep(1)
+            # steek gelezen waarde in database
+            DataRepository.add_data_point(val, 1, 2)
+            # broadcast gemeten waarde
+            socketio.emit("B2F_CO2", {"CO2": val})
+            # voorlopig hardcoded
+            for i, datapunt in enumerate(list_data):
+                # pm sensor begint bij eenheidID2
+                DataRepository.add_data_point(datapunt, 1, 3 + i)
 
-        val = read_mhz19b()
-        time.sleep(1)
-        list_data, dict_data = read_pms()
-        print(dict_data)
-        time.sleep(1)
-        # steek gelezen waarde in database
-        DataRepository.add_data_point(val, 1, 2)
-        # broadcast gemeten waarde
-        socketio.emit("B2F_CO2", {"CO2": val})
-        # voorlopig hardcoded
-        for i, datapunt in enumerate(list_data):
-            # pm sensor begint bij eenheidID2
-            DataRepository.add_data_point(datapunt, 1, 3 + i)
-
-        socketio.emit("B2F_PM", dict_data)
-        time.sleep(60)
+            socketio.emit("B2F_PM", dict_data)
+            sensor_active = False
+            time.sleep(60)
 
 
 # endregion
@@ -117,6 +119,27 @@ def serial_send_and_receive(msg):
             return " "
 
 
+def refesh():
+    global sensor_active
+    while sensor_active:
+        # Als sensor nog bezig is, wacht dan even.
+        time.sleep(0.1)
+    sensor_active = True
+    val = read_mhz19b()
+    time.sleep(0.02)
+    list_data, dict_data = read_pms()
+    sensor_active = False
+    DataRepository.add_data_point(val, 1, 2)
+    # broadcast gemeten waarde
+    socketio.emit("B2F_CO2", {"CO2": val})
+    # voorlopig hardcoded
+    for i, datapunt in enumerate(list_data):
+        # pm sensor begint bij eenheidID2
+        DataRepository.add_data_point(datapunt, 1, 3 + i)
+
+    socketio.emit("B2F_PM", dict_data)
+
+
 # endregion
 
 
@@ -126,6 +149,18 @@ def serial_send_and_receive(msg):
 @app.route("/")
 def hallo():
     return "Server is running, er zijn momenteel geen API endpoints beschikbaar."
+
+
+@app.route("/data/actueel/")
+def actuele_data():
+    return jsonify(data=DataRepository.get_all_recent_data()), 200
+
+
+@app.route("/data/refesh/")
+def refesh():
+    thread = threading.Thread(target=refesh, args=(), daemon=True)
+    thread.start()
+    return jsonify(Refeshing="True"), 200
 
 
 @socketio.on("connect")
