@@ -21,6 +21,7 @@ from model.pms5003 import Pms5003
 def setup_gpio():
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
+    GPIO.setup((trans_pin_PMS, trans_pin_mhz), GPIO.OUT, initial=0)
 
 
 # Code voor Flask
@@ -42,18 +43,22 @@ def error_handler(e):
 # pms init
 pms = Pms5003(set=20, reset=21)
 pms.setup()
+trans_pin_PMS = 19
+trans_pin_mhz = 26
 
 # region Main Thread
 def main_thread():
 
-    # kan nog niet doen, weet nog niet hoe 2de uart bus werkt
     while True:
-        # val = read_mhz19b()
-        # DataRepository.add_data_point(val, 1, 2)
-        # socketio.emit("B2F_CO2", {"CO2": val})
+        val = read_mhz19b()
+        print(val)
+        DataRepository.add_data_point(val, 1, 2)
+        socketio.emit("B2F_CO2", {"CO2": val})
         time.sleep(1)
-        list_data, dict_data = pms.read()  # dict met 9 data punten
+        list_data, dict_data = read_pms()
+
         # voorlopig hardcoded
+        print(dict_data)
         for i, datapunt in enumerate(list_data):
             # pm sensor begint bij eenheidID2
             DataRepository.add_data_point(datapunt, 1, 3 + i)
@@ -65,8 +70,19 @@ def main_thread():
 # endregion
 
 # Region SENSORS
+def read_pms():
+    GPIO.output(trans_pin_mhz, 0)
+    GPIO.output(trans_pin_PMS, 1)
+    list_data, dict_data = pms.read()
+    GPIO.output(trans_pin_PMS, 0)
+    return list_data, dict_data
+
+
 def read_mhz19b():
+    GPIO.output(trans_pin_mhz, 1)
+    GPIO.output(trans_pin_PMS, 0)
     data = serial_send_and_receive(b"\xff\x01\x86\x00\x00\x00\x00\x00\x79")
+    GPIO.output(trans_pin_mhz, 0)
     val = int.from_bytes(data[2:4], "big")
     return val
 
