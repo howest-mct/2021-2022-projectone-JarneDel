@@ -48,9 +48,21 @@ const showCharts = function () {
 }
 const showUpdatedCharts = function (jsonObject) {
   console.log(jsonObject)
+  const data = jsonObject.data
+  for (let sensorWaarde of data) {
+    if (sensorWaarde.devicenaam == 'MH-Z19B') {
+      updateCo2chart(sensorWaarde.setwaarde)
+      co2Chart.updateSeries([valueToPercentCO2(sensorWaarde.setwaarde)])
+    }
+  }
 }
 
 // #endregion
+
+// #region ***  Updates  ***
+const updateCo2chart = function (val) {
+  co2Chart.updateSeries([valueToPercentCO2(val)])
+}
 
 // #region ***  Callback-No Visualisation - callback___  ***********
 const callbackError = function (jsonObject) {
@@ -91,9 +103,8 @@ const listenToSocket = function () {
 const listenToSocketCharts = function () {
   socketio.on("B2F_CO2", function (data) {
     console.log("New co2 reading")
-    co2Chart.updateSeries([
-      valueToPercentCO2(data['CO2'])
-    ])
+    updateCo2chart(data['CO2'])
+
   })
   socketio.on('B2F_PM', function (data) {
     console.log(data)
