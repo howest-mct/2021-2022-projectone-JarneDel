@@ -12,7 +12,7 @@ class DataRepository:
 
     @staticmethod
     def add_data_point(setWaarde, actieID, EenheidID):
-        sql = "insert into historiek (setWaarde, actieID, EenheidID) values(%s,%s,%s)"
+        sql = "insert into historiek (setWaarde, actieID, DeviceEenheidID) values(%s,%s,%s)"
         params = [setWaarde, actieID, EenheidID]
         return Database.execute_sql(sql, params)
 

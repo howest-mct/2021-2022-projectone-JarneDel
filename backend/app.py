@@ -50,15 +50,17 @@ trans_pin_mhz = 26
 def main_thread():
 
     while True:
+
         val = read_mhz19b()
-        print(val)
-        DataRepository.add_data_point(val, 1, 2)
-        socketio.emit("B2F_CO2", {"CO2": val})
         time.sleep(1)
         list_data, dict_data = read_pms()
-
-        # voorlopig hardcoded
         print(dict_data)
+        time.sleep(1)
+        # steek gelezen waarde in database
+        DataRepository.add_data_point(val, 1, 2)
+        # broadcast gemeten waarde
+        socketio.emit("B2F_CO2", {"CO2": val})
+        # voorlopig hardcoded
         for i, datapunt in enumerate(list_data):
             # pm sensor begint bij eenheidID2
             DataRepository.add_data_point(datapunt, 1, 3 + i)
@@ -191,5 +193,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("KeyboardInterrupt exception is caught")
     finally:
-        pms.cleanup()
         GPIO.cleanup()
