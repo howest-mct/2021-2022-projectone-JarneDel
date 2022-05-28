@@ -32,6 +32,7 @@ socketio = SocketIO(
     app, cors_allowed_origins="*", logger=False, engineio_logger=False, ping_timeout=1
 )
 sensor_active = False
+endpoint = "/api/v1"
 CORS(app)
 
 
@@ -151,12 +152,12 @@ def hallo():
     return "Server is running, er zijn momenteel geen API endpoints beschikbaar."
 
 
-@app.route("/data/actueel/")
+@app.route(endpoint + "/data/actueel/")
 def actuele_data():
     return jsonify(data=DataRepository.get_all_recent_data()), 200
 
 
-@app.route("/data/refesh/")
+@app.route(endpoint + "/data/refesh/")
 def refesh():
     thread = threading.Thread(target=refesh, args=(), daemon=True)
     thread.start()
