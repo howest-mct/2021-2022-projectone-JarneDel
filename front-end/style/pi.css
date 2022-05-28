@@ -210,3 +210,7 @@ h2 {
   margin: 0 auto;
   margin-top: 32px;
 }
+
+.c-hidden{
+  display: none !important;
+}

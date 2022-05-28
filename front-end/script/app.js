@@ -10,64 +10,9 @@ try {
   console.log('geen socketio');
 }
 
-const valueToPercent = function (value) {
-  return (value * 100) / 5000
-}
-let chartOptions = {
-  chart: {
-    height: 280,
-    type: "radialBar",
-  },
-  series: [valueToPercent(2500)],
-  colors: ["#2699FB"],
-  plotOptions: {
-    radialBar: {
-      startAngle: -135,
-      endAngle: 135,
-      hollow: {
-        margin: 15,
-        size: '65%',
-      },
-      track: {
-        background: '#BCE0FD',
-        startAngle: -135,
-        endAngle: 135,
-        // strokeWidth: '75%',
-      },
-      dataLabels: {
-        name: {
-          show: true,
-          fontSize: "20px",
-          fontWeight: 400,
-          fontFamily: "proxima-nova",
-          offsetY: 20,
-        },
-        value: {
-          formatter: (val) => (val * 5000) / 100,
-          fontSize: "40px",
-          fontWeight: 700,
-          fontFamily: "proxima-nova",
-          show: true,
-          offsetY: -20,
-        }
-      }
-    }
-  },
-  fill: {
-    type: "solid",
-    // gradient: {
-    //   shade: "dark",
-    //   type: "horizontal",
-    //   // gradientToColors: ["#87D4F9"],
-    //   stops: [0, 100]
-    // }
-  },
-  stroke: {
-    lineCap: "round"
-  },
-  labels: ["Zwaar vervuild"]
-};
-let co2Chart;
+
+
+let co2Chart, tempChart, humidityChart, pressureChart;
 
 let selectedPage = "actueel";
 // #region ***  DOM references                           ***********
@@ -89,12 +34,15 @@ const showPage = function (type) {
 
 const showCharts = function () {
   console.log("chart will be shown")
-
-  co2Chart = new ApexCharts(document.querySelector(".js-co2-chart"), chartOptions);
-
+  co2Chart = new ApexCharts(document.querySelector(".js-co2-chart"), CO2ChartOptions);
   co2Chart.render();
-
-
+  tempChart = new ApexCharts(document.querySelector('.js-temperature-chart'), tempChartOptions)
+  tempChart.render();
+  humidityChart = new ApexCharts(document.querySelector('.js-humidity-chart'), humidityChartOptions)
+  humidityChart.render();
+  pressureChart = new ApexCharts(document.querySelector('.js-pressure-chart'), PressureChartOptions)
+  pressureChart.render()
+  listenToSocketCharts();
 }
 
 
@@ -125,12 +73,20 @@ const listenToSocket = function () {
     }
     htmlOnBoot.innerHTML = html;
   });
-  socketio.on("B2F_new_co2", function (data) {
-    co2Chart.updateSeries([{
-      data: valueToPercent(data['CO2'])
-    }])
-  })
+
 };
+
+const listenToSocketCharts = function () {
+  socketio.on("B2F_CO2", function (data) {
+    console.log("New co2 reading")
+    co2Chart.updateSeries([
+      valueToPercentCO2(data['CO2'])
+    ])
+  })
+  socketio.on('B2F_PM', function (data) {
+    console.log(data)
+  })
+}
 
 const listenToBtnSidebar = function () {
   const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
