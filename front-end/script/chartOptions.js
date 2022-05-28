@@ -1,14 +1,14 @@
 const valueToPercentCO2 = function (value) {
-    return (value * 100) / 5000
+    return Math.round((value * 100) / 5000, 2)
 }
 const valueToPercentTemp = function (value) {
-    return (value * 100) / 45
+    return Math.round((value * 100) / 45, 2)
 }
 const valueToPercentHum = function (value) {
-    return (value * 100) / 100
+    return Math.round((value * 100) / 100, 2)
 }
 const valueToPercentPressure = function (value) {
-    return ((value - 940) * 100) / (1060 - 940);
+    return Math.round(((value - 940) * 100) / (1060 - 940), 2);
 }
 let CO2ChartOptions = {
     chart: {

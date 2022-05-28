@@ -9,7 +9,7 @@ try {
 } catch {
   console.log('geen socketio');
 }
-
+let OnlyOneListener = true;
 
 
 let co2Chart, tempChart, humidityChart, pressureChart;
@@ -27,7 +27,8 @@ const showPage = function (type) {
   if (type == 'actueel') {
     document.querySelector('.c-topbar').innerHTML = `<h2>Actuele data</h2>`
     htmlActueel.classList.remove('c-hidden')
-    showCharts()
+    if (OnlyOneListener) { showCharts(); OnlyOneListener = false };
+
   }
 }
 
@@ -43,15 +44,26 @@ const showCharts = function () {
   pressureChart = new ApexCharts(document.querySelector('.js-pressure-chart'), PressureChartOptions)
   pressureChart.render()
   listenToSocketCharts();
+  getActueleData()
 }
-
+const showUpdatedCharts = function (jsonObject) {
+  console.log(jsonObject)
+}
 
 // #endregion
 
 // #region ***  Callback-No Visualisation - callback___  ***********
+const callbackError = function (jsonObject) {
+  console.log(jsonObject);
+  console.error("Er is een error opgetredenv bij de fetch")
+}
 // #endregion
 
 // #region ***  Data Access - get___                     ***********
+const getActueleData = function () {
+  const url = backend + '/data/actueel/'
+  handleData(url, showUpdatedCharts, callbackError)
+}
 // #endregion
 
 

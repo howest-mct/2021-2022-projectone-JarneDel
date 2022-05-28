@@ -82,7 +82,7 @@ h2 {
     height: calc(100vh - 72px);
     overflow-y: auto;
     overflow-x: hidden;
-    background: #eee;
+    background: #EAEAEA;
   }
   
   .c-sidebar__title {
@@ -162,6 +162,7 @@ h2 {
   border: 1px solid #A5A5A5;
   width: 413px;
   margin: 16px 4px;
+  box-shadow: 0 3px 6px #a5a5a5;
 }
 .c-box__header{
   border-bottom: 1px solid #a5a5a5;
