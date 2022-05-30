@@ -46,6 +46,7 @@ h2 {
   font-size: 1.3rem;
 }
 
+
 /* Components */
 .c-app {
   display: grid;
@@ -55,6 +56,10 @@ h2 {
 }
 
 .c-logo {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 182px;
   display: flex;
   justify-content: center;
   padding: 1rem;
@@ -68,6 +73,7 @@ h2 {
 }
 
 .c-topbar {
+  position: static;
   padding: 0 2rem;
   background: rgba(255, 255, 255, 1);
   border-bottom: 1px solid #cfcfcf;
@@ -77,8 +83,11 @@ h2 {
 
 @media (min-width:850px) {
   .c-sidebar {
+    position: fixed;
     box-sizing: border-box;
     padding: 1rem 0;
+    width: 14.4vw;
+    top: 72px;
     height: calc(100vh - 72px);
     overflow-y: auto;
     overflow-x: hidden;
@@ -164,6 +173,10 @@ h2 {
   margin: 16px 4px;
   box-shadow: 0 3px 6px #a5a5a5;
 }
+.c-box--wide{
+  width: 834px;
+}
+
 .c-box__header{
   border-bottom: 1px solid #a5a5a5;
   display: flex;
@@ -207,10 +220,17 @@ h2 {
   bottom: 16px;
 }
 .c-content{
+  
+  top: 64px;
+  right: 0px;
   max-width: 60rem;
   margin: 0 auto;
   margin-top: 32px;
+  margin-left: 14.4vw;
+  transform: translateX(-10%)
 }
+
+
 
 .c-hidden{
   display: none !important;

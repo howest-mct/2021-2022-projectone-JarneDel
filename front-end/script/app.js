@@ -11,10 +11,9 @@ try {
 }
 let OnlyOneListener = true;
 
+let co2Chart, tempChart, humidityChart, pressureChart, PMchart, PMNopChart;
 
-let co2Chart, tempChart, humidityChart, pressureChart;
-
-let selectedPage = "actueel";
+let selectedPage = 'actueel';
 // #region ***  DOM references                           ***********
 let hmtlPM, htmlOnBoot;
 let htmlActueel;
@@ -23,62 +22,83 @@ let htmlActueel;
 
 // #region ***  Callback-Visualisation - show___         ***********
 const showPage = function (type) {
-  console.log(type)
+  console.log(type);
   if (type == 'actueel') {
-    document.querySelector('.c-topbar').innerHTML = `<h2>Actuele data</h2>`
-    htmlActueel.classList.remove('c-hidden')
-    if (OnlyOneListener) { showCharts(); OnlyOneListener = false };
-
-  }
-}
-
-
-const showCharts = function () {
-  console.log("chart will be shown")
-  co2Chart = new ApexCharts(document.querySelector(".js-co2-chart"), CO2ChartOptions);
-  co2Chart.render();
-  tempChart = new ApexCharts(document.querySelector('.js-temperature-chart'), tempChartOptions)
-  tempChart.render();
-  humidityChart = new ApexCharts(document.querySelector('.js-humidity-chart'), humidityChartOptions)
-  humidityChart.render();
-  pressureChart = new ApexCharts(document.querySelector('.js-pressure-chart'), PressureChartOptions)
-  pressureChart.render()
-  listenToSocketCharts();
-  getActueleData()
-}
-const showUpdatedCharts = function (jsonObject) {
-  console.log(jsonObject)
-  const data = jsonObject.data
-  for (let sensorWaarde of data) {
-    if (sensorWaarde.devicenaam == 'MH-Z19B') {
-      updateCo2chart(sensorWaarde.setwaarde)
-      co2Chart.updateSeries([valueToPercentCO2(sensorWaarde.setwaarde)])
+    document.querySelector('.c-topbar').innerHTML = `<h2>Actuele data</h2>`;
+    htmlActueel.classList.remove('c-hidden');
+    if (OnlyOneListener) {
+      showCharts();
+      OnlyOneListener = false;
     }
   }
-}
+};
+
+const showCharts = function () {
+  console.log('chart will be shown');
+  co2Chart = new ApexCharts(
+    document.querySelector('.js-co2-chart'),
+    CO2ChartOptions
+  );
+  co2Chart.render();
+  tempChart = new ApexCharts(
+    document.querySelector('.js-temperature-chart'),
+    tempChartOptions
+  );
+  tempChart.render();
+  humidityChart = new ApexCharts(
+    document.querySelector('.js-humidity-chart'),
+    humidityChartOptions
+  );
+  humidityChart.render();
+  pressureChart = new ApexCharts(
+    document.querySelector('.js-pressure-chart'),
+    PressureChartOptions
+  );
+  pressureChart.render();
+  PMchart = new ApexCharts(
+    document.querySelector('.js-pm-chart'),
+    PMChartOptions
+  );
+  PMchart.render();
+  PMNopChart = new ApexCharts(
+    document.querySelector('.js-pm-chart-NOP'),
+    PMNopChartOptions
+  );
+  PMNopChart.render();
+  listenToSocketCharts();
+  getActueleData();
+};
+const showUpdatedCharts = function (jsonObject) {
+  console.log(jsonObject);
+  const data = jsonObject.data;
+  for (let sensorWaarde of data) {
+    if (sensorWaarde.devicenaam == 'MH-Z19B') {
+      updateCo2chart(sensorWaarde.setwaarde);
+      co2Chart.updateSeries([valueToPercentCO2(sensorWaarde.setwaarde)]);
+    }
+  }
+};
 
 // #endregion
 
 // #region ***  Updates  ***
 const updateCo2chart = function (val) {
-  co2Chart.updateSeries([valueToPercentCO2(val)])
-}
+  co2Chart.updateSeries([valueToPercentCO2(val)]);
+};
 
 // #region ***  Callback-No Visualisation - callback___  ***********
 const callbackError = function (jsonObject) {
   console.log(jsonObject);
-  console.error("Er is een error opgetredenv bij de fetch")
-}
+  console.error('Er is een error opgetredenv bij de fetch');
+};
 // #endregion
 
 // #region ***  Data Access - get___                     ***********
 const getActueleData = function () {
-  const url = backend + '/data/actueel/'
-  handleData(url, showUpdatedCharts, callbackError)
-}
+  const url = backend + '/data/actueel/';
+  handleData(url, showUpdatedCharts, callbackError);
+};
 // #endregion
-
-
 
 // #region ***  Event Listeners - listenTo___            ***********
 const listenToSocket = function () {
@@ -97,19 +117,17 @@ const listenToSocket = function () {
     }
     htmlOnBoot.innerHTML = html;
   });
-
 };
 
 const listenToSocketCharts = function () {
-  socketio.on("B2F_CO2", function (data) {
-    console.log("New co2 reading")
-    updateCo2chart(data['CO2'])
-
-  })
+  socketio.on('B2F_CO2', function (data) {
+    console.log('New co2 reading');
+    updateCo2chart(data['CO2']);
+  });
   socketio.on('B2F_PM', function (data) {
-    console.log(data)
-  })
-}
+    console.log(data);
+  });
+};
 
 const listenToBtnSidebar = function () {
   const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
@@ -121,18 +139,18 @@ const listenToBtnSidebar = function () {
       }
       this.classList.add('c-selected');
       const type = this.dataset.type;
-      showPage(type)
-    })
+      showPage(type);
+    });
   }
-}
+};
 
 // #endregion
 const SetReload = function () {
   document.location.reload(true);
-}
+};
 // #region ***  Init / DOMContentLoaded                  ***********
 const init = function () {
-  console.log("Timeout")
+  console.log('Timeout');
   // setTimeout(SetReload, 30000)
   if (document.querySelector('.js-testData')) {
     console.log('test pagina');
@@ -140,9 +158,9 @@ const init = function () {
     htmlOnBoot = document.querySelector('.js-on-boot');
     listenToSocket();
   } else if (document.querySelector('.Homepagina')) {
-    console.log("Homepage")
-    htmlActueel = document.querySelector('.js-actueel')
-    listenToBtnSidebar()
+    console.log('Homepage');
+    htmlActueel = document.querySelector('.js-actueel');
+    listenToBtnSidebar();
   }
 };
 
