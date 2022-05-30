@@ -11,7 +11,13 @@ try {
 }
 let OnlyOneListener = true;
 
-let co2Chart, tempChart, humidityChart, pressureChart, PMchart, PMNopChart;
+let co2Chart,
+  tempChart,
+  humidityChart,
+  pressureChart,
+  PMchart,
+  PMNopChart,
+  VOCchart;
 
 let selectedPage = 'actueel';
 // #region ***  DOM references                           ***********
@@ -24,10 +30,16 @@ let htmlActueel;
 const showPage = function (type) {
   console.log(type);
   if (type == 'actueel') {
-    document.querySelector('.c-topbar').innerHTML = `<h2>Actuele data</h2>`;
+    document.querySelector(
+      '.c-topbar'
+    ).innerHTML = `<h2>Actuele data</h2><svg class="js-refesh" xmlns="http://www.w3.org/2000/svg" height="48" width="48">
+    <path
+      d="M24 40Q17.35 40 12.675 35.325Q8 30.65 8 24Q8 17.35 12.675 12.675Q17.35 8 24 8Q28.25 8 31.45 9.725Q34.65 11.45 37 14.45V8H40V20.7H27.3V17.7H35.7Q33.8 14.7 30.85 12.85Q27.9 11 24 11Q18.55 11 14.775 14.775Q11 18.55 11 24Q11 29.45 14.775 33.225Q18.55 37 24 37Q28.15 37 31.6 34.625Q35.05 32.25 36.4 28.35H39.5Q38.05 33.6 33.75 36.8Q29.45 40 24 40Z" />
+  </svg>`;
     htmlActueel.classList.remove('c-hidden');
     if (OnlyOneListener) {
       showCharts();
+      listenToRefesh();
       OnlyOneListener = false;
     }
   }
@@ -65,6 +77,11 @@ const showCharts = function () {
     PMNopChartOptions
   );
   PMNopChart.render();
+  VOCchart = new ApexCharts(
+    document.querySelector('.js-voc-chart'),
+    VOCChartOptions
+  );
+  VOCchart.render();
   listenToSocketCharts();
   getActueleData();
 };
@@ -77,6 +94,10 @@ const showUpdatedCharts = function (jsonObject) {
       co2Chart.updateSeries([valueToPercentCO2(sensorWaarde.setwaarde)]);
     }
   }
+};
+
+const showRefesh = function (jsonObject) {
+  console.log(jsonObject);
 };
 
 // #endregion
@@ -97,6 +118,11 @@ const callbackError = function (jsonObject) {
 const getActueleData = function () {
   const url = backend + '/data/actueel/';
   handleData(url, showUpdatedCharts, callbackError);
+};
+
+const getRefesh = function () {
+  const url = backend + '/data/refesh/';
+  handleData(url, showRefesh, callbackError);
 };
 // #endregion
 
@@ -142,6 +168,13 @@ const listenToBtnSidebar = function () {
       showPage(type);
     });
   }
+};
+
+const listenToRefesh = function () {
+  document.querySelector('.js-refesh').addEventListener('click', function () {
+    console.log('Refesh');
+    getRefesh();
+  });
 };
 
 // #endregion

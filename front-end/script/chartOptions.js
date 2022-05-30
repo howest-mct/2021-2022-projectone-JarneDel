@@ -229,6 +229,60 @@ let PressureChartOptions = {
   labels: ['Hoge druk'],
 };
 
+let VOCChartOptions = {
+  chart: {
+    height: 280,
+    type: 'radialBar',
+  },
+  series: [valueToPercentCO2(1023)],
+  colors: ['#2699FB'],
+  plotOptions: {
+    radialBar: {
+      startAngle: -135,
+      endAngle: 135,
+      hollow: {
+        margin: 15,
+        size: '65%',
+      },
+      track: {
+        background: '#BCE0FD',
+        startAngle: -135,
+        endAngle: 135,
+        // strokeWidth: '75%',
+      },
+      dataLabels: {
+        name: {
+          show: true,
+          fontSize: '20px',
+          fontWeight: 400,
+          fontFamily: 'proxima-nova',
+          offsetY: 20,
+        },
+        value: {
+          formatter: (val) => (val * (1060 - 940)) / 100 + 940,
+          fontSize: '40px',
+          fontWeight: 700,
+          fontFamily: 'proxima-nova',
+          show: true,
+          offsetY: -20,
+        },
+      },
+    },
+  },
+  fill: {
+    type: 'solid',
+    // gradient: {
+    //   shade: "dark",
+    //   type: "horizontal",
+    //   // gradientToColors: ["#87D4F9"],
+    //   stops: [0, 100]
+    // }
+  },
+  stroke: {
+    lineCap: 'round',
+  },
+  labels: ['Some label'],
+};
 // let PMChartOptions = {
 //   chart: {
 //     height: 280,
