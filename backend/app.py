@@ -1,7 +1,7 @@
 import time
 from RPi import GPIO
 from helpers.klasseknop import Button
-from multiprocessing import Process
+import threading
 
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, send
@@ -53,6 +53,7 @@ def main_thread():
     while True:
         if not sensor_active:
             sensor_active = True
+            print(sensor_active)
             val = read_mhz19b()
             time.sleep(1)
             list_data, dict_data = read_pms()
@@ -68,6 +69,7 @@ def main_thread():
                 DataRepository.add_data_point(datapunt, 1, 3 + i)
 
             socketio.emit("B2F_PM", dict_data)
+            print(sensor_active)
             sensor_active = False
             time.sleep(60)
         else:
@@ -125,31 +127,28 @@ def serial_send_and_receive(msg):
 
 def refesh_sensor():
 
-    try:
-        global sensor_active
-        print(sensor_active)
-        while sensor_active == True:
-            # Als sensor nog bezig is, wacht dan even.
-            print("sensor is active")
-            time.sleep(0.1)
-        sensor_active = True
-        val = read_mhz19b()
-        # print(val)
-        time.sleep(0.02)
-        list_data, dict_data = read_pms()
-        sensor_active = False
-        DataRepository.add_data_point(val, 1, 2)
-        # broadcast gemeten waarde
-        socketio.emit("B2F_CO2", {"CO2": val}, broadcast=True)
-        # voorlopig hardcoded
-        for i, datapunt in enumerate(list_data):
-            # pm sensor begint bij eenheidID2
-            DataRepository.add_data_point(datapunt, 1, 3 + i)
+    global sensor_active
+    print(sensor_active)
+    while sensor_active == True:
+        # Als sensor nog bezig is, wacht dan even.
+        print("sensor is active")
+        time.sleep(0.1)
+    sensor_active = True
+    val = read_mhz19b()
+    # print(val)
+    time.sleep(0.02)
+    list_data, dict_data = read_pms()
+    sensor_active = False
+    DataRepository.add_data_point(val, 1, 2)
+    # broadcast gemeten waarde
+    socketio.emit("B2F_CO2", {"CO2": val}, broadcast=True)
+    # voorlopig hardcoded
+    for i, datapunt in enumerate(list_data):
+        # pm sensor begint bij eenheidID2
+        DataRepository.add_data_point(datapunt, 1, 3 + i)
 
-        socketio.emit("B2F_PM", dict_data, broadcast=True)
-        # print("Refesh thread finished")
-    except Exception as error:
-        print(error)
+    socketio.emit("B2F_PM", dict_data, broadcast=True)
+    # print("Refesh thread finished")
 
 
 # endregion
@@ -170,7 +169,7 @@ def actuele_data():
 
 @app.route(endpoint + "/data/refesh/")
 def refesh():
-    p = Process(target=refesh_sensor, args=())
+    p = threading.thread(target=refesh_sensor, args=())
     p.start()
     return jsonify(Refeshing="True"), 200
 
@@ -186,7 +185,7 @@ def initial_connection():
 
 def start_thread():
     print("**** Starting THREAD ****")
-    thread = Process(target=main_thread, args=())
+    thread = threading.Thread(target=main_thread, args=())
     thread.start()
 
 
@@ -223,7 +222,7 @@ def start_chrome_kiosk():
 
 def start_chrome_thread():
     print("**** Starting CHROME ****")
-    chromeThread = Process(target=start_chrome_kiosk, args=())
+    chromeThread = threading.Thread(target=start_chrome_kiosk, args=())
     chromeThread.start()
 
 
