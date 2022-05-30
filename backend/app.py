@@ -169,7 +169,7 @@ def actuele_data():
 
 @app.route(endpoint + "/data/refesh/")
 def refesh():
-    p = threading.thread(target=refesh_sensor, args=())
+    p = threading.Thread(target=refesh_sensor, args=())
     p.start()
     return jsonify(Refeshing="True"), 200
 
