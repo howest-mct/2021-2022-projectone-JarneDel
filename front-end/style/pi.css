@@ -215,18 +215,18 @@ h2 {
 .c-box__header{
   border-bottom: 1px solid #a5a5a5;
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
 }
 .c-box__header .c-icon
 {
-  /* margin-left: 16px ; */
+  padding-left: 16px ;
   height: 48px;
   width: 48px;
   fill: rgb(127, 127, 127) !important;
 }
 .c-box__header .c-historiek{
-  /* margin: 0; */
+  padding-right: 16px;
   height: 48px;
   width: 48px;
   fill: rgb(127, 127, 127);
@@ -297,4 +297,40 @@ h2 {
 
 .c-hidden{
   display: none !important;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 25px 0;
+  font-size: 0.9em;
+  font-family: sans-serif;
+  min-width: 400px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+thead tr {
+  background-color: #2699fb;
+  color: #ffffff;
+  text-align: left;
+}
+th,
+td {
+    padding: 12px 15px;
+}
+th{
+  text-align: left;
+}
+ tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+  tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+  tbody tr:last-of-type {
+  border-bottom: 2px solid #2699fb;
+}
+  tbody tr.active-row {
+  font-weight: bold;
+  color: #2699fb;
 }

@@ -9,7 +9,8 @@ try {
 } catch {
   console.log('geen socketio');
 }
-let OnlyOneListener, OnlyOneListenersettings = true;
+let OnlyOneListener = true;
+let OnlyOneListenersettings = true;
 
 let co2Chart,
   tempChart,
@@ -22,9 +23,17 @@ let co2Chart,
 let selectedPage = 'actueel';
 // #region ***  DOM references                           ***********
 let hmtlPM, htmlOnBoot;
-let htmlActueel, htmlSettings;
+let htmlActueel, htmlSettings, htmlRefesh;
 
 // #endregion
+
+const hide = function(DomObject){
+  DomObject.classList.add('c-hidden')
+}
+const show = function(DomObject){
+  DomObject.classList.remove('c-hidden')
+}
+
 
 // #region ***  Callback-Visualisation - show___         ***********
 const showPage = function (type) {
@@ -33,7 +42,9 @@ const showPage = function (type) {
   if (type == 'actueel') {
     console.log("Actuele pagina")
     htmlTopBarTitle.innerHTML = `Actuele data`;
-    htmlActueel.classList.remove('c-hidden');
+    show(htmlActueel)
+    show(htmlRefesh)
+    hide(htmlSettings)
     if (OnlyOneListener) {
       showCharts();
       listenToRefesh();
@@ -43,8 +54,9 @@ const showPage = function (type) {
   else if (type == 'settings'){
     console.log("Settings")
     htmlTopBarTitle.innerHTML='Instellingen'
-    htmlActueel.classList.add('c-hidden')
-    htmlSettings.classList.remove('c-hidden')
+    hide(htmlActueel)
+    hide(htmlRefesh)
+    show(htmlSettings)
     if (OnlyOneListenersettings){
       getIP()
     }
@@ -53,6 +65,18 @@ const showPage = function (type) {
 
 const showIP = function(jsonIP){
   console.log(jsonIP)
+  let lanIps = jsonIP.ip.lan;
+  let wlanIps = jsonIP.ip.wlan;
+  const htmlIP = document.querySelector('.js-ip');
+  let html = '<table><tr><th>Interface</th><th>IP</th></tr>';
+  for (let lanIP of lanIps){
+    html += `<tr><td>LAN</td><td>${lanIP}</td></tr>`;
+  }
+  for (let wlanIP of wlanIps){
+    html+= `<tr><td>WLAN</td><td>${wlanIP}</td></tr>`;
+  }
+  html += '</table>';
+  htmlIP.innerHTML = html
 }
 
 const showCharts = function () {
@@ -187,7 +211,7 @@ const listenToBtnSidebar = function () {
 };
 
 const listenToRefesh = function () {
-  document.querySelector('.js-refesh').addEventListener('click', function () {
+  htmlRefesh.addEventListener('click', function () {
     console.log('Refesh');
     getRefesh();
   });
@@ -208,6 +232,7 @@ const init = function () {
     listenToSocket();
   } else if (document.querySelector('.Homepagina')) {
     console.log('Homepage');
+    htmlRefesh = document.querySelector('.js-refesh')
     htmlSettings = document.querySelector('.js-settings')
     htmlActueel = document.querySelector('.js-actueel');
     listenToBtnSidebar();
