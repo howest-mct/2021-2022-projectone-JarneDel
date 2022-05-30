@@ -1,7 +1,7 @@
 import time
 from RPi import GPIO
 from helpers.klasseknop import Button
-import threading
+from multiprocessing import Process
 
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, send
@@ -70,6 +70,9 @@ def main_thread():
             socketio.emit("B2F_PM", dict_data)
             sensor_active = False
             time.sleep(60)
+        else:
+            print("Sensor is reading")
+            time.sleep(0.2)
 
 
 # endregion
@@ -120,25 +123,33 @@ def serial_send_and_receive(msg):
             return " "
 
 
-def refesh():
-    global sensor_active
-    while sensor_active:
-        # Als sensor nog bezig is, wacht dan even.
-        time.sleep(0.1)
-    sensor_active = True
-    val = read_mhz19b()
-    time.sleep(0.02)
-    list_data, dict_data = read_pms()
-    sensor_active = False
-    DataRepository.add_data_point(val, 1, 2)
-    # broadcast gemeten waarde
-    socketio.emit("B2F_CO2", {"CO2": val})
-    # voorlopig hardcoded
-    for i, datapunt in enumerate(list_data):
-        # pm sensor begint bij eenheidID2
-        DataRepository.add_data_point(datapunt, 1, 3 + i)
+def refesh_sensor():
 
-    socketio.emit("B2F_PM", dict_data)
+    try:
+        global sensor_active
+        print(sensor_active)
+        while sensor_active == True:
+            # Als sensor nog bezig is, wacht dan even.
+            print("sensor is active")
+            time.sleep(0.1)
+        sensor_active = True
+        val = read_mhz19b()
+        # print(val)
+        time.sleep(0.02)
+        list_data, dict_data = read_pms()
+        sensor_active = False
+        DataRepository.add_data_point(val, 1, 2)
+        # broadcast gemeten waarde
+        socketio.emit("B2F_CO2", {"CO2": val}, broadcast=True)
+        # voorlopig hardcoded
+        for i, datapunt in enumerate(list_data):
+            # pm sensor begint bij eenheidID2
+            DataRepository.add_data_point(datapunt, 1, 3 + i)
+
+        socketio.emit("B2F_PM", dict_data, broadcast=True)
+        # print("Refesh thread finished")
+    except Exception as error:
+        print(error)
 
 
 # endregion
@@ -159,8 +170,8 @@ def actuele_data():
 
 @app.route(endpoint + "/data/refesh/")
 def refesh():
-    thread = threading.Thread(target=refesh, args=(), daemon=True)
-    thread.start()
+    p = Process(target=refesh_sensor, args=())
+    p.start()
     return jsonify(Refeshing="True"), 200
 
 
@@ -175,7 +186,7 @@ def initial_connection():
 
 def start_thread():
     print("**** Starting THREAD ****")
-    thread = threading.Thread(target=main_thread, args=(), daemon=True)
+    thread = Process(target=main_thread, args=())
     thread.start()
 
 
@@ -212,7 +223,7 @@ def start_chrome_kiosk():
 
 def start_chrome_thread():
     print("**** Starting CHROME ****")
-    chromeThread = threading.Thread(target=start_chrome_kiosk, args=(), daemon=True)
+    chromeThread = Process(target=start_chrome_kiosk, args=())
     chromeThread.start()
 
 
