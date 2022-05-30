@@ -9,7 +9,7 @@ try {
 } catch {
   console.log('geen socketio');
 }
-let OnlyOneListener = true;
+let OnlyOneListener, OnlyOneListenersettings = true;
 
 let co2Chart,
   tempChart,
@@ -22,20 +22,17 @@ let co2Chart,
 let selectedPage = 'actueel';
 // #region ***  DOM references                           ***********
 let hmtlPM, htmlOnBoot;
-let htmlActueel;
+let htmlActueel, htmlSettings;
 
 // #endregion
 
 // #region ***  Callback-Visualisation - show___         ***********
 const showPage = function (type) {
+  const htmlTopBarTitle = document.querySelector('.js-topbar-title')
   console.log(type);
   if (type == 'actueel') {
-    document.querySelector(
-      '.c-topbar'
-    ).innerHTML = `<h2>Actuele data</h2><svg class="js-refesh" xmlns="http://www.w3.org/2000/svg" height="48" width="48">
-    <path
-      d="M24 40Q17.35 40 12.675 35.325Q8 30.65 8 24Q8 17.35 12.675 12.675Q17.35 8 24 8Q28.25 8 31.45 9.725Q34.65 11.45 37 14.45V8H40V20.7H27.3V17.7H35.7Q33.8 14.7 30.85 12.85Q27.9 11 24 11Q18.55 11 14.775 14.775Q11 18.55 11 24Q11 29.45 14.775 33.225Q18.55 37 24 37Q28.15 37 31.6 34.625Q35.05 32.25 36.4 28.35H39.5Q38.05 33.6 33.75 36.8Q29.45 40 24 40Z" />
-  </svg>`;
+    console.log("Actuele pagina")
+    htmlTopBarTitle.innerHTML = `Actuele data`;
     htmlActueel.classList.remove('c-hidden');
     if (OnlyOneListener) {
       showCharts();
@@ -43,7 +40,20 @@ const showPage = function (type) {
       OnlyOneListener = false;
     }
   }
+  else if (type == 'settings'){
+    console.log("Settings")
+    htmlTopBarTitle.innerHTML='Instellingen'
+    htmlActueel.classList.add('c-hidden')
+    htmlSettings.classList.remove('c-hidden')
+    if (OnlyOneListenersettings){
+      getIP()
+    }
+  }
 };
+
+const showIP = function(jsonIP){
+  console.log(jsonIP)
+}
 
 const showCharts = function () {
   console.log('chart will be shown');
@@ -124,6 +134,11 @@ const getRefesh = function () {
   const url = backend + '/data/refesh/';
   handleData(url, showRefesh, callbackError);
 };
+
+const getIP = function(){
+  const url = backend + '/ip/';
+  handleData(url, showIP, callbackError)
+}
 // #endregion
 
 // #region ***  Event Listeners - listenTo___            ***********
@@ -165,6 +180,7 @@ const listenToBtnSidebar = function () {
       }
       this.classList.add('c-selected');
       const type = this.dataset.type;
+      console.log(type)
       showPage(type);
     });
   }
@@ -192,6 +208,7 @@ const init = function () {
     listenToSocket();
   } else if (document.querySelector('.Homepagina')) {
     console.log('Homepage');
+    htmlSettings = document.querySelector('.js-settings')
     htmlActueel = document.querySelector('.js-actueel');
     listenToBtnSidebar();
   }

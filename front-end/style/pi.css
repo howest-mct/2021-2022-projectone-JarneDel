@@ -32,7 +32,7 @@ html {
 
 ::selection {
   color: #fff;
-  background: #0071b7;
+  background: #2699fb;
 }
 
 h1 {
@@ -215,15 +215,32 @@ h2 {
 .c-box__header{
   border-bottom: 1px solid #a5a5a5;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
 }
-.c-box__header svg,
-.c-box__header img{
-  margin-left: 16px ;
+.c-box__header .c-icon
+{
+  /* margin-left: 16px ; */
   height: 48px;
   width: 48px;
+  fill: rgb(127, 127, 127) !important;
 }
+.c-box__header .c-historiek{
+  /* margin: 0; */
+  height: 48px;
+  width: 48px;
+  fill: rgb(127, 127, 127);
+  border-radius: 12px;
+}
+.c-historiek:hover{
+  background: #ccc;
+}
+.c-historiek:active{
+  background: #aaa;
+  fill: #333;
+}
+
+
 .c-box__header div{
   margin-right: 16px;
 }
@@ -238,16 +255,20 @@ h2 {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  /* height:230px; */
 }
 .c-box__content .c-chart{
-  position: relative;
-  left: 50%;
-  transform: translate(-50%,-0%);
+  position: static;
+  margin: 0 auto; 
   margin-bottom: 16px;
+   /* left: 50%; */
+  /* transform: translate(-50%,-0%); */
+  /* margin-bottom: 16px; */
+  /* height: 230px; */
 }
 
 .c-box__content--btn{
-  margin-bottom: 8px;
+  /* margin-bottom: 8px;
   margin-right: 16px;
   font-size: 20px;
   line-height: 1;
@@ -255,7 +276,8 @@ h2 {
   color: #2699FB;
   position: relative;
   right: 0px;
-  bottom: 16px;
+  bottom: 16px; */
+  display:none;
 }
 .c-content{
   margin: auto;
