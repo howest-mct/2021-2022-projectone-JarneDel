@@ -2,7 +2,7 @@ import time
 from RPi import GPIO
 from helpers.klasseknop import Button
 import threading
-
+from subprocess import check_output
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, send
 from flask import Flask, jsonify
@@ -78,6 +78,41 @@ def main_thread():
 
 
 # endregion
+
+# region ip
+def format_ip(ifstring):
+    out = []
+    count = ifstring.count("inet ")  # controleren of er meerdere ip adressen zijn
+    if count > 1:
+        print("multiple addresses found!")
+    if "inet" in ifstring:
+        while count:
+
+            count = ifstring.count("inet ")
+            index = ifstring.find("inet ")
+            index += 5
+            ifstring = ifstring[index:]
+            if count >= 1:
+                out.append(ifstring.split("/")[0])
+    else:
+        print("No IP addresses found")
+    return out
+
+
+def get_ip():
+    wlan0 = check_output(["ip", "addr", "show", "wlan0"])
+    lan = check_output(["ip", "addr", "show", "eth0"])
+    wlan = format_ip(
+        wlan0.decode("utf-8")
+    )  # Informatie uit command halen in format functie
+    lan = format_ip(lan.decode("utf-8"))
+    ip_dict = {"lan": lan, "wlan": wlan}
+
+    return ip_dict
+
+
+# endregion
+
 
 # Region SENSORS
 def read_pms():
@@ -172,6 +207,12 @@ def refesh():
     p = threading.Thread(target=refesh_sensor, args=())
     p.start()
     return jsonify(Refeshing="True"), 200
+
+
+@app.route(endpoint + "/ip/")
+def ip():
+    ip = get_ip()
+    return jsonify(ip=ip), 200
 
 
 @socketio.on("connect")

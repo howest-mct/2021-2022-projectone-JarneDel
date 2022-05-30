@@ -1,61 +1,33 @@
-from model.pms5003 import Pms5003
-from RPi import GPIO
-from serial import Serial, PARITY_NONE
-from time import sleep
-
-pms = Pms5003(set=20, reset=21)
-pms.setup()
-trans_pin_PMS = 19
-trans_pin_mhz = 26
+from subprocess import check_output
 
 
-def setup_gpio():
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup((trans_pin_PMS, trans_pin_mhz), GPIO.OUT, initial=0)
+def format_ip(ifstring):
+    out = []
+    count = ifstring.count("inet ")  # controleren of er meerdere ip adressen zijn
+    if count > 1:
+        print("multiple addresses found!")
+    if "inet" in ifstring:
+        while count:
+
+            count = ifstring.count("inet ")
+            index = ifstring.find("inet ")
+            index += 5
+            ifstring = ifstring[index:]
+            if count >= 1:
+                out.append(ifstring.split("/")[0])
+    else:
+        print("No IP addresses found")
+    return out
 
 
-def read_mhz19b():
-    GPIO.output(trans_pin_mhz, 1)
-    GPIO.output(trans_pin_PMS, 0)
-    data = serial_send_and_receive(b"\xff\x01\x86\x00\x00\x00\x00\x00\x79")
-    GPIO.output(trans_pin_mhz, 0)
-    val = int.from_bytes(data[2:4], "big")
-    return val
+def get_ip():
+    wlan0 = check_output(["ip", "addr", "show", "wlan0"])
+    lan = check_output(["ip", "addr", "show", "eth0"])
+    wlan = format_ip(
+        wlan0.decode("utf-8")
+    )  # Informatie uit command halen in format functie
+    lan = format_ip(lan.decode("utf-8"))
+    return [lan, wlan]
 
 
-def serial_send_and_receive(msg):
-
-    with Serial(
-        "/dev/ttyS0",
-        9600,
-        bytesize=8,
-        parity=PARITY_NONE,
-        stopbits=1,
-        timeout=3,
-    ) as port:
-        try:
-            port.write(msg)
-            return port.read(9)
-
-        except Exception as ex:
-            print(f"Er is een fout opgetreden: {ex}")
-            return " "
-
-
-def read_pms():
-    GPIO.output(trans_pin_mhz, 0)
-    GPIO.output(trans_pin_PMS, 1)
-    list_data, dict_data = pms.read()
-    GPIO.output(trans_pin_PMS, 0)
-    return list_data, dict_data
-
-
-setup_gpio()
-
-while True:
-    print(read_mhz19b())
-    sleep(1)
-    list_data, dict_data = read_pms()
-    print(dict_data)
-    sleep(1)
+print(get_ip())
