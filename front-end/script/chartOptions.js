@@ -50,6 +50,22 @@ let CO2ChartOptions = {
       },
     },
   },
+  responsive: [
+    {
+      breakpoint: 900,
+      options: {
+        chart: { height: '200px' },
+        plotOptions: {
+          radialBar: {
+            dataLabels: {
+              name: { fontSize: '14px' },
+              value: { fontSize: '30px' },
+            },
+          },
+        },
+      },
+    },
+  ],
   fill: {
     type: 'solid',
     // gradient: {
@@ -118,6 +134,22 @@ let tempChartOptions = {
     lineCap: 'round',
   },
   labels: ['Aangenaaam'],
+  responsive: [
+    {
+      breakpoint: 900,
+      options: {
+        chart: { height: '200px' },
+        plotOptions: {
+          radialBar: {
+            dataLabels: {
+              name: { fontSize: '14px' },
+              value: { fontSize: '30px' },
+            },
+          },
+        },
+      },
+    },
+  ],
 };
 
 let humidityChartOptions = {
@@ -173,6 +205,22 @@ let humidityChartOptions = {
     lineCap: 'round',
   },
   labels: ['Normaal'],
+  responsive: [
+    {
+      breakpoint: 900,
+      options: {
+        chart: { height: '200px' },
+        plotOptions: {
+          radialBar: {
+            dataLabels: {
+              name: { fontSize: '14px' },
+              value: { fontSize: '30px' },
+            },
+          },
+        },
+      },
+    },
+  ],
 };
 let PressureChartOptions = {
   chart: {
@@ -227,6 +275,22 @@ let PressureChartOptions = {
     lineCap: 'round',
   },
   labels: ['Hoge druk'],
+  responsive: [
+    {
+      breakpoint: 900,
+      options: {
+        chart: { height: '200px' },
+        plotOptions: {
+          radialBar: {
+            dataLabels: {
+              name: { fontSize: '14px' },
+              value: { fontSize: '30px' },
+            },
+          },
+        },
+      },
+    },
+  ],
 };
 
 let VOCChartOptions = {
@@ -282,6 +346,22 @@ let VOCChartOptions = {
     lineCap: 'round',
   },
   labels: ['Some label'],
+  responsive: [
+    {
+      breakpoint: 900,
+      options: {
+        chart: { height: '200px' },
+        plotOptions: {
+          radialBar: {
+            dataLabels: {
+              name: { fontSize: '14px' },
+              value: { fontSize: '30px' },
+            },
+          },
+        },
+      },
+    },
+  ],
 };
 // let PMChartOptions = {
 //   chart: {
@@ -353,6 +433,9 @@ let VOCChartOptions = {
 let PMChartOptions = {
   chart: {
     type: 'bar',
+    toolbar: {
+      show: false,
+    },
   },
   plotOptions: {
     bar: {
@@ -377,6 +460,14 @@ let PMChartOptions = {
       ],
     },
   ],
+  responsive: [
+    {
+      breakpoint: 900,
+      options: {
+        chart: { width: '100%', height: '100%' },
+      },
+    },
+  ],
 };
 
 let PMNopChartOptions = {
@@ -384,6 +475,9 @@ let PMNopChartOptions = {
     height: 280,
     width: 700,
     type: 'bar',
+    toolbar: {
+      show: false,
+    },
   },
   plotOptions: {
     bar: {
@@ -418,6 +512,15 @@ let PMNopChartOptions = {
           y: 13,
         },
       ],
+    },
+  ],
+  responsive: [
+    {
+      breakpoint: 900,
+      options: {
+        chart: { width: '370px', height: '144px' },
+        plotOptions: { bar: { horizontal: true } },
+      },
     },
   ],
 };
