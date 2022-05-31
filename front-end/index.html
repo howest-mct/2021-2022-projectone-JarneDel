@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+  <!-- Meta data -->
+  <!-- Version 2022 -->
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>userPage</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://use.typekit.net/vai1nmh.css" />
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"
+    integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H"
+    crossorigin="anonymous"></script>
+  <!-- Stylesheets -->
+  <link rel="stylesheet" type="text/css" media="screen" href="style/reset.css" />
+  <link rel="stylesheet" type="text/css" media="screen" href="style/pi.css" />
+
+  <!-- Script -->
+
+  <script src="script/dataHandler.js"></script>
+  <script src="script/chartOptions.js"></script>
+  <script src="script/app.js"></script>
+</head>
+
+<body class="Homepagina">
+  <div class="c-app">
+    <main class="c-content js-content">
+      <div class="js-actueel c-actueel c-hidden">
+        <div class="js-C02 c-box">
+          <div class="c-box__header">
+            <svg  class = "c-icon" xmlns="http://www.w3.org/2000/svg" height="48" width="48">
+              <path
+                d="M22.15 29.25Q21.55 29.25 21.15 28.85Q20.75 28.45 20.75 27.85V20.15Q20.75 19.55 21.15 19.15Q21.55 18.75 22.15 18.75H27.85Q28.45 18.75 28.85 19.15Q29.25 19.55 29.25 20.15V27.85Q29.25 28.45 28.85 28.85Q28.45 29.25 27.85 29.25ZM22.25 27.75H27.75V20.25H22.25ZM8.15 29.25Q7.55 29.25 7.15 28.85Q6.75 28.45 6.75 27.85V20.15Q6.75 19.55 7.15 19.15Q7.55 18.75 8.15 18.75H13.85Q14.45 18.75 14.85 19.15Q15.25 19.55 15.25 20.15V21.25H13.75V20.25H8.25V27.75H13.75V26.75H15.25V27.85Q15.25 28.45 14.85 28.85Q14.45 29.25 13.85 29.25ZM34.75 35.25V30.75Q34.75 30.15 35.15 29.775Q35.55 29.4 36.15 29.4H40.75V26.25H34.75V24.75H40.85Q41.45 24.75 41.85 25.15Q42.25 25.55 42.25 26.15V29.25Q42.25 29.85 41.85 30.225Q41.45 30.6 40.85 30.6H36.25V33.75H42.25V35.25Z" />
+            </svg>
+            <p class="c-inhoud-titel">CO2 [PPM]</p>
+            <svg class='c-historiek' xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px" fill="#7f7f7f"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg>
+          </div>
+          <div class="c-box__content">
+            <!-- <div class="c-spacing" style="width: 50px"></div> -->
+            <div class="js-co2-chart c-chart"></div>
+            <!-- <div class="js-btn-historiek c-box__content--btn">historiek</div> -->
+          </div>
+        </div>
+        <div class="js-temp-box c-box">
+          <div class="c-box__header">
+            <svg class = "c-icon" xmlns="http://www.w3.org/2000/svg" height="48" width="48">
+              <path
+                d="M24 40Q20.85 40 18.625 37.775Q16.4 35.55 16.4 32.4Q16.4 30.2 17.55 28.4Q18.7 26.6 20.65 25.5V11.35Q20.65 9.95 21.625 8.975Q22.6 8 24 8Q25.35 8 26.35 8.975Q27.35 9.95 27.35 11.35V25.5Q29.3 26.6 30.45 28.4Q31.6 30.2 31.6 32.4Q31.6 35.55 29.375 37.775Q27.15 40 24 40ZM22.15 21.3H25.85V11.35Q25.85 10.6 25.3 10.075Q24.75 9.55 24 9.55Q23.25 9.55 22.7 10.075Q22.15 10.6 22.15 11.35Z" />
+            </svg>
+            <p class="c-inhoud-titel">temperatuur [°C]</p>
+            <svg class='c-historiek' xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px" fill="#7f7f7f"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg>
+            <!-- <div class="c-spacing" style="width: 50px"></div> -->
+          </div>
+          <div class="c-box__content">
+            <!-- <div class="c-spacing" style="width: 50px"></div> -->
+            <div class="js-temperature-chart c-chart"></div>
+            <div class="js-btn-historiek c-box__content--btn">historiek</div>
+          </div>
+        </div>
+        <div class="js-humidity-box c-box">
+          <div class="c-box__header">
+            <svg class = "c-icon" xmlns="http://www.w3.org/2000/svg" height="48" width="48">
+              <path
+                d="M24 41Q18.2 41 14.1 37.025Q10 33.05 10 27.3Q10 24.3 11.125 21.875Q12.25 19.45 14.1 17.45L24 7.75L33.9 17.45Q35.75 19.45 36.875 21.925Q38 24.4 38 27.3Q38 33.05 33.925 37.025Q29.85 41 24 41ZM24 9.95 15.1 18.7Q13.6 20.2 12.7 22.05Q11.8 23.9 11.6 26.1H36.4Q36.2 23.9 35.3 22.05Q34.4 20.2 32.9 18.7Z" />
+            </svg>
+            <p class="c-inhoud-titel">vochtigheid [%]</p>
+            <!-- <div class="c-spacing" style="width: 50px"></div>-->
+            <svg class='c-historiek' xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px" fill="#7f7f7f"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg>
+          </div>
+          <div class="c-box__content">
+            <!-- <div class="c-spacing" style="width: 50px"></div> -->
+            <div class="js-humidity-chart c-chart"></div>
+            <div class="js-btn-historiek c-box__content--btn">historiek</div>
+          </div>
+        </div>
+        <div class="js-pressure-box c-box">
+          <div class="c-box__header">
+            <svg class = "c-icon" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 487.912 487.912"
+              style="enable-background: new 0 0 487.912 487.912" xml:space="preserve" height="48" width="48">
+              <g transform="translate(0 -572.36)">
+                <g>
+                  <g>
+                    <path
+                      d="M203.206,877.272c2.6,0,5.2-1,7.1-3l20.3-20.6c4,1.9,8.5,3,13.2,3c16.9,0,30.7-13.7,30.7-30.6c0-4.6-1.1-8.9-2.9-12.7
+				c0,0,0.1,0,0.1-0.1l23.5-23.9v6.2c0,5.5,4.5,10,10,10s10-4.5,10-10v-30.5c0-5.5-4.4-10-10-10h0h-30.7c-5.5,0-10,4.5-10,10
+				s4.5,10,10,10h6.7l-23.7,24.2c0,0,0,0-0.1,0.1c-4.1-2-8.7-3.1-13.5-3.1c-16.9,0-30.7,13.4-30.7,29.8c0,4.9,1.2,9.5,3.2,13.6
+				l-20.3,20.6c-3.9,3.9-3.8,10.3,0.1,14.1C198.106,876.272,200.706,877.272,203.206,877.272z M243.906,816.273
+				c5.8,0,10.7,4.5,10.7,9.8c0,6-4.7,10.6-10.7,10.6s-10.7-4.7-10.7-10.6C233.206,820.773,238.106,816.273,243.906,816.273z" />
+                    <path d="M292.206,638.573L292.206,638.573c6.4-19.3,0.5-41.1-15.8-54.2c-18.1-16-46-16-64.9-0.1c-16.3,13.1-22.3,35-15.9,54.3
+				c-95.2,21.8-166.4,106.8-166.4,208.1c0,117.8,96.3,213.6,214.7,213.6s214.8-95.8,214.8-213.6
+				C458.706,745.372,387.406,660.372,292.206,638.573z M224.106,599.773L224.106,599.773c0.1-0.1,0.2-0.1,0.2-0.2
+				c11.5-9.7,28.3-9.8,39-0.2c0.1,0.1,0.3,0.2,0.4,0.4c10.5,8.4,13.8,23,8.4,35.1c-9.2-1.2-18.7-1.8-28.2-1.8s-19,0.6-28.2,1.8
+				C210.206,622.773,213.506,608.172,224.106,599.773z M243.906,1040.272c-78.3,0-146-46.2-176.9-112.7h53.4h246.9h53.4
+				C389.906,994.072,322.206,1040.272,243.906,1040.272z M157.506,745.372c50.1-41.3,122.8-41.3,172.9,0
+				c47.7,39.3,60.4,106.7,31.1,162.2h-235.2C97.106,852.073,109.706,784.672,157.506,745.372z M428.006,907.672h-44.3
+				c12.1-27.4,16.2-57.8,11.3-87.3c-5.8-35.5-24.3-67.6-51.9-90.4c-57.5-47.3-140.8-47.3-198.3,0c-27.6,22.8-46.1,54.9-51.9,90.4
+				c-4.9,29.5-0.8,59.9,11.3,87.3h-45.2c-6.4-19.2-9.9-39.6-9.9-60.9c0.1-106.8,87.4-193.7,194.8-193.7v0
+				c107.4,0,194.8,86.8,194.8,193.6c0,21.3-3.5,41.8-9.9,61C428.506,907.672,428.306,907.672,428.006,907.672z" />
+                  </g>
+                </g>
+              </g>
+            </svg>
+            <p class="c-inhoud-titel">luchtdruk [hPa]</p>
+            <!-- <div class="c-spacing" style="width: 50px"></div> -->
+            <svg class='c-historiek' xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px" fill="#7f7f7f"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg>
+          </div>
+          <div class="c-box__content">
+            <!-- <div class="c-spacing" style="width: 50px"></div> -->
+            <div class="js-pressure-chart c-chart"></div>
+            <div class="js-btn-historiek c-box__content--btn">historiek</div>
+          </div>
+        </div>
+        <div class="js-voc-box c-box">
+          <div class="c-box__header">
+            <img class = "c-icon" style="width: 48px; height: 48px;" src="/img/clipart3552309.png"
+              alt="Nerve Comments - Volatile Organic Compound Icon Png">
+
+            <p class="c-inhoud-titel">VOC [?]</p>
+            <!-- <div class="c-spacing" style="width: 50px"></div> -->
+            <svg class='c-historiek' xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px" fill="#7f7f7f"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg>
+          </div>
+          <div class="c-box__content">
+            <!-- <div class="c-spacing" style="width: 50px"></div> -->
+            <div class="js-voc-chart c-chart"></div>
+            <div class="js-btn-historiek c-box__content--btn">historiek</div>
+          </div>
+        </div>
+        <div class="js-PM-box c-box">
+          <div class="c-box__header">
+            <svg class = "c-icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48" height="48"
+              viewBox="0 0 50 50">
+              <defs>
+                <pattern id="pattern" preserveAspectRatio="xMidYMid slice" width="100%" height="100%"
+                  viewBox="0 0 48 48">
+                  <image width="48" height="48"
+                    xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAAC2UlEQVRoge2YW4iNURTH17iTxiFDSeSWknKnXF4oD6MpYZSaOkdqGFIuNTQPPIwyYVLm8DK8IG+8KJ4leScPSLmECEm5JLf/mr12Z5093/7OOX2fr9O0//Wrs/daZ++1vm9fP6KgoKCgoKCgATWBnSAX45MTn8mZRFSjroK/oBjjc158LmcSUY3iJ/sabIvxaRWfQhYBDWkNA12go4LfYXCogg+3cRQ0pBBX1VpGZiwzTR6fucpntsdnivJZmnKMsRoF+sFp8j85fks8ofvkd5QapI1+aTNoyIlf6yYyyx/TAiYo+1iwNuJ/PObnOHVTQTNYTdHDZbS0b/vaAhoTxD6g3VSaZJZPYJ3Yj0tdp/rPLPAZvFJ1efBNtfEAzHD6OhjRV2/SBLqkodugB1yT8lOx90r5J1gFRoB7UvdFfGaCH5LABXBH7DedvrpVPfd1AsxLK4F2VfdE6hpVAsxjcEqVbQJtUu6R8kjwEXyl8hXMJtCWNOioBK6DI+Ac+A1eSuc2gfdO4N9VAivEf42UF4Jf4IXTl03gIbgFjoFxaSWg4aHQLHabAL+hN/K7AD6oBLQmUukN7nds9k1p7pMZlokTuCJB8mScruw2AV4x+MnukPqoBIaTebLsf4OiN8BpZFawBeCu+LakkUC7x64T0IpK4Kz4PqLqlsdO8d9XbbBRSiuBPJWGxUlpb6XY5oPxZJLKi42Dfwf+UMIzUod02uqx231gg1P/jMr3gec0eHzzXjGGzBLLD2KvY+fgu5MET9IBB+ebSDwpN9Pgw9pysFiV15NZxTQbxbaVzOY3icxmxjZOZlHS4IOC/qP4NHkJnCH/hYbXff4KUZTfPvEEvkgZX2hqvVK6R2srfaVcknKMseKnzhfxPRX8eFU5UMHHXup9186garWLzIHOt+mxtoO3ZD6C1Z34wMdjuS/Gp0h1/GmRJ3OByu/MrnLiU5cfd4OCgoKCgjLXP4XjxbGjCSfVAAAAAElFTkSuQmCC" />
+                </pattern>
+              </defs>
+              <circle id="_7304531_pm2.5_dust_pollution_smog_dangerous_icon"
+                data-name="7304531_pm2.5_dust_pollution_smog_dangerous_icon" cx="25" cy="25" r="25"
+                fill="url(#pattern)" />
+            </svg>
+
+            <p class="c-inhoud-titel">PM [PPM]</p>
+            <!-- <div class="c-spacing" style="width: 50px"></div> -->
+            <svg class='c-historiek' xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px" fill="#7f7f7f"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg>
+          </div>
+          <div class="c-box__content">
+            <!-- <div class="c-spacing" style="width: 50px"></div> -->
+            <div class="js-pm-chart c-chart"></div>
+            <div class="js-btn-historiek c-box__content--btn">historiek</div>
+          </div>
+        </div>
+        <div class="js-PM-NOP-box c-box c-box--wide">
+          <div class="c-box__header">
+            <svg class = "c-icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48" height="48"
+              viewBox="0 0 50 50">
+              <defs>
+                <pattern id="pattern" preserveAspectRatio="xMidYMid slice" width="100%" height="100%"
+                  viewBox="0 0 48 48">
+                  <image width="48" height="48"
+                    xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAAC2UlEQVRoge2YW4iNURTH17iTxiFDSeSWknKnXF4oD6MpYZSaOkdqGFIuNTQPPIwyYVLm8DK8IG+8KJ4leScPSLmECEm5JLf/mr12Z5093/7OOX2fr9O0//Wrs/daZ++1vm9fP6KgoKCgoKCgATWBnSAX45MTn8mZRFSjroK/oBjjc158LmcSUY3iJ/sabIvxaRWfQhYBDWkNA12go4LfYXCogg+3cRQ0pBBX1VpGZiwzTR6fucpntsdnivJZmnKMsRoF+sFp8j85fks8ofvkd5QapI1+aTNoyIlf6yYyyx/TAiYo+1iwNuJ/PObnOHVTQTNYTdHDZbS0b/vaAhoTxD6g3VSaZJZPYJ3Yj0tdp/rPLPAZvFJ1efBNtfEAzHD6OhjRV2/SBLqkodugB1yT8lOx90r5J1gFRoB7UvdFfGaCH5LABXBH7DedvrpVPfd1AsxLK4F2VfdE6hpVAsxjcEqVbQJtUu6R8kjwEXyl8hXMJtCWNOioBK6DI+Ac+A1eSuc2gfdO4N9VAivEf42UF4Jf4IXTl03gIbgFjoFxaSWg4aHQLHabAL+hN/K7AD6oBLQmUukN7nds9k1p7pMZlokTuCJB8mScruw2AV4x+MnukPqoBIaTebLsf4OiN8BpZFawBeCu+LakkUC7x64T0IpK4Kz4PqLqlsdO8d9XbbBRSiuBPJWGxUlpb6XY5oPxZJLKi42Dfwf+UMIzUod02uqx231gg1P/jMr3gec0eHzzXjGGzBLLD2KvY+fgu5MET9IBB+ebSDwpN9Pgw9pysFiV15NZxTQbxbaVzOY3icxmxjZOZlHS4IOC/qP4NHkJnCH/hYbXff4KUZTfPvEEvkgZX2hqvVK6R2srfaVcknKMseKnzhfxPRX8eFU5UMHHXup9186garWLzIHOt+mxtoO3ZD6C1Z34wMdjuS/Gp0h1/GmRJ3OByu/MrnLiU5cfd4OCgoKCgjLXP4XjxbGjCSfVAAAAAElFTkSuQmCC" />
+                </pattern>
+              </defs>
+              <circle id="_7304531_pm2.5_dust_pollution_smog_dangerous_icon"
+                data-name="7304531_pm2.5_dust_pollution_smog_dangerous_icon" cx="25" cy="25" r="25"
+                fill="url(#pattern)" />
+            </svg>
+
+            <p class="c-inhoud-titel">PM [parts/.1l]</p>
+            <!-- <div class="c-spacing" style="width: 50px"></div> -->
+            <svg class='c-historiek' xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px" fill="#7f7f7f"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/></svg>
+          </div>
+          <div class="c-box__content">
+            <!-- <div class="c-spacing" style="width: 50px"></div> -->
+            <div class="js-pm-chart-NOP c-chart"></div>
+            <div class="js-btn-historiek c-box__content--btn">historiek</div>
+          </div>
+        </div>
+      </div>
+      <div class="js-settings c-hidden c-settings">
+        <div class="js-about">
+          <div class="js-ip"></div>
+        </div>
+      </div>
+    </main>
+    <a href="index.html" class="c-logo">
+      <svg class="c-logo__symbol" xmlns="http://www.w3.org/2000/svg" width="109" height="32" viewBox="0 0 109 32">
+        <text id="Air_Insight" data-name="Air Insight" transform="translate(0 26)" fill="#fff" font-size="24"
+          font-family="proxima-nova, proxima nova">
+          <tspan x="0" y="0">Air Insight</tspan>
+        </text>
+      </svg>
+    </a>
+    <div class="c-topbar">
+      <h2 class="js-topbar-title">Actuele data</h2>
+      <svg class="js-refesh c-hidden" xmlns="http://www.w3.org/2000/svg" height="48" width="48">
+        <path
+          d="M24 40Q17.35 40 12.675 35.325Q8 30.65 8 24Q8 17.35 12.675 12.675Q17.35 8 24 8Q28.25 8 31.45 9.725Q34.65 11.45 37 14.45V8H40V20.7H27.3V17.7H35.7Q33.8 14.7 30.85 12.85Q27.9 11 24 11Q18.55 11 14.775 14.775Q11 18.55 11 24Q11 29.45 14.775 33.225Q18.55 37 24 37Q28.15 37 31.6 34.625Q35.05 32.25 36.4 28.35H39.5Q38.05 33.6 33.75 36.8Q29.45 40 24 40Z" />
+      </svg>
+
+    </div>
+    <aside class="c-sidebar">
+      <h2 class="c-sidebar__title">Administratie</h2>
+      <h3 class="c-sidebar__subtitle js-btn-bg-blue-sidebar" data-type="actueel">
+        <svg xmlns="http://www.w3.org/2000/svg" width="130" height="24" viewBox="0 0 130 24">
+          <text id="ACTUELE_DATA" data-name="ACTUELE DATA" transform="translate(32 17)" font-size="14"
+            font-family="ProximaNova-Medium, proxima-nova" font-weight="500">
+            <tspan x="0" y="0">ACTUELE DATA</tspan>
+          </text>
+          <g id="air_black_24dp">
+            <g id="Group_327" data-name="Group 327">
+              <path id="Path_234" data-name="Path 234" d="M0,0H24V24H0Z" fill="none" />
+            </g>
+            <g id="Group_329" data-name="Group 329">
+              <g id="Group_328" data-name="Group 328">
+                <path id="Path_235" data-name="Path 235"
+                  d="M14.5,17a3,3,0,0,1-6,0h2a1,1,0,1,0,1-1H2V14h9.5A3.009,3.009,0,0,1,14.5,17ZM19,6.5a3.5,3.5,0,0,0-7,0h2A1.5,1.5,0,1,1,15.5,8H2v2H15.5A3.5,3.5,0,0,0,19,6.5ZM18.5,11H2v2H18.5a1.5,1.5,0,0,1,0,3v2a3.5,3.5,0,0,0,0-7Z" />
+              </g>
+            </g>
+          </g>
+        </svg>
+      </h3>
+      <h3 class="c-sidebar__subtitle js-btn-bg-blue-sidebar" data-type="historiek">
+        <svg xmlns="http://www.w3.org/2000/svg" width="101" height="24" viewBox="0 0 101 24">
+          <text id="HISTORIEK" transform="translate(32 16)" font-size="14"
+            font-family="ProximaNova-Medium, proxima-nova" font-weight="500">
+            <tspan x="0" y="0">HISTORIEK</tspan>
+          </text>
+          <g id="timeline_black_24dp">
+            <g id="Group_330" data-name="Group 330">
+              <rect id="Rectangle_1096" data-name="Rectangle 1096" width="24" height="24" fill="none" />
+            </g>
+            <g id="Group_332" data-name="Group 332">
+              <g id="Group_331" data-name="Group 331">
+                <path id="Path_236" data-name="Path 236"
+                  d="M23,8a2.006,2.006,0,0,1-2,2,1.7,1.7,0,0,1-.51-.07l-3.56,3.55A1.766,1.766,0,0,1,17,14a2,2,0,0,1-4,0,1.766,1.766,0,0,1,.07-.52l-2.55-2.55a1.966,1.966,0,0,1-1.04,0L4.93,15.49A1.7,1.7,0,0,1,5,16a2,2,0,1,1-2-2,1.7,1.7,0,0,1,.51.07L8.07,9.52A1.766,1.766,0,0,1,8,9a2,2,0,0,1,4,0,1.766,1.766,0,0,1-.07.52l2.55,2.55a1.966,1.966,0,0,1,1.04,0l3.55-3.56A1.7,1.7,0,0,1,19,8a2,2,0,0,1,4,0Z" />
+              </g>
+            </g>
+          </g>
+        </svg>
+      </h3>
+
+      <h3 class="c-sidebar__subtitle c-bottom js-btn-bg-blue-sidebar" data-type="settings">
+        <svg xmlns="http://www.w3.org/2000/svg" width="126" height="24" viewBox="0 0 126 24">
+          <text id="INSTELLINGEN" transform="translate(32 17)" font-size="14"
+            font-family="ProximaNova-Medium, proxima-nova" font-weight="500">
+            <tspan x="0" y="0">INSTELLINGEN</tspan>
+          </text>
+          <path id="settings_FILL1_wght400_GRAD0_opsz48"
+            d="M13.24,28l-.6-3.78a8.039,8.039,0,0,1-1.2-.57,8.245,8.245,0,0,1-1.11-.75L6.79,24.52,4,19.6l3.24-2.37a3.567,3.567,0,0,1-.075-.615Q7.15,16.27,7.15,16t.015-.615a3.567,3.567,0,0,1,.075-.615L4,12.4,6.79,7.48,10.33,9.1a8.245,8.245,0,0,1,1.11-.75,6.208,6.208,0,0,1,1.2-.54L13.24,4h5.52l.6,3.78a9.726,9.726,0,0,1,1.215.555,5.164,5.164,0,0,1,1.1.765l3.54-1.62L28,12.4l-3.24,2.31a4.228,4.228,0,0,1,.075.645q.015.345.015.645t-.015.63a4.177,4.177,0,0,1-.075.63L28,19.6l-2.79,4.92L21.67,22.9a9.952,9.952,0,0,1-1.1.765,5.228,5.228,0,0,1-1.215.555L18.76,28ZM16,19.9A3.892,3.892,0,0,0,19.9,16,3.892,3.892,0,0,0,16,12.1,3.892,3.892,0,0,0,12.1,16,3.892,3.892,0,0,0,16,19.9Z"
+            transform="translate(-4 -4)" />
+        </svg>
+      </h3>
+    </aside>
+  </div>
+</body>
+
+</html>
