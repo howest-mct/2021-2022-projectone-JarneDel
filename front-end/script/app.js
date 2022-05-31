@@ -20,64 +20,70 @@ let co2Chart,
   PMNopChart,
   VOCchart;
 
+let RPI = false;
 let selectedPage = 'actueel';
 // #region ***  DOM references                           ***********
 let hmtlPM, htmlOnBoot;
-let htmlActueel, htmlSettings, htmlRefesh;
+let htmlActueel,
+  htmlSettings,
+  htmlRefesh,
+  htmlMobileNav,
+  htmlCloseHamburger,
+  htmlhamburger;
 
 // #endregion
 
-const hide = function(DomObject){
-  DomObject.classList.add('c-hidden')
-}
-const show = function(DomObject){
-  DomObject.classList.remove('c-hidden')
-}
-
-
+const hide = function (DomObject) {
+  DomObject.classList.add('c-hidden');
+};
+const show = function (DomObject) {
+  DomObject.classList.remove('c-hidden');
+};
+const toggleClass = function (DomObject) {
+  DomObject.classList.toggle('c-hidden');
+};
 // #region ***  Callback-Visualisation - show___         ***********
 const showPage = function (type) {
-  const htmlTopBarTitle = document.querySelector('.js-topbar-title')
+  const htmlTopBarTitle = document.querySelector('.js-topbar-title');
   console.log(type);
   if (type == 'actueel') {
-    console.log("Actuele pagina")
-    htmlTopBarTitle.innerHTML = `Actuele data`;
-    show(htmlActueel)
-    show(htmlRefesh)
-    hide(htmlSettings)
+    console.log('Actuele pagina');
+    htmlTopBarTitle.innerHTML = `Realtime overzicht`;
+    show(htmlActueel);
+    show(htmlRefesh);
+    hide(htmlSettings);
     if (OnlyOneListener) {
       showCharts();
       listenToRefesh();
       OnlyOneListener = false;
     }
-  }
-  else if (type == 'settings'){
-    console.log("Settings")
-    htmlTopBarTitle.innerHTML='Instellingen'
-    hide(htmlActueel)
-    hide(htmlRefesh)
-    show(htmlSettings)
-    if (OnlyOneListenersettings){
-      getIP()
+  } else if (type == 'settings') {
+    console.log('Settings');
+    htmlTopBarTitle.innerHTML = 'Instellingen';
+    hide(htmlActueel);
+    hide(htmlRefesh);
+    show(htmlSettings);
+    if (OnlyOneListenersettings) {
+      getIP();
     }
   }
 };
 
-const showIP = function(jsonIP){
-  console.log(jsonIP)
+const showIP = function (jsonIP) {
+  console.log(jsonIP);
   let lanIps = jsonIP.ip.lan;
   let wlanIps = jsonIP.ip.wlan;
   const htmlIP = document.querySelector('.js-ip');
-  let html = '<table><tr><th>Interface</th><th>IP</th></tr>';
-  for (let lanIP of lanIps){
+  let html = '<table><tr><th class ="u-table-title"columnspan=2>Device IP Adress</th></tr><tr><th>Interface</th><th>IP</th></tr>';
+  for (let lanIP of lanIps) {
     html += `<tr><td>LAN</td><td>${lanIP}</td></tr>`;
   }
-  for (let wlanIP of wlanIps){
-    html+= `<tr><td>WLAN</td><td>${wlanIP}</td></tr>`;
+  for (let wlanIP of wlanIps) {
+    html += `<tr><td>WLAN</td><td>${wlanIP}</td></tr>`;
   }
   html += '</table>';
-  htmlIP.innerHTML = html
-}
+  htmlIP.innerHTML = html;
+};
 
 const showCharts = function () {
   console.log('chart will be shown');
@@ -159,10 +165,26 @@ const getRefesh = function () {
   handleData(url, showRefesh, callbackError);
 };
 
-const getIP = function(){
+const getIP = function () {
   const url = backend + '/ip/';
-  handleData(url, showIP, callbackError)
-}
+  handleData(url, showIP, callbackError);
+};
+
+const getBrowerSize = function () {
+  const vw = Math.max(
+    document.documentElement.clientWidth || 0,
+    window.innerWidth || 0
+  );
+  const vh = Math.max(
+    document.documentElement.clientHeight || 0,
+    window.innerHeight || 0
+  );
+  console.log(vw, vh);
+  if (600 < vw < 700 && 400 < vh < 500) {
+    console.log('Pi pagina');
+    RPI = true;
+  }
+};
 // #endregion
 
 // #region ***  Event Listeners - listenTo___            ***********
@@ -202,9 +224,12 @@ const listenToBtnSidebar = function () {
       for (let btn2 of btns) {
         btn2.classList.remove('c-selected');
       }
+      htmlMobileNav.classList.toggle('c-show-nav');
+      toggleClass(htmlhamburger);
+      toggleClass(htmlCloseHamburger);
       this.classList.add('c-selected');
       const type = this.dataset.type;
-      console.log(type)
+      console.log(type);
       showPage(type);
     });
   }
@@ -217,6 +242,17 @@ const listenToRefesh = function () {
   });
 };
 
+const listenToMobileNav = function () {
+  const hamburgermenu = document.querySelectorAll('.js-menu');
+  for (let menu of hamburgermenu) {
+    menu.addEventListener('click', function () {
+      console.log('mobile nav');
+      htmlMobileNav.classList.toggle('c-show-nav');
+      toggleClass(htmlhamburger);
+      toggleClass(htmlCloseHamburger);
+    });
+  }
+};
 // #endregion
 const SetReload = function () {
   document.location.reload(true);
@@ -231,11 +267,16 @@ const init = function () {
     htmlOnBoot = document.querySelector('.js-on-boot');
     listenToSocket();
   } else if (document.querySelector('.Homepagina')) {
+    // getBrowerSize();
     console.log('Homepage');
-    htmlRefesh = document.querySelector('.js-refesh')
-    htmlSettings = document.querySelector('.js-settings')
+    htmlRefesh = document.querySelector('.js-refesh');
+    htmlSettings = document.querySelector('.js-settings');
     htmlActueel = document.querySelector('.js-actueel');
+    htmlhamburger = document.querySelector('.c-hamburger-menu');
+    htmlCloseHamburger = document.querySelector('.c-close-hamburger');
+    htmlMobileNav = document.querySelector('.js-mobile-nav');
     listenToBtnSidebar();
+    listenToMobileNav();
   }
 };
 
