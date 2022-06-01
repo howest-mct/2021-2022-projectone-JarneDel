@@ -1,2 +1,5 @@
 __pycache__/
 config.py
+BSEC_2.0.6.1_Generic_Release_04302021
+src/
+*.egg-info
