@@ -29,16 +29,11 @@ def setup_gpio():
 
 
 # logging setup
-log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
-
-file = logging.FileHandler("logs/app_log.log")
-file.setLevel(logging.INFO)
-fileformat = logging.Formatter(
-    "%(asctime)s [%(levelname)s] - [%(filename)s > %(funcName)s() > %(lineno)s] - %(message)s"
+logging.basicConfig(
+    filename="logs/app_log.log",
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] - [%(filename)s > %(funcName)s() > %(lineno)s] - %(message)s",
 )
-file.setFormatter(fileformat)
-log.addHandler(file)
 
 
 # Code voor Flask
@@ -65,7 +60,7 @@ trans_pin_PMS = 19
 trans_pin_mhz = 26
 
 # fan init
-fan = Fan(13, 6, 2, initial=40)
+fan = Fan(6, 13, 2, initial=40)
 
 
 # region Main Thread
@@ -99,7 +94,9 @@ def main_thread():
 
 
 def fan_thread():
+    print("***starting Fan thread***")
     fan.fan_mode = DataRepository.get_fan_setting()["setwaarde"]
+    fan.pwm_speed = 50
     start = time.time()
     while True:
         socketio.emit("B2F_fan_speed", {"rpm": fan.rpm})
@@ -109,6 +106,7 @@ def fan_thread():
             start = time.time()
             # Log fan speed every 60s
             DataRepository.add_data_point(fan.rpm, 1, 1)
+        # logging.debug(fan.rpm)
 
 
 # endregion
@@ -263,7 +261,7 @@ def fan_mode():
             val -= 2 * data["manual"]
             logging.info("Fan set to manual mode")
         if val < 0 or val == 2:
-            log.error(f"Wrong Value fanmode: {val}")
+            logging.error(f"Wrong Value fanmode: {val}")
             return jsonify(message=f"Wrong Value fanmode: {val}"), 400
         fan.fan_mode = val
         data = DataRepository.set_fan_setting(val)

@@ -42,6 +42,7 @@ class Fan:
     @property
     def rpm(self):
         """FAN RPM (ROTATIONS PER MINUTE)"""
+        # print(self.__rpm)
         return self.__rpm
 
     # ********** property pwm_speed - (setter/getter) ***********
