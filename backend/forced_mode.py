@@ -1,42 +1,72 @@
-# This example demonstrates the FORCED MODE
-# First with BSEC disabled
-# Then with BSEC enabled
+#!/usr/bin/env python
 
-from bme68x import BME68X
-import bme68xConstants as cst
-import bsecConstants as bsec
-from time import sleep
+import bme680
+import time
 
-print("TESTING FORCED MODE WITHOUT BSEC")
-bme = BME68X(cst.BME68X_I2C_ADDR_LOW, 1)
-# Configure sensor to measure at 320 degC for 100 millisec
-bme.set_heatr_conf(cst.BME68X_FORCED_MODE, 320, 100, cst.BME68X_ENABLE)
-print(bme.get_data())
-sleep(3)
-print("\nTESTING FORCED MODE WITH BSEC")
-bme = BME68X(cst.BME68X_I2C_ADDR_LOW, 1)
-bme.set_sample_rate(bsec.BSEC_SAMPLE_RATE_LP)
+print(
+    """read-all.py - Displays temperature, pressure, humidity, and gas.
+Press Ctrl+C to exit!
+"""
+)
 
+try:
+    sensor = bme680.BME680(bme680.I2C_ADDR_PRIMARY)
+except IOError:
+    sensor = bme680.BME680(bme680.I2C_ADDR_SECONDARY)
 
-def get_data(sensor):
-    data = {}
-    try:
-        data = sensor.get_bsec_data()
-    except Exception as e:
-        print(e)
-        return None
-    if data == None or data == {}:
-        sleep(0.1)
-        return None
-    else:
-        sleep(3)
-        return data
+# These calibration data can safely be commented
+# out, if desired.
 
+print("Calibration data:")
+for name in dir(sensor.calibration_data):
 
-bsec_data = get_data(bme)
-while bsec_data == None:
-    bsec_data = get_data(bme)
-print(bsec_data)
+    if not name.startswith("_"):
+        value = getattr(sensor.calibration_data, name)
 
-while True:
-    print(get_data(bme))
+        if isinstance(value, int):
+            print("{}: {}".format(name, value))
+
+# These oversampling settings can be tweaked to
+# change the balance between accuracy and noise in
+# the data.
+
+sensor.set_humidity_oversample(bme680.OS_2X)
+sensor.set_pressure_oversample(bme680.OS_4X)
+sensor.set_temperature_oversample(bme680.OS_8X)
+sensor.set_filter(bme680.FILTER_SIZE_3)
+sensor.set_gas_status(bme680.ENABLE_GAS_MEAS)
+
+print("\n\nInitial reading:")
+for name in dir(sensor.data):
+    value = getattr(sensor.data, name)
+
+    if not name.startswith("_"):
+        print("{}: {}".format(name, value))
+
+sensor.set_gas_heater_temperature(320)
+sensor.set_gas_heater_duration(150)
+sensor.select_gas_heater_profile(0)
+
+# Up to 10 heater profiles can be configured, each
+# with their own temperature and duration.
+# sensor.set_gas_heater_profile(200, 150, nb_profile=1)
+# sensor.select_gas_heater_profile(1)
+
+print("\n\nPolling:")
+try:
+    while True:
+        if sensor.get_sensor_data():
+            output = "{0:.2f} C,{1:.2f} hPa,{2:.2f} %RH".format(
+                sensor.data.temperature, sensor.data.pressure, sensor.data.humidity
+            )
+
+            if sensor.data.heat_stable:
+                print("{0},{1} Ohms".format(output, sensor.data.gas_resistance))
+
+            else:
+                print(output)
+
+        time.sleep(1)
+
+except KeyboardInterrupt:
+    pass

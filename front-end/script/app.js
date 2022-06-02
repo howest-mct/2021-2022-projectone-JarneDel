@@ -287,6 +287,11 @@ const listenToSocketCharts = function () {
       },
     ]);
   });
+  socketio.on('B2F_BME', function(bme_data){
+    tempChart.updateSeries([valueToPercentTemp(bme_data.temperature)])
+    pressureChart.updateSeries([valueToPercentPressure(bme_data.pressure/100)])
+    humidityChart.updateSeries([valueToPercentHum(bme_data.humidity)])
+  })
 };
 
 const listenToBtnSidebar = function () {
