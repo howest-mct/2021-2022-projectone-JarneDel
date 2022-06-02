@@ -1,5 +1,4 @@
-from mimetypes import init
-from operator import imod
+import logging
 from RPi import GPIO
 from time import time
 
@@ -14,8 +13,10 @@ class Fan:
         self.PULSE = PULSE
         self.__t = time()
         self.__rpm = 0
-        self.__initial = 20
+        self.__initial = initial
         self.__fan_mode = 0  # 0 = auto, 1 = man
+        self.__list_last_vals = []
+        self.__old_val = []
 
     def start(self):
         GPIO.add_event_detect(self.TACH, GPIO.FALLING, self.callback_tacho_meter)
@@ -36,14 +37,22 @@ class Fan:
 
         frequentie = 1 / dt
         self.__rpm = (frequentie / self.PULSE) * 60
+        self.__list_last_vals.append(self.__rpm)
+        if len(self.__list_last_vals) > 50:
+            self.__list_last_vals.pop(0)
         self.__t = time()
 
     # ********** property rpm - (enkel getter) ***********
     @property
     def rpm(self):
         """FAN RPM (ROTATIONS PER MINUTE)"""
-        # print(self.__rpm)
-        return self.__rpm
+        sum_val = sum(self.__list_last_vals)
+        if sum_val == self.__old_val:
+            return 0
+
+        avg_rpm = sum_val / (len(self.__list_last_vals))
+        self.__old_val = sum_val
+        return round(avg_rpm, 0)
 
     # ********** property pwm_speed - (setter/getter) ***********
     @property
@@ -53,6 +62,7 @@ class Fan:
 
     @pwm_speed.setter
     def pwm_speed(self, value):
+        value = int(value)
         if 0 <= value <= 100:
             self.__pwm_speed = value
             self.__pwm_channel.ChangeDutyCycle(value)
