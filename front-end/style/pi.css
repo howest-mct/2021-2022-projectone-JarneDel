@@ -96,6 +96,60 @@ h2 {
 }
 
 
+.c-switch{
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+/* Hide default html checkbox */
+.c-switch__input{
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.c-switch__slider{
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left:0;
+  bottom:0;
+  right:0;
+  background-color: var(--hover-background);
+  -webkit-transition: .4s;
+  transition: .4s;
+
+}
+.c-switch__slider:before{
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+
+}
+input:checked + .c-switch__slider{
+  background-color: var(--primary-color);
+}
+input:focus + .c-switch__slider{
+  box-shadow: 0 0 1px var(--primary-color)
+}
+input:checked + .c-switch__slider:before{
+  -webkit-transform: translateX(26px);
+  transform: translateX(26px);
+}
+.u-round{
+  border-radius: 34px;
+}
+.u-round:before{
+  border-radius: 50%;
+}
+
+
 @media (min-width:900px) {
   /* Navigatie voor desktopwebsites */
   .c-logo {
@@ -507,6 +561,8 @@ th{
 .c-clickable-icon{
   border-radius: 12px;
   transition: all .3s;
+  cursor: pointer;
+  user-select: none;
 }
 
 .c-clickable-icon:hover{

@@ -29,7 +29,9 @@ let htmlActueel,
   htmlRefesh,
   htmlMobileNav,
   htmlCloseHamburger,
-  htmlhamburger;
+  htmlhamburger,
+  htmlSlider,
+  htmlRPM;
 
 // #endregion
 
@@ -63,8 +65,12 @@ const showPage = function (type) {
     hide(htmlActueel);
     hide(htmlRefesh);
     show(htmlSettings);
+    getFanSetting();
     if (OnlyOneListenersettings) {
       getIP();
+      listenToSocketFan();
+      listenToFanMode();
+      listenToSlider();
     }
   }
 };
@@ -74,7 +80,8 @@ const showIP = function (jsonIP) {
   let lanIps = jsonIP.ip.lan;
   let wlanIps = jsonIP.ip.wlan;
   const htmlIP = document.querySelector('.js-ip');
-  let html = '<table><tr><th class ="u-table-title"columnspan=2>Device IP Adress</th></tr><tr><th>Interface</th><th>IP</th></tr>';
+  let html =
+    '<table><tr><th class ="u-table-title"columnspan=2>Device IP Adress</th></tr><tr><th>Interface</th><th>IP</th></tr>';
   for (let lanIP of lanIps) {
     html += `<tr><td>LAN</td><td>${lanIP}</td></tr>`;
   }
@@ -139,6 +146,13 @@ const showUpdatedCharts = function (jsonObject) {
 const showRefesh = function (jsonObject) {
   console.log(jsonObject);
 };
+const showFanSetting = function (jsonObject) {
+  document.querySelector('.js-toggle-fan-checkbox').checked =
+    jsonObject.setting.setwaarde;
+  if (jsonObject.setting.setwaarde) {
+    show(htmlSlider);
+  }
+};
 
 // #endregion
 
@@ -151,6 +165,18 @@ const updateCo2chart = function (val) {
 const callbackError = function (jsonObject) {
   console.log(jsonObject);
   console.error('Er is een error opgetredenv bij de fetch');
+};
+
+const showFanManSlider = function (jsonObject) {
+  console.log(jsonObject);
+  const pwm = jsonObject.pwm.setwaarde;
+
+  htmlSlider.value = pwm;
+  show(htmlSlider);
+};
+
+const hideFanManSlider = function (jsonObject) {
+  hide(htmlSlider);
 };
 // #endregion
 
@@ -168,6 +194,10 @@ const getRefesh = function () {
 const getIP = function () {
   const url = backend + '/ip/';
   handleData(url, showIP, callbackError);
+};
+const getFanSetting = function () {
+  const url = backend + '/fan/mode/';
+  handleData(url, showFanSetting, callbackError);
 };
 
 const getBrowerSize = function () {
@@ -213,6 +243,49 @@ const listenToSocketCharts = function () {
   });
   socketio.on('B2F_PM', function (data) {
     console.log(data);
+    const pm2_5 = data['PM2.5_AP'];
+    const pm1 = data['PM1_AP'];
+    const pm10 = data['PM10_AP1'];
+    PMchart.updateSeries([
+      {
+        data: [
+          { x: 'PM1', y: pm1 },
+          { x: 'PM2.5', y: pm2_5 },
+          { x: 'PM10', y: pm10 },
+        ],
+      },
+    ]);
+
+    PMNopChart.updateSeries([
+      {
+        data: [
+          {
+            x: 'NOP 0.3 um',
+            y: data['NOP_0.3um'],
+          },
+          {
+            x: 'NOP 0.5 um',
+            y: data['NOP_0.5um'],
+          },
+          {
+            x: 'NOP 1 um',
+            y: data['NOP_1um'],
+          },
+          {
+            x: 'NOP 2.5 um',
+            y: data['NOP_2.5um'],
+          },
+          {
+            x: 'NOP 5 um',
+            y: data['NOP_5um'],
+          },
+          {
+            x: 'NOP 10 um',
+            y: data['NOP_10um'],
+          },
+        ],
+      },
+    ]);
   });
 };
 
@@ -253,6 +326,37 @@ const listenToMobileNav = function () {
     });
   }
 };
+
+const listenToFanMode = function () {
+  document
+    .querySelector('.js-toggle-fan-checkbox')
+    .addEventListener('change', function () {
+      const url = backend + '/fan/mode/';
+      if (this.checked) {
+        console.log('toggle switch on', this);
+        const body = JSON.stringify({ auto: true });
+        handleData(url, showFanManSlider, callbackError, 'POST', body);
+      } else {
+        console.log('toggle switch off', this);
+        const body = JSON.stringify({ manual: true });
+        handleData(url, hideFanManSlider, callbackError, 'POST', body);
+      }
+    });
+};
+const listenToSlider = function () {
+  htmlSlider.addEventListener('change', function () {
+    let val = this.value;
+    if (100 >= val >= 0) {
+      socketio.emit('F2B_fan_speed', { pwm: val });
+    }
+  });
+};
+
+const listenToSocketFan = function () {
+  socketio.on('B2F_fan_speed', function (msg) {
+    htmlRPM.innerHTML = Math.round(msg.rpm) + ' rpm';
+  });
+};
 // #endregion
 const SetReload = function () {
   document.location.reload(true);
@@ -275,6 +379,8 @@ const init = function () {
     htmlhamburger = document.querySelector('.c-hamburger-menu');
     htmlCloseHamburger = document.querySelector('.c-close-hamburger');
     htmlMobileNav = document.querySelector('.js-mobile-nav');
+    htmlSlider = document.querySelector('.js-slider');
+    htmlRPM = document.querySelector('.js-fan-rpm');
     listenToBtnSidebar();
     listenToMobileNav();
   }

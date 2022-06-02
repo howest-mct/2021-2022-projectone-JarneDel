@@ -31,7 +31,7 @@ def setup_gpio():
 # logging setup
 logging.basicConfig(
     filename="logs/app_log.log",
-    level=logging.DEBUG,
+    level=logging.INFO,
     format="%(asctime)s [%(levelname)s] - [%(filename)s > %(funcName)s() > %(lineno)s] - %(message)s",
 )
 
@@ -60,7 +60,8 @@ trans_pin_PMS = 19
 trans_pin_mhz = 26
 
 # fan init
-fan = Fan(6, 13, 2, initial=40)
+fan_pwm = DataRepository.get_last_fan_setting()["setwaarde"]
+fan = Fan(6, 13, 2, initial=fan_pwm)
 
 
 # region Main Thread
@@ -254,20 +255,23 @@ def fan_mode():
     elif request.method == "POST":
         val = 2
         data = DataRepository.json_or_formdata(request)
+        logging.info(data)
         if "auto" in data.keys():
-            val -= data["auto"]
+            val -= bool(data["auto"])
             logging.info("Fan set to auto mode")
         if "manual" in data.keys():
-            val -= 2 * data["manual"]
+            val -= 2 * bool(data["manual"])
             logging.info("Fan set to manual mode")
         if val < 0 or val == 2:
             logging.error(f"Wrong Value fanmode: {val}")
             return jsonify(message=f"Wrong Value fanmode: {val}"), 400
         fan.fan_mode = val
         data = DataRepository.set_fan_setting(val)
+        logging.info(data)
         if data is not None:
             if data >= 0:
-                return jsonify(gebeurtenisID=data), 200
+                last_man_fan_val = DataRepository.get_last_fan_setting()
+                return jsonify(gebeurtenisID=data, pwm=last_man_fan_val), 200
         return jsonify(message="error"), 400
 
 
@@ -301,6 +305,14 @@ def initial_connection():
     emit("B2F_Actuele_data", data)
     # # Send to the client!
     # vraag de status op van de lampen uit de DB
+
+
+@socketio.on("F2B_fan_speed")
+def change_fan_speed(jsonObject):
+    pwm = jsonObject["pwm"]
+    fan.pwm_speed = pwm
+    logging.info(f"Changed pwm speed: {pwm}")
+    DataRepository.set_fan_pwm(pwm)
 
 
 def start_thread():
