@@ -1,3 +1,4 @@
+import json
 import time
 from RPi import GPIO
 from helpers.klasseknop import Button
@@ -5,13 +6,15 @@ import threading
 from subprocess import check_output
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, send
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from repositories.DataRepository import DataRepository
 
 from selenium import webdriver
 
 from serial import Serial, PARITY_NONE
 from model.pms5003 import Pms5003
+from model.Fan import Fan
+import logging
 
 # from selenium import webdriver
 # from selenium.webdriver.chrome.options import Options
@@ -22,6 +25,15 @@ def setup_gpio():
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
     GPIO.setup((trans_pin_PMS, trans_pin_mhz), GPIO.OUT, initial=0)
+    fan.start()
+
+
+# logging setup
+logging.basicConfig(
+    filename="logs/app_log.log",
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] - [%(filename)s > %(funcName)s() > %(lineno)s] - %(message)s",
+)
 
 
 # Code voor Flask
@@ -46,6 +58,11 @@ pms = Pms5003(set=20, reset=21)
 pms.setup()
 trans_pin_PMS = 19
 trans_pin_mhz = 26
+
+# fan init
+fan_pwm = DataRepository.get_last_fan_setting()["setwaarde"]
+fan = Fan(6, 13, 2, initial=fan_pwm)
+
 
 # region Main Thread
 def main_thread():
@@ -75,6 +92,22 @@ def main_thread():
         else:
             print("Sensor is reading")
             time.sleep(0.2)
+
+
+def fan_thread():
+    print("***starting Fan thread***")
+    fan.fan_mode = DataRepository.get_fan_setting()["setwaarde"]
+    fan.pwm_speed = 50
+    start = time.time()
+    while True:
+        socketio.emit("B2F_fan_speed", {"rpm": fan.rpm})
+        dt = start - time.time()
+        time.sleep(0.2)
+        if dt > 60:
+            start = time.time()
+            # Log fan speed every 60s
+            DataRepository.add_data_point(fan.rpm, 1, 1)
+        # logging.debug(fan.rpm)
 
 
 # endregion
@@ -215,6 +248,56 @@ def ip():
     return jsonify(ip=ip), 200
 
 
+@app.route(endpoint + "/fan/mode/", methods=["GET", "POST"])
+def fan_mode():
+    if request.method == "GET":
+        return jsonify(setting=DataRepository.get_fan_setting())
+    elif request.method == "POST":
+        val = 2
+        data = DataRepository.json_or_formdata(request)
+        logging.info(data)
+        if "auto" in data.keys():
+            val -= bool(data["auto"])
+            logging.info("Fan set to auto mode")
+        if "manual" in data.keys():
+            val -= 2 * bool(data["manual"])
+            logging.info("Fan set to manual mode")
+        if val < 0 or val == 2:
+            logging.error(f"Wrong Value fanmode: {val}")
+            return jsonify(message=f"Wrong Value fanmode: {val}"), 400
+        fan.fan_mode = val
+        data = DataRepository.set_fan_setting(val)
+        logging.info(data)
+        if data is not None:
+            if data >= 0:
+                last_man_fan_val = DataRepository.get_last_fan_setting()
+                return jsonify(gebeurtenisID=data, pwm=last_man_fan_val), 200
+        return jsonify(message="error"), 400
+
+
+@app.route(endpoint + "/fan/pwm/", methods=["GET", "POST"])
+def fan_pwm():
+    if request.method == "GET":
+        return jsonify(fan_pwm=fan.pwm_speed)
+    elif request.method == "POST":
+        data = DataRepository.json_or_formdata(request)
+        if "pwm" not in data.keys():
+            return jsonify(message="error"), 400
+        pwm = data["pwm"]
+        if pwm > 100 or pwm < 0:
+            return jsonify(message="wrong value"), 400
+        fan.pwm_speed = pwm
+        data = DataRepository.set_fan_pwm(pwm)
+        return jsonify(gebeurtenisID=data)
+
+
+@app.route(endpoint + "/fan/rpm/", methods=["GET"])
+def fan_rpm():
+    if request.method == "GET":
+        data = DataRepository.get_fan_speed()
+        return jsonify(fan_speed=data), 200
+
+
 @socketio.on("connect")
 def initial_connection():
     print("A new client connect")
@@ -224,10 +307,20 @@ def initial_connection():
     # vraag de status op van de lampen uit de DB
 
 
+@socketio.on("F2B_fan_speed")
+def change_fan_speed(jsonObject):
+    pwm = jsonObject["pwm"]
+    fan.pwm_speed = pwm
+    logging.info(f"Changed pwm speed: {pwm}")
+    DataRepository.set_fan_pwm(pwm)
+
+
 def start_thread():
     print("**** Starting THREAD ****")
     thread = threading.Thread(target=main_thread, args=())
     thread.start()
+    obj_fan_thread = threading.Thread(target=fan_thread, args=())
+    obj_fan_thread.start()
 
 
 def start_chrome_kiosk():
@@ -280,4 +373,5 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("KeyboardInterrupt exception is caught")
     finally:
+        fan.stop()
         GPIO.cleanup()
