@@ -1,14 +1,14 @@
-import json
 import time
 from RPi import GPIO
-from helpers.klasseknop import Button
 import threading
 from subprocess import check_output
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, send
 from flask import Flask, jsonify, request
 from repositories.DataRepository import DataRepository
-
+from bme68x import BME68X
+import bme68xConstants as cst
+import bsecConstants as bsec
 from selenium import webdriver
 
 from serial import Serial, PARITY_NONE
@@ -31,7 +31,7 @@ def setup_gpio():
 # logging setup
 logging.basicConfig(
     filename="logs/app_log.log",
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] - [%(filename)s > %(funcName)s() > %(lineno)s] - %(message)s",
 )
 
@@ -92,6 +92,53 @@ def main_thread():
         else:
             print("Sensor is reading")
             time.sleep(0.2)
+
+
+def bme_main():
+    print("TESTING FORCED MODE WITHOUT BSEC")
+    bme = BME68X(cst.BME68X_I2C_ADDR_LOW, 1)
+    # Configure sensor to measure at 320 degC for 100 millisec
+    bme.set_heatr_conf(cst.BME68X_FORCED_MODE, 320, 100, cst.BME68X_ENABLE)
+    print(bme.get_data())
+    time.sleep(3)
+    print("\nTESTING FORCED MODE WITH BSEC")
+    bme = BME68X(cst.BME68X_I2C_ADDR_LOW, 1)
+    bme.set_sample_rate(bsec.BSEC_SAMPLE_RATE_LP)
+    while True:
+        bsec_data = get_data(bme)
+        if bsec_data is not None:
+            logging.debug(bsec_data)
+            # print(bsec_data["temperature"], "temp")
+            temperature = round(bsec_data["temperature"], 2)
+            humidity = round(bsec_data["humidity"], 2)
+            raw_pressure = round(bsec_data["raw_pressure"], 1)
+            # print(temperature, humidity, raw_pressure)
+            DataRepository.add_data_point(temperature, 1, 15)
+            DataRepository.add_data_point(humidity, 1, 17)
+            DataRepository.add_data_point(raw_pressure, 1, 16)
+            socketio.emit(
+                "B2F_BME",
+                {
+                    "temperature": temperature,
+                    "humidity": humidity,
+                    "pressure": raw_pressure,
+                },
+            )
+
+
+def get_data(sensor):
+    data = {}
+    try:
+        data = sensor.get_bsec_data()
+    except Exception as e:
+        print(e)
+        return None
+    if data == None or data == {}:
+        time.sleep(0.1)
+        return None
+    else:
+        time.sleep(3)
+        return data
 
 
 def fan_thread():
@@ -321,6 +368,8 @@ def start_thread():
     thread.start()
     obj_fan_thread = threading.Thread(target=fan_thread, args=())
     obj_fan_thread.start()
+    bme_thread = threading.Thread(target=bme_main, args=())
+    bme_thread.start()
 
 
 def start_chrome_kiosk():
