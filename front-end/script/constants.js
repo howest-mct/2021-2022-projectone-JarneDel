@@ -1,21 +1,23 @@
 const valueToPercentCO2 = function (value) {
-  return Math.round((value * 100) / 5000, 4);
+  return (value * 100) / 2000;
 };
 const valueToPercentTemp = function (value) {
-  return Math.round((value * 100) / 45, 4);
+  return (value * 100) / 45;
 };
 const valueToPercentHum = function (value) {
-  return Math.round((value * 100) / 100, 4);
+  return (value * 100) / 100;
 };
 const valueToPercentPressure = function (value) {
-  return Math.round(((value - 940) * 100) / (1060 - 940), 4);
+  return ((value - 940) * 100) / (1060 - 940);
+  s;
 };
-let CO2ChartOptions = {
+const CO2ChartOptions = {
   chart: {
     height: 280,
     type: 'radialBar',
   },
-  series: [valueToPercentCO2(2500)],
+
+  series: [0],
   colors: ['#2699FB'],
   plotOptions: {
     radialBar: {
@@ -37,13 +39,15 @@ let CO2ChartOptions = {
           fontSize: '20px',
           fontWeight: 400,
           fontFamily: 'proxima-nova',
+          color: '#7F7F7F',
           offsetY: 20,
         },
         value: {
-          formatter: (val) => (val * 5000) / 100,
+          formatter: (val) => ((val * 2000) / 100).toFixed(0),
           fontSize: '40px',
           fontWeight: 700,
           fontFamily: 'proxima-nova',
+          color: '#7F7F7F',
           show: true,
           offsetY: -20,
         },
@@ -78,7 +82,7 @@ let CO2ChartOptions = {
   stroke: {
     lineCap: 'round',
   },
-  labels: ['Zwaar vervuild'],
+  labels: [' '],
 };
 
 let tempChartOptions = {
@@ -86,7 +90,7 @@ let tempChartOptions = {
     height: 280,
     type: 'radialBar',
   },
-  series: [valueToPercentTemp(23)],
+  series: [0],
   colors: ['#2699FB'],
   plotOptions: {
     radialBar: {
@@ -109,14 +113,16 @@ let tempChartOptions = {
           fontWeight: 400,
           fontFamily: 'proxima-nova',
           offsetY: 20,
+          color: '#7F7F7F',
         },
         value: {
-          formatter: (val) => (val * 45) / 100,
+          formatter: (val) => ((val * 45) / 100).toFixed(1),
           fontSize: '40px',
           fontWeight: 700,
           fontFamily: 'proxima-nova',
           show: true,
           offsetY: -20,
+          color: '#7F7F7F',
         },
       },
     },
@@ -133,7 +139,7 @@ let tempChartOptions = {
   stroke: {
     lineCap: 'round',
   },
-  labels: ['Aangenaaam'],
+  labels: [' '],
   responsive: [
     {
       breakpoint: 900,
@@ -157,7 +163,7 @@ let humidityChartOptions = {
     height: 280,
     type: 'radialBar',
   },
-  series: [valueToPercentHum(50)],
+  series: [0],
   colors: ['#2699FB'],
   plotOptions: {
     radialBar: {
@@ -179,13 +185,15 @@ let humidityChartOptions = {
           fontSize: '20px',
           fontWeight: 400,
           fontFamily: 'proxima-nova',
+          color: '#7F7F7F',
           offsetY: 20,
         },
         value: {
-          formatter: (val) => (val * 100) / 100,
+          formatter: (val) => ((val * 100) / 100).toFixed(2),
           fontSize: '40px',
           fontWeight: 700,
           fontFamily: 'proxima-nova',
+          color: '#7F7F7F',
           show: true,
           offsetY: -20,
         },
@@ -204,7 +212,7 @@ let humidityChartOptions = {
   stroke: {
     lineCap: 'round',
   },
-  labels: ['Normaal'],
+  labels: ['...'],
   responsive: [
     {
       breakpoint: 900,
@@ -227,7 +235,7 @@ let PressureChartOptions = {
     height: 280,
     type: 'radialBar',
   },
-  series: [valueToPercentPressure(1023)],
+  series: [0],
   colors: ['#2699FB'],
   plotOptions: {
     radialBar: {
@@ -249,13 +257,15 @@ let PressureChartOptions = {
           fontSize: '20px',
           fontWeight: 400,
           fontFamily: 'proxima-nova',
+          color: '#7F7F7F',
           offsetY: 20,
         },
         value: {
-          formatter: (val) => (val * (1060 - 940)) / 100 + 940,
+          formatter: (val) => ((val * (1060 - 940)) / 100 + 940).toFixed(1),
           fontSize: '40px',
           fontWeight: 700,
           fontFamily: 'proxima-nova',
+          color: '#7F7F7F',
           show: true,
           offsetY: -20,
         },
@@ -264,17 +274,11 @@ let PressureChartOptions = {
   },
   fill: {
     type: 'solid',
-    // gradient: {
-    //   shade: "dark",
-    //   type: "horizontal",
-    //   // gradientToColors: ["#87D4F9"],
-    //   stops: [0, 100]
-    // }
   },
   stroke: {
     lineCap: 'round',
   },
-  labels: ['Hoge druk'],
+  labels: ['...'],
   responsive: [
     {
       breakpoint: 900,
@@ -298,7 +302,7 @@ let VOCChartOptions = {
     height: 280,
     type: 'radialBar',
   },
-  series: [valueToPercentCO2(1023)],
+  series: [0],
   colors: ['#2699FB'],
   plotOptions: {
     radialBar: {
@@ -321,14 +325,16 @@ let VOCChartOptions = {
           fontWeight: 400,
           fontFamily: 'proxima-nova',
           offsetY: 20,
+          color: '#7F7F7F',
         },
         value: {
-          formatter: (val) => (val * (1060 - 940)) / 100 + 940,
+          formatter: (val) => val.toFixed(0),
           fontSize: '40px',
           fontWeight: 700,
           fontFamily: 'proxima-nova',
           show: true,
           offsetY: -20,
+          color: '#7F7F7F',
         },
       },
     },
@@ -345,7 +351,7 @@ let VOCChartOptions = {
   stroke: {
     lineCap: 'round',
   },
-  labels: ['Some label'],
+  labels: ['...'],
   responsive: [
     {
       breakpoint: 900,
@@ -521,6 +527,137 @@ let PMNopChartOptions = {
         chart: { width: '370px', height: '144px' },
         plotOptions: { bar: { horizontal: true } },
       },
+    },
+  ],
+};
+
+const labels = {
+  co2: [
+    {
+      min: 0,
+      max: 900,
+      val: 'Good!',
+      color: '#0F9942',
+    },
+    {
+      min: 900,
+      max: 1500,
+      val: 'ventilate!',
+      color: '#f27931',
+    },
+    {
+      min: 1500,
+      max: 5000,
+      val: 'Very bad!',
+      color: '#db1a32',
+    },
+  ],
+  temperature: [
+    {
+      min: -10,
+      max: 14,
+      val: 'Cold 🥶',
+      color: '#0432ff',
+    },
+    {
+      min: 14,
+      max: 17,
+      val: 'chilly',
+      color: '#50a7f9',
+    },
+    {
+      min: 17,
+      max: 20,
+      val: 'cool',
+      color: '#009193',
+    },
+    {
+      min: 20,
+      max: 22,
+      val: 'ideal',
+      color: '#2699FB',
+    },
+    {
+      min: 22,
+      max: 24,
+      val: 'Tepid',
+      color: '#70bf40',
+    },
+    {
+      min: 24,
+      max: 28,
+      val: 'warm',
+      color: '#f5d328',
+    },
+    {
+      min: 28,
+      max: 32,
+      val: 'Very Warm',
+      color: '#df6a10',
+    },
+    {
+      min: 32,
+      max: 100,
+      val: 'Hot 🔥',
+      color: '#d92808',
+    },
+  ],
+  humidity: [
+    {
+      max: 100,
+      min: 70,
+      val: 'Too High!',
+      color: '#E31E36',
+    },
+    {
+      min: 69,
+      max: 70,
+      val: 'Bit wet',
+      color: '#CD00E1',
+    },
+    {
+      max: 68,
+      min: 60,
+      val: 'Bit high',
+      color: '#ED7730', //#f27931
+    },
+    {
+      max: 60,
+      min: 30,
+      val: 'Healthy',
+      color: '#0F9942',
+    },
+    {
+      max: 30,
+      min: 25,
+      val: 'Bit low',
+      color: '#ED7730', //#f27931
+    },
+    {
+      max: 25,
+      min: 0,
+      val: 'Too low!',
+      color: '#E31E36',
+    },
+  ],
+  pressure: [
+    {
+      min: 1022.689,
+      max: 1060,
+      val: 'High Pressure',
+      color: '#2699FB',
+    },
+    {
+      min: 1009.144,
+      max: 1022.689,
+      val: 'Normal',
+      color: '#2699FB',
+    },
+    {
+      max: 1009.144,
+      min: 940,
+      val: 'Low pressure',
+      color: '#2699FB',
     },
   ],
 };

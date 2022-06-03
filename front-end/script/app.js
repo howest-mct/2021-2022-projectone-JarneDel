@@ -81,7 +81,7 @@ const showIP = function (jsonIP) {
   let wlanIps = jsonIP.ip.wlan;
   const htmlIP = document.querySelector('.js-ip');
   let html =
-    '<table><tr><th class ="u-table-title"columnspan=2>Device IP Adress</th></tr><tr><th>Interface</th><th>IP</th></tr>';
+    '<table><tr><th class ="u-table-title"colspan=2>Device IP Adress</th></tr><tr><th>Interface</th><th>IP</th></tr>';
   for (let lanIP of lanIps) {
     html += `<tr><td>LAN</td><td>${lanIP}</td></tr>`;
   }
@@ -135,12 +135,32 @@ const showCharts = function () {
 const showUpdatedCharts = function (jsonObject) {
   console.log(jsonObject);
   const data = jsonObject.data;
+  let PM = {};
   for (let sensorWaarde of data) {
-    if (sensorWaarde.devicenaam == 'MH-Z19B') {
-      updateCo2chart(sensorWaarde.setwaarde);
-      co2Chart.updateSeries([valueToPercentCO2(sensorWaarde.setwaarde)]);
+    const setPoint = sensorWaarde.setwaarde;
+    switch (sensorWaarde.beschrijving) {
+      case 'CO2':
+        updateOptionsCharts(setPoint, 'CO2');
+        break;
+      case 'Temperature':
+        updateOptionsCharts(setPoint, 'temperature');
+        break;
+      case 'Humidity':
+        updateOptionsCharts(setPoint, 'humidity');
+        break;
+      case 'Pressure':
+        updateOptionsCharts(setPoint, 'pressure');
+        break;
+    }
+    switch (sensorWaarde.devicenaam) {
+      case 'PMS5003':
+        console.log('PMS');
+        const beschrijving = sensorWaarde.beschrijving;
+        PM[beschrijving] = sensorWaarde.setwaarde;
     }
   }
+  console.log(PM);
+  updatePMNOPcharts(PM);
 };
 
 const showRefesh = function (jsonObject) {
@@ -154,12 +174,90 @@ const showFanSetting = function (jsonObject) {
   }
 };
 
-// #endregion
+const updateOptionsCharts = function (value, type) {
+  let seriesValue, typeLabel, chart;
+  switch (type) {
+    case 'CO2':
+      chart = co2Chart;
+      seriesValue = valueToPercentCO2(value);
+      typeLabel = labels.co2;
+      break;
+    case 'humidity':
+      chart = humidityChart;
+      seriesValue = valueToPercentHum(value);
+      typeLabel = labels.humidity;
+      break;
+    case 'pressure':
+      chart = pressureChart;
+      seriesValue = valueToPercentPressure(value);
+      typeLabel = labels.pressure;
+      break;
+    case 'temperature':
+      chart = tempChart;
+      seriesValue = valueToPercentTemp(value);
+      typeLabel = labels.temperature;
+      break;
+  }
+  // console.log(seriesValue, typeLabel);
 
-// #region ***  Updates  ***
-const updateCo2chart = function (val) {
-  co2Chart.updateSeries([valueToPercentCO2(val)]);
+  for (let label of typeLabel) {
+    if (label.min < value && label.max > value) {
+      let labelName = label.val;
+      let color = label.color;
+      console.log(labelName, color);
+      chart.updateOptions({
+        labels: [labelName],
+        series: [seriesValue],
+        colors: [color],
+      });
+    }
+  }
 };
+
+const updatePMCharts = function (pm1, pm2_5, pm10) {
+  PMchart.updateSeries([
+    {
+      data: [
+        { x: 'PM1', y: pm1 },
+        { x: 'PM2.5', y: pm2_5 },
+        { x: 'PM10', y: pm10 },
+      ],
+    },
+  ]);
+};
+const updatePMNOPcharts = function (data) {
+  PMNopChart.updateSeries([
+    {
+      data: [
+        {
+          x: 'NOP 0.3 µm',
+          y: data['NOP_0.3um'],
+        },
+        {
+          x: 'NOP 0.5 µm',
+          y: data['NOP_0.5um'],
+        },
+        {
+          x: 'NOP 1 µm',
+          y: data['NOP_1um'],
+        },
+        {
+          x: 'NOP 2.5 µm',
+          y: data['NOP_2.5um'],
+        },
+        {
+          x: 'NOP 5 µm',
+          y: data['NOP_5um'],
+        },
+        {
+          x: 'NOP 10 µm',
+          y: data['NOP_10um'],
+        },
+      ],
+    },
+  ]);
+};
+// #endregion
 
 // #region ***  Callback-No Visualisation - callback___  ***********
 const callbackError = function (jsonObject) {
@@ -239,59 +337,26 @@ const listenToSocket = function () {
 const listenToSocketCharts = function () {
   socketio.on('B2F_CO2', function (data) {
     console.log('New co2 reading');
-    updateCo2chart(data['CO2']);
+    const co2Reading = data['CO2'];
+    updateOptionsCharts(co2Reading, 'CO2');
   });
   socketio.on('B2F_PM', function (data) {
-    console.log(data);
+    // console.log(data);
     const pm2_5 = data['PM2.5_AP'];
     const pm1 = data['PM1_AP'];
     const pm10 = data['PM10_AP1'];
-    PMchart.updateSeries([
-      {
-        data: [
-          { x: 'PM1', y: pm1 },
-          { x: 'PM2.5', y: pm2_5 },
-          { x: 'PM10', y: pm10 },
-        ],
-      },
-    ]);
-
-    PMNopChart.updateSeries([
-      {
-        data: [
-          {
-            x: 'NOP 0.3 um',
-            y: data['NOP_0.3um'],
-          },
-          {
-            x: 'NOP 0.5 um',
-            y: data['NOP_0.5um'],
-          },
-          {
-            x: 'NOP 1 um',
-            y: data['NOP_1um'],
-          },
-          {
-            x: 'NOP 2.5 um',
-            y: data['NOP_2.5um'],
-          },
-          {
-            x: 'NOP 5 um',
-            y: data['NOP_5um'],
-          },
-          {
-            x: 'NOP 10 um',
-            y: data['NOP_10um'],
-          },
-        ],
-      },
-    ]);
+    updatePMCharts(pm1, pm2_5, pm10);
+    updatePMNOPcharts(data);
   });
-  socketio.on('B2F_BME', function(bme_data){
-    tempChart.updateSeries([valueToPercentTemp(bme_data.temperature)])
-    pressureChart.updateSeries([valueToPercentPressure(bme_data.pressure/100)])
-    humidityChart.updateSeries([valueToPercentHum(bme_data.humidity)])
-  })
+  socketio.on('B2F_BME', function (bme_data) {
+    let pressureVal = bme_data.pressure / 100;
+    let humidityVal = bme_data.humidity;
+    let temperatureVal = bme_data.temperature;
+    // console.log(pressureVal, humidityVal, temperatureVal);
+    updateOptionsCharts(pressureVal, 'pressure');
+    updateOptionsCharts(humidityVal, 'humidity');
+    updateOptionsCharts(temperatureVal, 'temperature');
+  });
 };
 
 const listenToBtnSidebar = function () {
