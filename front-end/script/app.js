@@ -11,7 +11,7 @@ try {
 }
 let OnlyOneListener = true;
 let onlyOneListenerHistoriek = true;
-let OnlyOneListenersettings = true
+let OnlyOneListenersettings = true;
 let firstTimeTemp = true;
 let firstTimeCo2 = true;
 let firstTimeHum = true;
@@ -143,15 +143,18 @@ const showHistoriekCo2 = function (historiek) {
     areaCO2.render();
   } else {
     console.log('update');
-    areaCO2.updateSeries({
-      data: historiek.data,
-    });
+    areaCO2.updateSeries([
+      {
+        data: historiek.data,
+      },
+    ]);
   }
 };
 const showHistoriekTemperature = function (tempJson) {
   hideAll();
   updateTitle('Temperature');
-  show(htmlHistoriekTemp)
+  console.log(tempJson);
+  show(htmlHistoriekTemp);
   console.log(tempJson);
   if (firstTimeTemp) {
     let tempHistoriekOptions = HistoriekOptions;
@@ -164,15 +167,18 @@ const showHistoriekTemperature = function (tempJson) {
     );
     areaTemp.render();
   } else {
-    areaTemp.updateSeries({
-      data: tempJson.data,
-    });
+    areaTemp.updateSeries([
+      {
+        data: tempJson.data,
+      },
+    ]);
   }
 };
 const showHistoriekHumidity = function (humJson) {
   hideAll();
   show(htmlHistoriekHum);
-  console.log('hum')
+  updateTitle('Humidity');
+  console.log('hum');
   if (firstTimeHum) {
     let humHistoriekOptions = HistoriekOptions;
     humHistoriekOptions.series[0].data = humJson.data;
@@ -183,8 +189,11 @@ const showHistoriekHumidity = function (humJson) {
       humHistoriekOptions
     );
     areaHum.render();
+  } else {
+    areaHum.updateSeries([{ data: humJson.data }]);
   }
-}
+};
+const showHistoriekPressure = function (pressureJson) {};
 
 const showCharts = function () {
   console.log('chart will be shown');
@@ -353,7 +362,7 @@ const updatePMNOPcharts = function (data) {
 };
 const updateTitle = function (newTitle) {
   for (let title of htmlTopBarTitle) {
-    title.innerHTML = newTitle
+    title.innerHTML = newTitle;
   }
 };
 // #endregion
@@ -407,9 +416,14 @@ const getHistoriekTemperature = function () {
 };
 
 const getHistoriekHum = function () {
-  const url = backend + '/historiek/humidity/'
+  const url = backend + '/historiek/humidity/';
   handleData(url, showHistoriekHumidity, callbackError);
-}
+};
+const getHistoriekPressure = function () {
+  const url = backend + '/historiek/pressure/';
+  handleData(url, showHistoriekPressure, callbackError);
+};
+
 const getBrowerSize = function () {
   const vw = Math.max(
     document.documentElement.clientWidth || 0,
@@ -558,7 +572,10 @@ const listenToHistoryDropdown = function () {
           getHistoriekTemperature();
           break;
         case 'humidity':
-          getHistoriekHum()
+          getHistoriekHum();
+          break;
+        case 'pressure':
+          getHistoriekPressure();
           break;
       }
     });
@@ -594,7 +611,7 @@ const init = function () {
     htmlHistoriekCO2 = document.querySelector('.js-historiek-co2');
     htmlTopBarTitle = document.querySelectorAll('.js-topbar-title');
     htmlHistoriekTemp = document.querySelector('.js-historiek-temp');
-    htmlHistoriekHum = document.querySelector('.js-historiek-hum')
+    htmlHistoriekHum = document.querySelector('.js-historiek-hum');
     listenToHistoryDropdown();
     listenToBtnSidebar();
     listenToMobileNav();
