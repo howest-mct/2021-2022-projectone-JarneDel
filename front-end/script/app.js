@@ -352,7 +352,7 @@ const updatePMNOPcharts = function (data) {
   ]);
 };
 const updateTitle = function (newTitle) {
-  for (title of htmlTopBarTitle) {
+  for (let title of htmlTopBarTitle) {
     title.innerHTML = newTitle
   }
 };
