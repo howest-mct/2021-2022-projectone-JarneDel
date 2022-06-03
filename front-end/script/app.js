@@ -352,7 +352,9 @@ const updatePMNOPcharts = function (data) {
   ]);
 };
 const updateTitle = function (newTitle) {
-  htmlTopBarTitle.innerHTML = newTitle;
+  for (title of htmlTopBarTitle) {
+    title.innerHTML = newTitle
+  }
 };
 // #endregion
 
@@ -590,7 +592,7 @@ const init = function () {
     htmlHistoriek = document.querySelector('.js-historiek');
     HTMLDropDownHistoriek = document.querySelector('.js-sidebar-historiek');
     htmlHistoriekCO2 = document.querySelector('.js-historiek-co2');
-    htmlTopBarTitle = document.querySelector('.js-topbar-title');
+    htmlTopBarTitle = document.querySelectorAll('.js-topbar-title');
     htmlHistoriekTemp = document.querySelector('.js-historiek-temp');
     htmlHistoriekHum = document.querySelector('.js-historiek-hum')
     listenToHistoryDropdown();
