@@ -10,15 +10,21 @@ try {
   console.log('geen socketio');
 }
 let OnlyOneListener = true;
-let OnlyOneListenersettings = true;
-
+let onlyOneListenerHistoriek = true;
+let OnlyOneListenersettings = true
+let firstTimeTemp = true;
+let firstTimeCo2 = true;
+let firstTimeHum = true;
 let co2Chart,
   tempChart,
   humidityChart,
   pressureChart,
   PMchart,
   PMNopChart,
-  VOCchart;
+  VOCchart,
+  areaCO2,
+  areaTemp,
+  areaHum;
 
 let RPI = false;
 let selectedPage = 'actueel';
@@ -31,7 +37,13 @@ let htmlActueel,
   htmlCloseHamburger,
   htmlhamburger,
   htmlSlider,
-  htmlRPM;
+  htmlRPM,
+  htmlHistoriek,
+  HTMLDropDownHistoriek,
+  htmlHistoriekCO2,
+  htmlTopBarTitle,
+  htmlHistoriekTemp,
+  htmlHistoriekHum;
 
 // #endregion
 
@@ -44,16 +56,30 @@ const show = function (DomObject) {
 const toggleClass = function (DomObject) {
   DomObject.classList.toggle('c-hidden');
 };
+const hideAll = function () {
+  const arrayDomObjects = [
+    htmlActueel,
+    // htmlHistoriek,
+    htmlSettings,
+    htmlRefesh,
+    htmlHistoriekCO2,
+    htmlHistoriekTemp,
+    htmlHistoriekHum,
+  ];
+  for (let DomObject of arrayDomObjects) {
+    hide(DomObject);
+  }
+};
+
 // #region ***  Callback-Visualisation - show___         ***********
 const showPage = function (type) {
-  const htmlTopBarTitle = document.querySelector('.js-topbar-title');
   console.log(type);
   if (type == 'actueel') {
     console.log('Actuele pagina');
-    htmlTopBarTitle.innerHTML = `Realtime overzicht`;
+    updateTitle('Realtime dashboard');
+    hideAll();
     show(htmlActueel);
     show(htmlRefesh);
-    hide(htmlSettings);
     if (OnlyOneListener) {
       showCharts();
       listenToRefesh();
@@ -61,9 +87,8 @@ const showPage = function (type) {
     }
   } else if (type == 'settings') {
     console.log('Settings');
-    htmlTopBarTitle.innerHTML = 'Instellingen';
-    hide(htmlActueel);
-    hide(htmlRefesh);
+    updateTitle('Settings');
+    hideAll();
     show(htmlSettings);
     getFanSetting();
     if (OnlyOneListenersettings) {
@@ -71,7 +96,16 @@ const showPage = function (type) {
       listenToSocketFan();
       listenToFanMode();
       listenToSlider();
+      OnlyOneListenersettings = false;
     }
+  } else if (type == 'historiek') {
+    toggleClass(HTMLDropDownHistoriek);
+    getHistoriekCo2();
+    // show(htmlDropDown);
+    // if (onlyOneListenerHistoriek) {
+    //   listenToHistoriekPaginas();
+    //   onlyOneListenerHistoriek = false;
+    // }
   }
 };
 
@@ -91,6 +125,66 @@ const showIP = function (jsonIP) {
   html += '</table>';
   htmlIP.innerHTML = html;
 };
+
+const showHistoriekCo2 = function (historiek) {
+  hideAll();
+  updateTitle('CO2 History');
+  show(htmlHistoriekCO2);
+  console.log(historiek);
+  if (firstTimeCo2) {
+    console.log('first time historiek');
+    firstTimeCo2 = false;
+    let CO2HistoriekOptions = HistoriekOptions;
+    CO2HistoriekOptions.series[0].data = historiek.data;
+    areaCO2 = new ApexCharts(
+      document.querySelector('.area-chart-co2'),
+      HistoriekOptions
+    );
+    areaCO2.render();
+  } else {
+    console.log('update');
+    areaCO2.updateSeries({
+      data: historiek.data,
+    });
+  }
+};
+const showHistoriekTemperature = function (tempJson) {
+  hideAll();
+  updateTitle('Temperature');
+  show(htmlHistoriekTemp)
+  console.log(tempJson);
+  if (firstTimeTemp) {
+    let tempHistoriekOptions = HistoriekOptions;
+    tempHistoriekOptions.series[0].data = tempJson.data;
+    console.log('first time temp historiek');
+    firstTimeTemp = false;
+    areaTemp = new ApexCharts(
+      document.querySelector('.area-chart-temp'),
+      tempHistoriekOptions
+    );
+    areaTemp.render();
+  } else {
+    areaTemp.updateSeries({
+      data: tempJson.data,
+    });
+  }
+};
+const showHistoriekHumidity = function (humJson) {
+  hideAll();
+  show(htmlHistoriekHum);
+  console.log('hum')
+  if (firstTimeHum) {
+    let humHistoriekOptions = HistoriekOptions;
+    humHistoriekOptions.series[0].data = humJson.data;
+    console.log('first time hum historiek');
+    firstTimeHum = false;
+    areaHum = new ApexCharts(
+      document.querySelector('.area-chart-hum'),
+      humHistoriekOptions
+    );
+    areaHum.render();
+  }
+}
 
 const showCharts = function () {
   console.log('chart will be shown');
@@ -133,7 +227,7 @@ const showCharts = function () {
   getActueleData();
 };
 const showUpdatedCharts = function (jsonObject) {
-  console.log(jsonObject);
+  // console.log(jsonObject);
   const data = jsonObject.data;
   let PM = {};
   for (let sensorWaarde of data) {
@@ -154,12 +248,12 @@ const showUpdatedCharts = function (jsonObject) {
     }
     switch (sensorWaarde.devicenaam) {
       case 'PMS5003':
-        console.log('PMS');
+        // console.log('PMS');
         const beschrijving = sensorWaarde.beschrijving;
         PM[beschrijving] = sensorWaarde.setwaarde;
     }
   }
-  console.log(PM);
+  // console.log(PM);
   updatePMNOPcharts(PM);
 };
 
@@ -204,7 +298,7 @@ const updateOptionsCharts = function (value, type) {
     if (label.min < value && label.max > value) {
       let labelName = label.val;
       let color = label.color;
-      console.log(labelName, color);
+      // console.log(labelName, color);
       chart.updateOptions({
         labels: [labelName],
         series: [seriesValue],
@@ -257,6 +351,9 @@ const updatePMNOPcharts = function (data) {
     },
   ]);
 };
+const updateTitle = function (newTitle) {
+  htmlTopBarTitle.innerHTML = newTitle;
+};
 // #endregion
 
 // #region ***  Callback-No Visualisation - callback___  ***********
@@ -298,6 +395,19 @@ const getFanSetting = function () {
   handleData(url, showFanSetting, callbackError);
 };
 
+const getHistoriekCo2 = function () {
+  const url = backend + '/historiek/co2/';
+  handleData(url, showHistoriekCo2, callbackError);
+};
+const getHistoriekTemperature = function () {
+  const url = backend + '/historiek/temperature/';
+  handleData(url, showHistoriekTemperature, callbackError);
+};
+
+const getHistoriekHum = function () {
+  const url = backend + '/historiek/humidity/'
+  handleData(url, showHistoriekHumidity, callbackError);
+}
 const getBrowerSize = function () {
   const vw = Math.max(
     document.documentElement.clientWidth || 0,
@@ -363,17 +473,22 @@ const listenToBtnSidebar = function () {
   const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
   for (let btn of btns) {
     btn.addEventListener('click', function () {
-      const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
-      for (let btn2 of btns) {
-        btn2.classList.remove('c-selected');
+      if (this.dataset.type == 'historiek') {
+        console.log('HI');
+        toggleClass(HTMLDropDownHistoriek);
+      } else {
+        const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
+        for (let btn2 of btns) {
+          btn2.classList.remove('c-selected');
+        }
+        htmlMobileNav.classList.toggle('c-show-nav');
+        toggleClass(htmlhamburger);
+        toggleClass(htmlCloseHamburger);
+        this.classList.add('c-selected');
+        const type = this.dataset.type;
+        console.log(type);
+        showPage(type);
       }
-      htmlMobileNav.classList.toggle('c-show-nav');
-      toggleClass(htmlhamburger);
-      toggleClass(htmlCloseHamburger);
-      this.classList.add('c-selected');
-      const type = this.dataset.type;
-      console.log(type);
-      showPage(type);
     });
   }
 };
@@ -427,6 +542,27 @@ const listenToSocketFan = function () {
     htmlRPM.innerHTML = Math.round(msg.rpm) + ' rpm';
   });
 };
+
+const listenToHistoryDropdown = function () {
+  let dropdown = document.querySelectorAll('.js-dropdown-btn');
+  for (const page of dropdown) {
+    page.addEventListener('click', function () {
+      console.log(this.dataset.type);
+      switch (this.dataset.type) {
+        case 'co2':
+          getHistoriekCo2();
+          break;
+        case 'temperature':
+          getHistoriekTemperature();
+          break;
+        case 'humidity':
+          getHistoriekHum()
+          break;
+      }
+    });
+  }
+};
+
 // #endregion
 const SetReload = function () {
   document.location.reload(true);
@@ -451,6 +587,13 @@ const init = function () {
     htmlMobileNav = document.querySelector('.js-mobile-nav');
     htmlSlider = document.querySelector('.js-slider');
     htmlRPM = document.querySelector('.js-fan-rpm');
+    htmlHistoriek = document.querySelector('.js-historiek');
+    HTMLDropDownHistoriek = document.querySelector('.js-sidebar-historiek');
+    htmlHistoriekCO2 = document.querySelector('.js-historiek-co2');
+    htmlTopBarTitle = document.querySelector('.js-topbar-title');
+    htmlHistoriekTemp = document.querySelector('.js-historiek-temp');
+    htmlHistoriekHum = document.querySelector('.js-historiek-hum')
+    listenToHistoryDropdown();
     listenToBtnSidebar();
     listenToMobileNav();
   }

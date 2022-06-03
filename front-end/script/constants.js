@@ -661,3 +661,33 @@ const labels = {
     },
   ],
 };
+let HistoriekOptions = {
+  chart: {
+    height: 280,
+    type: 'area',
+  },
+  dataLabels: {
+    enabled: false,
+  },
+  series: [
+    {
+      data: [
+        {
+          x: new Date('2018-02-12').getTime(),
+          y: 76,
+        },
+        {
+          x: new Date('2018-02-13').getTime(),
+          y: 78,
+        },
+      ],
+    },
+  ],
+  colors: ['#2699FB'],
+  stroke: {
+    curve: 'smooth',
+  },
+  xaxis: {
+    type: 'datetime',
+  },
+};

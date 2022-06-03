@@ -65,6 +65,7 @@ class DataRepository:
         sql = "select setWaarde from historiek where DeviceEenheidID = 1 order by GebeurtenisID desc limit 1"
         return Database.get_one_row(sql)
 
+    @staticmethod
     def get_last_fan_setting():
         sql = """select h.setwaarde from historiek h
                     join acties a on h.actieID = a.ActieID
@@ -72,3 +73,9 @@ class DataRepository:
                     order by h.GebeurtenisID desc
                     limit 1;"""
         return Database.get_one_row(sql)
+
+    @staticmethod
+    def get_historiek(deviceEenheidID):
+        sql = """select unix_timestamp(Datum) * 1000 as 'x', setWaarde as 'y' from historiek where DeviceEenheidID = %s order by `x` desc limit 5000"""
+        params = [deviceEenheidID]
+        return Database.get_rows(sql, params)

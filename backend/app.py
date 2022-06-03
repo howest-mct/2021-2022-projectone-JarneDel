@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 from RPi import GPIO
 import threading
 from subprocess import check_output
@@ -9,15 +10,16 @@ from repositories.DataRepository import DataRepository
 from bme68x import BME68X
 import bme68xConstants as cst
 import bsecConstants as bsec
-from selenium import webdriver
+
+# from selenium import webdriver
 
 from serial import Serial, PARITY_NONE
 from model.pms5003 import Pms5003
 from model.Fan import Fan
 import logging
 
-# from selenium import webdriver
-# from selenium.webdriver.chrome.options import Options
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 
 # Code voor Hardware
@@ -34,7 +36,11 @@ logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] - [%(filename)s > %(funcName)s() > %(lineno)s] - %(message)s",
 )
+logger = logging.getLogger("app")
 
+# hieronder zeg je tegen mysql connector dat die enkel bij warn level mag printen, en voor geventwebsocket bij info
+logging.getLogger("mysql.connector.connection").setLevel("WARN")
+logging.getLogger("geventwebsocket.handler").setLevel("INFO")
 
 # Code voor Flask
 
@@ -104,6 +110,7 @@ def bme_main():
     print("\nTESTING FORCED MODE WITH BSEC")
     bme = BME68X(cst.BME68X_I2C_ADDR_LOW, 1)
     bme.set_sample_rate(bsec.BSEC_SAMPLE_RATE_LP)
+    start = time.time()
     while True:
         bsec_data = get_data(bme)
         if bsec_data is not None:
@@ -113,9 +120,11 @@ def bme_main():
             humidity = round(bsec_data["humidity"], 2)
             raw_pressure = round(bsec_data["raw_pressure"], 1)
             # print(temperature, humidity, raw_pressure)
-            DataRepository.add_data_point(temperature, 1, 15)
-            DataRepository.add_data_point(humidity, 1, 17)
-            DataRepository.add_data_point(raw_pressure, 1, 16)
+            if time.time() - start > 120:
+                start = time.time()
+                DataRepository.add_data_point(temperature, 1, 15)
+                DataRepository.add_data_point(humidity, 1, 17)
+                DataRepository.add_data_point(raw_pressure, 1, 16)
             socketio.emit(
                 "B2F_BME",
                 {
@@ -149,7 +158,7 @@ def fan_thread():
     while True:
         socketio.emit("B2F_fan_speed", {"rpm": fan.rpm})
         dt = start - time.time()
-        time.sleep(0.2)
+        time.sleep(2)
         if dt > 60:
             start = time.time()
             # Log fan speed every 60s
@@ -345,6 +354,24 @@ def fan_rpm():
         return jsonify(fan_speed=data), 200
 
 
+@app.route(endpoint + "/historiek/co2/")
+def get_historiek_co2():
+    data = DataRepository.get_historiek(2)
+    return jsonify(data=data), 200
+
+
+@app.route(endpoint + "/historiek/temperature/")
+def get_historiek_temp():
+    data = DataRepository.get_historiek(15)
+    return jsonify(data=data), 200
+
+
+@app.route(endpoint + "/historiek/humidity/")
+def get_historiek_humidity():
+    data = DataRepository.get_historiek(17)
+    return jsonify(data=data), 200
+
+
 @socketio.on("connect")
 def initial_connection():
     print("A new client connect")
@@ -400,12 +427,12 @@ def start_chrome_kiosk():
     driver = webdriver.Chrome(options=options)
     driver.get("http://localhost")
     while True:
-        pass
+        time.sleep(120000)
 
 
 def start_chrome_thread():
     print("**** Starting CHROME ****")
-    chromeThread = threading.Thread(target=start_chrome_kiosk, args=())
+    chromeThread = threading.Thread(target=start_chrome_kiosk, args=(), daemon=True)
     chromeThread.start()
 
 
