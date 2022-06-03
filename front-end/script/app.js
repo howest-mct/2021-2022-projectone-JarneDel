@@ -15,6 +15,8 @@ let OnlyOneListenersettings = true;
 let firstTimeTemp = true;
 let firstTimeCo2 = true;
 let firstTimeHum = true;
+let firstTimePressure = true;
+let firstTimePM = true;
 let co2Chart,
   tempChart,
   humidityChart,
@@ -24,7 +26,9 @@ let co2Chart,
   VOCchart,
   areaCO2,
   areaTemp,
-  areaHum;
+  areaHum,
+  areaPressure,
+  areaPM;
 
 let RPI = false;
 let selectedPage = 'actueel';
@@ -43,7 +47,9 @@ let htmlActueel,
   htmlHistoriekCO2,
   htmlTopBarTitle,
   htmlHistoriekTemp,
-  htmlHistoriekHum;
+  htmlHistoriekHum,
+  htmlHistoriekPressure,
+  htmlHistoriekPM;
 
 // #endregion
 
@@ -65,6 +71,8 @@ const hideAll = function () {
     htmlHistoriekCO2,
     htmlHistoriekTemp,
     htmlHistoriekHum,
+    htmlHistoriekPressure,
+    htmlHistoriekPM,
   ];
   for (let DomObject of arrayDomObjects) {
     hide(DomObject);
@@ -126,6 +134,32 @@ const showIP = function (jsonIP) {
   htmlIP.innerHTML = html;
 };
 
+const createChart = function (data, name, dom) {
+  let tempOptions = HistoriekOptions;
+  tempOptions.series[0].data = data;
+  tempOptions.series[0].name = name;
+  let chart = new ApexCharts(dom, tempOptions);
+  chart.render();
+  return chart;
+};
+
+const createStackedChart = function (dom, arrayJsonStacked, arrayNames) {
+  let tempOptions = HistoriekOptions;
+  tempOptions.chart.stacked = true;
+  tempOptions.colors = ['#2699FB', '#00E396', '#CED4DC'];
+  console.log(arrayJsonStacked.data.length);
+  for (let i = 0; i < arrayJsonStacked.data.length; i++) {
+    tempOptions.series[i] = {
+      data: arrayJsonStacked.data[i],
+      name: arrayNames[i],
+    };
+  }
+  console.log(tempOptions);
+  let chart = new ApexCharts(dom, tempOptions);
+  chart.render;
+  return chart;
+};
+
 const showHistoriekCo2 = function (historiek) {
   hideAll();
   updateTitle('CO2 History');
@@ -134,13 +168,11 @@ const showHistoriekCo2 = function (historiek) {
   if (firstTimeCo2) {
     console.log('first time historiek');
     firstTimeCo2 = false;
-    let CO2HistoriekOptions = HistoriekOptions;
-    CO2HistoriekOptions.series[0].data = historiek.data;
-    areaCO2 = new ApexCharts(
-      document.querySelector('.area-chart-co2'),
-      HistoriekOptions
+    areaCO2 = createChart(
+      historiek.data,
+      'Co2 concentration [ppm]',
+      document.querySelector('.area-chart-co2')
     );
-    areaCO2.render();
   } else {
     console.log('update');
     areaCO2.updateSeries([
@@ -157,15 +189,12 @@ const showHistoriekTemperature = function (tempJson) {
   show(htmlHistoriekTemp);
   console.log(tempJson);
   if (firstTimeTemp) {
-    let tempHistoriekOptions = HistoriekOptions;
-    tempHistoriekOptions.series[0].data = tempJson.data;
-    console.log('first time temp historiek');
-    firstTimeTemp = false;
-    areaTemp = new ApexCharts(
-      document.querySelector('.area-chart-temp'),
-      tempHistoriekOptions
+    areaTemp = createChart(
+      tempJson.data,
+      'temperature [°C]',
+      document.querySelector('.area-chart-temp')
     );
-    areaTemp.render();
+    firstTimeTemp = false;
   } else {
     areaTemp.updateSeries([
       {
@@ -180,20 +209,57 @@ const showHistoriekHumidity = function (humJson) {
   updateTitle('Humidity');
   console.log('hum');
   if (firstTimeHum) {
-    let humHistoriekOptions = HistoriekOptions;
-    humHistoriekOptions.series[0].data = humJson.data;
-    console.log('first time hum historiek');
-    firstTimeHum = false;
-    areaHum = new ApexCharts(
-      document.querySelector('.area-chart-hum'),
-      humHistoriekOptions
+    areaHum = createChart(
+      humJson.data,
+      'Relative humidity [%]',
+      document.querySelector('.area-chart-hum')
     );
-    areaHum.render();
+    firstTimeHum = false;
   } else {
     areaHum.updateSeries([{ data: humJson.data }]);
   }
 };
-const showHistoriekPressure = function (pressureJson) {};
+const showHistoriekPressure = function (pressureJson) {
+  hideAll();
+  show(htmlHistoriekPressure);
+  updateTitle('Pressure');
+  console.log('pressure');
+  if (firstTimePressure) {
+    areaPressure = createChart(
+      pressureJson.data,
+      'pressure [Pa]',
+      document.querySelector('.area-chart-pressure')
+    );
+    firstTimePressure = false;
+  } else {
+    areaPressure.updateSeries([{ data: pressureJson.data }]);
+  }
+};
+
+const showHistoriekPM = function (jsonPM) {
+  console.log(jsonPM);
+  hideAll();
+  show(htmlHistoriekPM);
+  updateTitle('Particulate Matter');
+  if (firstTimePM) {
+    areaPM = createStackedChart(
+      document.querySelector('.area-chart-pm'),
+      jsonPM,
+      ['pm1', 'pm2.5', 'pm10']
+    );
+    console.log(areaPM);
+    areaPM.render();
+  }
+  // else {
+  //   for (let i = 0; i < arrayJsonStacked.data.length; i++) {
+  //     data = {
+  //       data: arrayJsonStacked.data[i],
+  //       name: arrayNames[i],
+  //     };
+  //   }
+  //   areaPM.updateSeries([{data: }]);
+  // }
+};
 
 const showCharts = function () {
   console.log('chart will be shown');
@@ -423,7 +489,10 @@ const getHistoriekPressure = function () {
   const url = backend + '/historiek/pressure/';
   handleData(url, showHistoriekPressure, callbackError);
 };
-
+const getHistoriekPM = function () {
+  const url = backend + '/historiek/pm/';
+  handleData(url, showHistoriekPM, callbackError);
+};
 const getBrowerSize = function () {
   const vw = Math.max(
     document.documentElement.clientWidth || 0,
@@ -577,6 +646,9 @@ const listenToHistoryDropdown = function () {
         case 'pressure':
           getHistoriekPressure();
           break;
+        case 'pm':
+          getHistoriekPM();
+          break;
       }
     });
   }
@@ -612,6 +684,8 @@ const init = function () {
     htmlTopBarTitle = document.querySelectorAll('.js-topbar-title');
     htmlHistoriekTemp = document.querySelector('.js-historiek-temp');
     htmlHistoriekHum = document.querySelector('.js-historiek-hum');
+    htmlHistoriekPressure = document.querySelector('.js-historiek-pressure');
+    htmlHistoriekPM = document.querySelector('.js-historiek-pm');
     listenToHistoryDropdown();
     listenToBtnSidebar();
     listenToMobileNav();

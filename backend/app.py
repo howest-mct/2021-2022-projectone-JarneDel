@@ -1,3 +1,4 @@
+import json
 import time
 from datetime import datetime
 from RPi import GPIO
@@ -369,6 +370,22 @@ def get_historiek_temp():
 @app.route(endpoint + "/historiek/humidity/")
 def get_historiek_humidity():
     data = DataRepository.get_historiek(17)
+    return jsonify(data=data), 200
+
+
+@app.route(endpoint + "/historiek/pressure/")
+def get_historiek_pressrue():
+    data = DataRepository.get_historiek(16)
+    return jsonify(data=data), 200
+
+
+@app.route(endpoint + "/historiek/pm/")
+def get_historiek_pm():
+    limit = 2500
+    pm1 = DataRepository.get_historiek(6, limit=limit)
+    pm2_5 = DataRepository.get_historiek(7, limit=limit)
+    pm10 = DataRepository.get_historiek(8, limit=limit)
+    data = [pm1, pm2_5, pm10]
     return jsonify(data=data), 200
 
 
