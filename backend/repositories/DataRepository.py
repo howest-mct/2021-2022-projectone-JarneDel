@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import logging
+from sqlite3 import paramstyle
 from mysqlx import DatabaseError
 from .Database import Database
 
@@ -78,6 +79,26 @@ class DataRepository:
     def get_historiek(deviceEenheidID, limit=10000):
         sql = """select unix_timestamp(Datum) * 1000 as 'x', setWaarde as 'y' from historiek where DeviceEenheidID = %s order by `x` desc limit %s"""
         params = [deviceEenheidID, limit]
+        return Database.get_rows(sql, params)
+
+    @staticmethod
+    def get_historiek_per_hour(deviceEenheidID, begindate, enddate):
+        """Provide begindate and enddate as unix timestamp"""
+        sql = "select unix_timestamp(Datum) * 1000 as 'x', avg(setWaarde) as 'y' from historiek where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s) group by hour(Datum)  order by Datum desc;"
+        params = [deviceEenheidID, begindate, enddate]
+        return Database.get_rows(sql, params)
+
+    @staticmethod
+    def get_historiek_per_minute(deviceEenheidID, begindate, enddate, limit=2500):
+        """Provide begindate and enddate as unix timestamp"""
+        sql = "select unix_timestamp(Datum) * 1000 as 'x', avg(setWaarde) as 'y' from historiek where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s) group by hour(Datum), minute(Datum)   order by Datum desc limit %s;"
+        params = [deviceEenheidID, begindate, enddate, limit]
+        return Database.get_rows(sql, params)
+
+    @staticmethod
+    def get_historiek_per_day(deviceEenheidID, begindate, enddate):
+        sql = "select unix_timestamp(Datum) * 1000 as 'x', avg(setWaarde) as 'y' from historiek where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s) group by day(Datum) order by Datum desc;"
+        params = [deviceEenheidID, begindate, enddate]
         return Database.get_rows(sql, params)
 
     # @staticmethod

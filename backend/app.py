@@ -356,30 +356,60 @@ def fan_rpm():
         return jsonify(fan_speed=data), 200
 
 
+def get_historiek_filtered(unit, timeType, daterange, limit=2500):
+    try:
+        begin, end = daterange.split("-")
+        beginTimestamp, endTimeStamp = int(begin), int(end)
+        if timeType == "perHour":
+            data = DataRepository.get_historiek_per_hour(
+                unit, beginTimestamp, endTimeStamp
+            )
+        elif timeType == "perMinute":
+            data = DataRepository.get_historiek_per_minute(
+                unit, beginTimestamp, endTimeStamp
+            )
+        elif timeType == "perDay":
+            data = DataRepository.get_historiek_per_day(
+                unit, beginTimestamp, endTimeStamp
+            )
+
+        elif timeType == "any":
+            data = DataRepository.get_historiek(unit)
+
+        return data
+    except TypeError as ex:
+        return None
+
+
+# depricated
 @app.route(endpoint + "/historiek/co2/")
 def get_historiek_co2():
     data = DataRepository.get_historiek(2)
     return jsonify(data=data), 200
 
 
+# depricated
 @app.route(endpoint + "/historiek/temperature/")
 def get_historiek_temp():
     data = DataRepository.get_historiek(15)
     return jsonify(data=data), 200
 
 
+# depricated
 @app.route(endpoint + "/historiek/humidity/")
 def get_historiek_humidity():
     data = DataRepository.get_historiek(17)
     return jsonify(data=data), 200
 
 
+# depricated
 @app.route(endpoint + "/historiek/pressure/")
 def get_historiek_pressrue():
     data = DataRepository.get_historiek(16)
     return jsonify(data=data), 200
 
 
+# depricated
 @app.route(endpoint + "/historiek/pm/")
 def get_historiek_pm():
     limit = 2500
@@ -388,6 +418,50 @@ def get_historiek_pm():
     pm10 = DataRepository.get_historiek(8, limit=limit)
     data = [pm1, pm2_5, pm10]
     return jsonify(data=data), 200
+
+
+@app.route(endpoint + "/historiek/co2/<time_type>/<range>/")
+def get_historiek_co2_filtered(time_type, range):
+    data = get_historiek_filtered(2, time_type, range)
+    if data is not None:
+        return jsonify(data=data), 200
+    else:
+        return jsonify(message="No return data"), 400
+
+
+@app.route(endpoint + "/historiek/temperature/<time_type>/<range>/")
+def get_historiek_temperature_filtered(time_type, range):
+    data = get_historiek_filtered(15, time_type, range)
+    if data is not None:
+        return jsonify(data=data), 200
+    else:
+        return jsonify(message="No return data"), 400
+
+
+@app.route(endpoint + "/historiek/humidity/<time_type>/<range>/")
+def get_historiek_humidity_filtered(time_type, range):
+    data = get_historiek_filtered(17, time_type, range)
+    if data is not None:
+        return jsonify(data=data), 200
+    else:
+        return jsonify(message="No return data"), 400
+
+
+@app.route(endpoint + "/historiek/pressure/<time_type>/<range>/")
+def get_historiek_pressure_filtered(time_type, range):
+    return get_historiek_filtered(16, time_type, range)
+
+
+@app.route(endpoint + "/historiek/pm/<time_type>/<range>/")
+def get_historiek_pm_filtered(time_type, range):
+    pm1 = get_historiek_filtered(6, time_type, range)
+    pm2_5 = get_historiek_filtered(7, time_type, range)
+    pm10 = get_historiek_filtered(8, time_type, range)
+    if (pm1 and pm2_5 and pm10) is not None:
+        data = [pm1, pm2_5, pm10]
+        return jsonify(data=data), 200
+    else:
+        return jsonify(message="No return data"), 400
 
 
 @socketio.on("connect")
