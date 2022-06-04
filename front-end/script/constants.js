@@ -663,7 +663,7 @@ const labels = {
 };
 const HistoriekOptions = {
   chart: {
-    height: 460,
+    height: 360,
     type: 'area',
   },
   dataLabels: {

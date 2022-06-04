@@ -152,6 +152,15 @@ input:checked + .c-switch__slider:before{
   border-radius: 50%;
 }
 
+.c-dropdown-icon,
+.c-dropup-icon{
+  float: right;
+  margin-right: 0;
+}
+.c-mobile-dropdown-icon,
+.c-mobile-dropup-icon{
+  padding-right: 16px;
+}
 
 @media (min-width:900px) {
   /* Navigatie voor desktopwebsites */
@@ -282,7 +291,7 @@ input:checked + .c-switch__slider:before{
       bottom: 20px;
       width: calc(14.399375rem - 32px);
     }
-  
+
 }
 
 .chart{
@@ -573,10 +582,33 @@ th{
   .c-selected{
     background: var(--primary-color-dim);
     fill: white !important;
+    color: #fff;
   }
   .c-settings{
     margin-left: 16px;
   }
+  .c-sidebar-dropdown{
+    width: 100%;
+  }
+  .js-dropdown-btn{
+    width: 100%;
+    padding-left: 48px;
+    padding-bottom: 8px;
+    padding-top: 8px;
+    margin-right: 0px;
+    margin: 0;
+    font-weight: 400;
+  }
+  .js-dropdown-btn:hover{
+    background: var(--hover-background);
+  }
+  .js-dropdown-btn:active,
+  .js-dropdown-btn.c-selected{
+    background-color: var(--primary-color-dim);
+    color: #fff;
+    fill: #fff;
+  }
+  
 }
 .c-clickable-icon{
   border-radius: 12px;

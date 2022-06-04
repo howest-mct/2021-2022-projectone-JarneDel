@@ -50,7 +50,8 @@ let htmlActueel,
   htmlHistoriekHum,
   htmlHistoriekPressure,
   htmlHistoriekPM,
-  htmlLoading;
+  htmlLoading,
+  htmlDropDownHistoriekMobile;
 
 // #endregion
 
@@ -64,20 +65,29 @@ const toggleClass = function (DomObject) {
   DomObject.classList.toggle('c-hidden');
 };
 const hideAll = function () {
-  const arrayDomObjects = [
+  let arrayDomObjects = [
     htmlActueel,
     // htmlHistoriek,
     htmlSettings,
-    htmlRefesh,
+
     htmlHistoriekCO2,
     htmlHistoriekTemp,
     htmlHistoriekHum,
     htmlHistoriekPressure,
     htmlHistoriekPM,
   ];
+  for (let element of htmlRefesh) {
+    arrayDomObjects.push(element);
+  }
   for (let DomObject of arrayDomObjects) {
     hide(DomObject);
   }
+};
+
+const toggleSidebar = function () {
+  htmlMobileNav.classList.toggle('c-show-nav');
+  toggleClass(htmlhamburger);
+  toggleClass(htmlCloseHamburger);
 };
 
 // #region ***  Callback-Visualisation - show___         ***********
@@ -88,7 +98,10 @@ const showPage = function (type) {
     updateTitle('Realtime dashboard');
     hideAll();
     show(htmlActueel);
-    show(htmlRefesh);
+    for (let refesh of htmlRefesh) {
+      show(refesh);
+    }
+
     if (OnlyOneListener) {
       showCharts();
       listenToRefesh();
@@ -109,6 +122,7 @@ const showPage = function (type) {
     }
   } else if (type == 'historiek') {
     toggleClass(HTMLDropDownHistoriek);
+    toggleClass(htmlDropDownHistoriekMobile);
     getHistoriekCo2();
     // show(htmlDropDown);
     // if (onlyOneListenerHistoriek) {
@@ -576,14 +590,21 @@ const listenToBtnSidebar = function () {
       if (this.dataset.type == 'historiek') {
         console.log('HI');
         toggleClass(HTMLDropDownHistoriek);
+        toggleClass(htmlDropDownHistoriekMobile);
+        toggleClass(document.querySelector('.c-dropup-icon'));
+        toggleClass(document.querySelector('.c-dropdown-icon'));
+        toggleClass(document.querySelector('.c-mobile-dropdown-icon'));
+        toggleClass(document.querySelector('.c-mobile-dropup-icon'));
       } else {
         const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
         for (let btn2 of btns) {
           btn2.classList.remove('c-selected');
         }
-        htmlMobileNav.classList.toggle('c-show-nav');
-        toggleClass(htmlhamburger);
-        toggleClass(htmlCloseHamburger);
+        let dropdown = document.querySelectorAll('.js-dropdown-btn');
+        for (let dropdownBtn of dropdown) {
+          dropdownBtn.classList.remove('c-selected');
+        }
+        toggleSidebar();
         this.classList.add('c-selected');
         const type = this.dataset.type;
         console.log(type);
@@ -594,10 +615,12 @@ const listenToBtnSidebar = function () {
 };
 
 const listenToRefesh = function () {
-  htmlRefesh.addEventListener('click', function () {
-    console.log('Refesh');
-    getRefesh();
-  });
+  for (let refesh of htmlRefesh) {
+    refesh.addEventListener('click', function () {
+      console.log('Refesh');
+      getRefesh();
+    });
+  }
 };
 
 const listenToMobileNav = function () {
@@ -605,9 +628,7 @@ const listenToMobileNav = function () {
   for (let menu of hamburgermenu) {
     menu.addEventListener('click', function () {
       console.log('mobile nav');
-      htmlMobileNav.classList.toggle('c-show-nav');
-      toggleClass(htmlhamburger);
-      toggleClass(htmlCloseHamburger);
+      toggleSidebar();
     });
   }
 };
@@ -647,9 +668,19 @@ const listenToHistoryDropdown = function () {
   let dropdown = document.querySelectorAll('.js-dropdown-btn');
   for (const page of dropdown) {
     page.addEventListener('click', function () {
+      toggleSidebar();
+      let dropdown = document.querySelectorAll('.js-dropdown-btn');
+      for (let dropdownBtn of dropdown) {
+        dropdownBtn.classList.remove('c-selected');
+      }
+      const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
+      for (let btn2 of btns) {
+        btn2.classList.remove('c-selected');
+      }
       console.log(this.dataset.type);
       show(document.querySelector('.js-loading'));
       hideAll();
+      console.log(this.classList.add('c-selected'));
       switch (this.dataset.type) {
         case 'co2':
           getHistoriekCo2();
@@ -687,7 +718,7 @@ const init = function () {
   } else if (document.querySelector('.Homepagina')) {
     // getBrowerSize();
     console.log('Homepage');
-    htmlRefesh = document.querySelector('.js-refesh');
+    htmlRefesh = document.querySelectorAll('.js-refesh');
     htmlSettings = document.querySelector('.js-settings');
     htmlActueel = document.querySelector('.js-actueel');
     htmlhamburger = document.querySelector('.c-hamburger-menu');
@@ -697,6 +728,9 @@ const init = function () {
     htmlRPM = document.querySelector('.js-fan-rpm');
     htmlHistoriek = document.querySelector('.js-historiek');
     HTMLDropDownHistoriek = document.querySelector('.js-sidebar-historiek');
+    htmlDropDownHistoriekMobile = document.querySelector(
+      '.js-mobile-sidebar-historiek'
+    );
     htmlHistoriekCO2 = document.querySelector('.js-historiek-co2');
     htmlTopBarTitle = document.querySelectorAll('.js-topbar-title');
     htmlHistoriekTemp = document.querySelector('.js-historiek-temp');
