@@ -75,7 +75,7 @@ class DataRepository:
         return Database.get_one_row(sql)
 
     @staticmethod
-    def get_historiek(deviceEenheidID, limit=5000):
+    def get_historiek(deviceEenheidID, limit=10000):
         sql = """select unix_timestamp(Datum) * 1000 as 'x', setWaarde as 'y' from historiek where DeviceEenheidID = %s order by `x` desc limit %s"""
         params = [deviceEenheidID, limit]
         return Database.get_rows(sql, params)

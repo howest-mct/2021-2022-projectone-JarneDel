@@ -123,6 +123,7 @@ def bme_main():
             # print(temperature, humidity, raw_pressure)
             if time.time() - start > 120:
                 start = time.time()
+                logging.debug("New data point")
                 DataRepository.add_data_point(temperature, 1, 15)
                 DataRepository.add_data_point(humidity, 1, 17)
                 DataRepository.add_data_point(raw_pressure, 1, 16)

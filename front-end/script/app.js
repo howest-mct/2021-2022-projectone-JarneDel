@@ -49,7 +49,8 @@ let htmlActueel,
   htmlHistoriekTemp,
   htmlHistoriekHum,
   htmlHistoriekPressure,
-  htmlHistoriekPM;
+  htmlHistoriekPM,
+  htmlLoading;
 
 // #endregion
 
@@ -136,10 +137,17 @@ const showIP = function (jsonIP) {
 
 const createChart = function (data, name, dom) {
   let tempOptions = HistoriekOptions;
-  tempOptions.series[0].data = data;
-  tempOptions.series[0].name = name;
+  tempOptions.chart.stacked = false;
+  tempOptions.series.pop();
+  tempOptions.series.pop();
+  tempOptions.series[0] = {
+    data: data,
+    name: name,
+  };
+
   let chart = new ApexCharts(dom, tempOptions);
   chart.render();
+
   return chart;
 };
 
@@ -181,6 +189,7 @@ const showHistoriekCo2 = function (historiek) {
       },
     ]);
   }
+  hide(htmlLoading);
 };
 const showHistoriekTemperature = function (tempJson) {
   hideAll();
@@ -202,12 +211,14 @@ const showHistoriekTemperature = function (tempJson) {
       },
     ]);
   }
+  hide(htmlLoading);
 };
 const showHistoriekHumidity = function (humJson) {
   hideAll();
   show(htmlHistoriekHum);
   updateTitle('Humidity');
-  console.log('hum');
+  console.log(humJson);
+
   if (firstTimeHum) {
     areaHum = createChart(
       humJson.data,
@@ -218,12 +229,14 @@ const showHistoriekHumidity = function (humJson) {
   } else {
     areaHum.updateSeries([{ data: humJson.data }]);
   }
+  hide(htmlLoading);
 };
 const showHistoriekPressure = function (pressureJson) {
   hideAll();
   show(htmlHistoriekPressure);
   updateTitle('Pressure');
-  console.log('pressure');
+  console.log(pressureJson);
+
   if (firstTimePressure) {
     areaPressure = createChart(
       pressureJson.data,
@@ -234,12 +247,14 @@ const showHistoriekPressure = function (pressureJson) {
   } else {
     areaPressure.updateSeries([{ data: pressureJson.data }]);
   }
+  hide(htmlLoading);
 };
 
 const showHistoriekPM = function (jsonPM) {
   console.log(jsonPM);
   hideAll();
   show(htmlHistoriekPM);
+
   updateTitle('Particulate Matter');
   if (firstTimePM) {
     areaPM = createStackedChart(
@@ -247,18 +262,18 @@ const showHistoriekPM = function (jsonPM) {
       jsonPM,
       ['pm1', 'pm2.5', 'pm10']
     );
-    console.log(areaPM);
     areaPM.render();
+    console.log(areaPM);
+  } else {
+    for (let i = 0; i < arrayJsonStacked.data.length; i++) {
+      data = {
+        data: arrayJsonStacked.data[i],
+        name: arrayNames[i],
+      };
+    }
+    areaPM.updateSeries([{ data: data }]);
   }
-  // else {
-  //   for (let i = 0; i < arrayJsonStacked.data.length; i++) {
-  //     data = {
-  //       data: arrayJsonStacked.data[i],
-  //       name: arrayNames[i],
-  //     };
-  //   }
-  //   areaPM.updateSeries([{data: }]);
-  // }
+  hide(htmlLoading);
 };
 
 const showCharts = function () {
@@ -633,6 +648,8 @@ const listenToHistoryDropdown = function () {
   for (const page of dropdown) {
     page.addEventListener('click', function () {
       console.log(this.dataset.type);
+      show(document.querySelector('.js-loading'));
+      hideAll();
       switch (this.dataset.type) {
         case 'co2':
           getHistoriekCo2();
@@ -686,6 +703,7 @@ const init = function () {
     htmlHistoriekHum = document.querySelector('.js-historiek-hum');
     htmlHistoriekPressure = document.querySelector('.js-historiek-pressure');
     htmlHistoriekPM = document.querySelector('.js-historiek-pm');
+    htmlLoading = document.querySelector('.js-loading');
     listenToHistoryDropdown();
     listenToBtnSidebar();
     listenToMobileNav();

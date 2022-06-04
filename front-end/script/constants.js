@@ -661,9 +661,9 @@ const labels = {
     },
   ],
 };
-let HistoriekOptions = {
+const HistoriekOptions = {
   chart: {
-    height: 280,
+    height: 460,
     type: 'area',
   },
   dataLabels: {
