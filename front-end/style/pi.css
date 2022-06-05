@@ -271,7 +271,8 @@ input:checked + .c-switch__slider:before{
     padding-bottom: 8px;
     padding-top: 8px;
     margin: 0;
-    font-weight: 400;
+    font-size: 14px;
+    font-weight: 300;
   }
   .js-dropdown-btn:hover{
     background: var(--hover-background);
@@ -597,7 +598,8 @@ th{
     padding-top: 8px;
     margin-right: 0px;
     margin: 0;
-    font-weight: 400;
+    font-size: 12px;
+    font-weight: 300;
   }
   .js-dropdown-btn:hover{
     background: var(--hover-background);

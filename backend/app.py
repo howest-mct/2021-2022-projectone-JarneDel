@@ -34,7 +34,7 @@ def setup_gpio():
 # logging setup
 logging.basicConfig(
     filename="logs/app_log.log",
-    level=logging.DEBUG,
+    level=logging.INFO,
     format="%(asctime)s [%(levelname)s] - [%(filename)s > %(funcName)s() > %(lineno)s] - %(message)s",
 )
 logger = logging.getLogger("app")
@@ -359,23 +359,30 @@ def fan_rpm():
 def get_historiek_filtered(unit, timeType, daterange, limit=2500):
     try:
         begin, end = daterange.split("-")
+        if begin == "start":
+            begin = DataRepository.get_date_first_entry(unit)["x"] // 1000
+        data = None
         beginTimestamp, endTimeStamp = int(begin), int(end)
-        if timeType == "perHour":
-            data = DataRepository.get_historiek_per_hour(
+        if timeType == "WEEK":
+            data = DataRepository.get_historiek_per_5_min(
                 unit, beginTimestamp, endTimeStamp
             )
-        elif timeType == "perMinute":
+            print(data)
+        elif timeType == "DAY":
             data = DataRepository.get_historiek_per_minute(
                 unit, beginTimestamp, endTimeStamp
             )
-        elif timeType == "perDay":
-            data = DataRepository.get_historiek_per_day(
+        elif timeType == "YTD":
+            data = DataRepository.get_historiek_per_hour(
                 unit, beginTimestamp, endTimeStamp
             )
 
         elif timeType == "any":
             data = DataRepository.get_historiek(unit)
-
+        else:
+            logging.warning("TimeType not correct")
+        if data is None:
+            logging.error("geen data")
         return data
     except TypeError as ex:
         return None
@@ -449,7 +456,13 @@ def get_historiek_humidity_filtered(time_type, range):
 
 @app.route(endpoint + "/historiek/pressure/<time_type>/<range>/")
 def get_historiek_pressure_filtered(time_type, range):
-    return get_historiek_filtered(16, time_type, range)
+    print(f"{time_type}, {range}")
+    data = get_historiek_filtered(16, time_type, range)
+    print(data)
+    if data is not None:
+        return jsonify(data=data), 200
+    else:
+        return jsonify(message="No return data"), 400
 
 
 @app.route(endpoint + "/historiek/pm/<time_type>/<range>/")

@@ -51,7 +51,9 @@ let htmlActueel,
   htmlHistoriekPressure,
   htmlHistoriekPM,
   htmlLoading,
-  htmlDropDownHistoriekMobile;
+  htmlDropDownHistoriekMobile,
+  htmlReloadPage,
+  htmlChartType;
 
 // #endregion
 
@@ -75,6 +77,8 @@ const hideAll = function () {
     htmlHistoriekHum,
     htmlHistoriekPressure,
     htmlHistoriekPM,
+    htmlReloadPage,
+    htmlChartType,
   ];
   for (let element of htmlRefesh) {
     arrayDomObjects.push(element);
@@ -88,6 +92,75 @@ const toggleSidebar = function () {
   htmlMobileNav.classList.toggle('c-show-nav');
   toggleClass(htmlhamburger);
   toggleClass(htmlCloseHamburger);
+};
+
+//reset chartoptions on switching graphs
+const resetGraphOptions = function (type) {
+  show(htmlChartType);
+  let chartranges = document.querySelectorAll('.js-chartrange');
+  for (let chartrange of chartranges) {
+    let chartType = chartrange.value;
+    console.log(chartType, type);
+    if (chartType == type) {
+      chartrange.checked = true;
+    } else {
+      chartrange.checked = false;
+    }
+  }
+};
+
+// Listen to the chart selection buttens/ only do run once
+const listenTographOptions = function () {
+  const htmlChartRange = document.querySelectorAll('.js-chartrange');
+  for (let chartRange of htmlChartRange) {
+    chartRange.addEventListener('change', function () {
+      let graph = htmlChartType.dataset.active_graph;
+      console.log(graph, this.value);
+      getGraphData(graph, this.value);
+    });
+  }
+};
+
+// updates the graph depending on state
+const getGraphData = function (graph, graphType) {
+  let now = new Date();
+  let dateNow = Math.round(now.getTime() / 1000);
+  let beginDate;
+  switch (graphType) {
+    case 'DAY':
+      now.setDate(now.getDate() - 1);
+      beginDate = Math.round(now.getTime() / 1000);
+      break;
+    case 'WEEK':
+      now.setDate(now.getDate() - 7);
+      beginDate = Math.round(now.getTime() / 1000);
+      break;
+    case 'YTD':
+      beginDate = 'start';
+      break;
+    default:
+      console.error('Invalid GraphType');
+  }
+
+  switch (graph) {
+    case 'co2':
+      getHistoriekCo2Filtered(graphType, beginDate, dateNow);
+      break;
+    case 'temperature':
+      getHistoriekTemperatureFiltered(graphType, beginDate, dateNow);
+      break;
+    case 'humidity':
+      getHistoriekHumFiltered(graphType, beginDate, dateNow);
+      break;
+    case 'pressure':
+      getHistoriekPressureFiltered(graphType, beginDate, dateNow);
+      break;
+    case 'pm':
+      getHistoriekPMFiltered(graphType, beginDate, dateNow);
+      break;
+    default:
+      console.error('Invalid Graph type');
+  }
 };
 
 // #region ***  Callback-Visualisation - show___         ***********
@@ -112,26 +185,20 @@ const showPage = function (type) {
     updateTitle('Settings');
     hideAll();
     show(htmlSettings);
+    show(htmlReloadPage);
     getFanSetting();
     if (OnlyOneListenersettings) {
       getIP();
+      listenToReload();
       listenToSocketFan();
       listenToFanMode();
       listenToSlider();
       OnlyOneListenersettings = false;
     }
-  } else if (type == 'historiek') {
-    toggleClass(HTMLDropDownHistoriek);
-    toggleClass(htmlDropDownHistoriekMobile);
-    getHistoriekCo2();
-    // show(htmlDropDown);
-    // if (onlyOneListenerHistoriek) {
-    //   listenToHistoriekPaginas();
-    //   onlyOneListenerHistoriek = false;
-    // }
   }
 };
 
+// shows ip address in settings --  called by getpage
 const showIP = function (jsonIP) {
   console.log(jsonIP);
   let lanIps = jsonIP.ip.lan;
@@ -149,26 +216,29 @@ const showIP = function (jsonIP) {
   htmlIP.innerHTML = html;
 };
 
+// Creates history chart -- called by showHisoriek
 const createChart = function (data, name, dom) {
-  let tempOptions = HistoriekOptions;
-  tempOptions.chart.stacked = false;
-  tempOptions.series.pop();
-  tempOptions.series.pop();
+  // just = is not enough cause just a reference, you need to do this stupid stuff.
+  let tempOptions = JSON.parse(JSON.stringify(HistoriekOptions));
   tempOptions.series[0] = {
     data: data,
     name: name,
   };
-
+  tempOptions.yaxis = {
+    labels: {
+      formatter(value) {
+        return Math.round(value);
+      },
+    },
+  };
   let chart = new ApexCharts(dom, tempOptions);
-  chart.render();
-
   return chart;
 };
 
+// creates a linechart with 3 rows -- called by showHistoriekPM
 const createStackedChart = function (dom, arrayJsonStacked, arrayNames) {
-  let tempOptions = HistoriekOptions;
-  tempOptions.chart.stacked = true;
-  tempOptions.colors = ['#2699FB', '#00E396', '#CED4DC'];
+  let tempOptions = HistoriekOptionsLineChart;
+  tempOptions.colors = ['#2699FB', '#00E396', '#504DE6'];
   console.log(arrayJsonStacked.data.length);
   for (let i = 0; i < arrayJsonStacked.data.length; i++) {
     tempOptions.series[i] = {
@@ -178,7 +248,6 @@ const createStackedChart = function (dom, arrayJsonStacked, arrayNames) {
   }
   console.log(tempOptions);
   let chart = new ApexCharts(dom, tempOptions);
-  chart.render;
   return chart;
 };
 
@@ -186,6 +255,7 @@ const showHistoriekCo2 = function (historiek) {
   hideAll();
   updateTitle('CO2 History');
   show(htmlHistoriekCO2);
+  show(htmlChartType);
   console.log(historiek);
   if (firstTimeCo2) {
     console.log('first time historiek');
@@ -195,6 +265,7 @@ const showHistoriekCo2 = function (historiek) {
       'Co2 concentration [ppm]',
       document.querySelector('.area-chart-co2')
     );
+    areaCO2.render();
   } else {
     console.log('update');
     areaCO2.updateSeries([
@@ -210,6 +281,7 @@ const showHistoriekTemperature = function (tempJson) {
   updateTitle('Temperature');
   console.log(tempJson);
   show(htmlHistoriekTemp);
+  show(htmlChartType);
   console.log(tempJson);
   if (firstTimeTemp) {
     areaTemp = createChart(
@@ -217,6 +289,7 @@ const showHistoriekTemperature = function (tempJson) {
       'temperature [°C]',
       document.querySelector('.area-chart-temp')
     );
+    areaTemp.render();
     firstTimeTemp = false;
   } else {
     areaTemp.updateSeries([
@@ -230,6 +303,7 @@ const showHistoriekTemperature = function (tempJson) {
 const showHistoriekHumidity = function (humJson) {
   hideAll();
   show(htmlHistoriekHum);
+  show(htmlChartType);
   updateTitle('Humidity');
   console.log(humJson);
 
@@ -239,6 +313,7 @@ const showHistoriekHumidity = function (humJson) {
       'Relative humidity [%]',
       document.querySelector('.area-chart-hum')
     );
+    areaHum.render();
     firstTimeHum = false;
   } else {
     areaHum.updateSeries([{ data: humJson.data }]);
@@ -248,6 +323,7 @@ const showHistoriekHumidity = function (humJson) {
 const showHistoriekPressure = function (pressureJson) {
   hideAll();
   show(htmlHistoriekPressure);
+  show(htmlChartType);
   updateTitle('Pressure');
   console.log(pressureJson);
 
@@ -257,6 +333,7 @@ const showHistoriekPressure = function (pressureJson) {
       'pressure [Pa]',
       document.querySelector('.area-chart-pressure')
     );
+    areaPressure.render();
     firstTimePressure = false;
   } else {
     areaPressure.updateSeries([{ data: pressureJson.data }]);
@@ -268,7 +345,7 @@ const showHistoriekPM = function (jsonPM) {
   console.log(jsonPM);
   hideAll();
   show(htmlHistoriekPM);
-
+  show(htmlChartType);
   updateTitle('Particulate Matter');
   if (firstTimePM) {
     areaPM = createStackedChart(
@@ -290,6 +367,7 @@ const showHistoriekPM = function (jsonPM) {
   hide(htmlLoading);
 };
 
+// renders the realtime charts
 const showCharts = function () {
   console.log('chart will be shown');
   co2Chart = new ApexCharts(
@@ -330,6 +408,7 @@ const showCharts = function () {
   listenToSocketCharts();
   getActueleData();
 };
+// updates the realtime charts
 const showUpdatedCharts = function (jsonObject) {
   // console.log(jsonObject);
   const data = jsonObject.data;
@@ -361,6 +440,7 @@ const showUpdatedCharts = function (jsonObject) {
   updatePMNOPcharts(PM);
 };
 
+// callback from when data is refeshed
 const showRefesh = function (jsonObject) {
   console.log(jsonObject);
 };
@@ -371,7 +451,7 @@ const showFanSetting = function (jsonObject) {
     show(htmlSlider);
   }
 };
-
+//updates label and data
 const updateOptionsCharts = function (value, type) {
   let seriesValue, typeLabel, chart;
   switch (type) {
@@ -501,25 +581,28 @@ const getFanSetting = function () {
   handleData(url, showFanSetting, callbackError);
 };
 
-const getHistoriekCo2 = function () {
-  const url = backend + '/historiek/co2/';
+const getHistoriekCo2Filtered = function (type, begin, end) {
+  const url = backend + `/historiek/co2/${type}/${begin}-${end}/`;
   handleData(url, showHistoriekCo2, callbackError);
 };
-const getHistoriekTemperature = function () {
-  const url = backend + '/historiek/temperature/';
+
+const getHistoriekTemperatureFiltered = function (type, begin, end) {
+  const url = backend + `/historiek/temperature/${type}/${begin}-${end}/`;
   handleData(url, showHistoriekTemperature, callbackError);
 };
 
-const getHistoriekHum = function () {
-  const url = backend + '/historiek/humidity/';
+const getHistoriekHumFiltered = function (type, begin, end) {
+  const url = backend + `/historiek/humidity/${type}/${begin}-${end}/`;
   handleData(url, showHistoriekHumidity, callbackError);
 };
-const getHistoriekPressure = function () {
-  const url = backend + '/historiek/pressure/';
+
+const getHistoriekPressureFiltered = function (type, begin, end) {
+  const url = backend + `/historiek/pressure/${type}/${begin}-${end}/`;
   handleData(url, showHistoriekPressure, callbackError);
 };
-const getHistoriekPM = function () {
-  const url = backend + '/historiek/pm/';
+
+const getHistoriekPMFiltered = function (type, begin, end) {
+  const url = backend + `/historiek/pm/${type}/${begin}-${end}/`;
   handleData(url, showHistoriekPM, callbackError);
 };
 const getBrowerSize = function () {
@@ -588,7 +671,7 @@ const listenToBtnSidebar = function () {
   for (let btn of btns) {
     btn.addEventListener('click', function () {
       if (this.dataset.type == 'historiek') {
-        console.log('HI');
+        // toggles the dropdown menu
         toggleClass(HTMLDropDownHistoriek);
         toggleClass(htmlDropDownHistoriekMobile);
         toggleClass(document.querySelector('.c-dropup-icon'));
@@ -678,30 +761,72 @@ const listenToHistoryDropdown = function () {
         btn2.classList.remove('c-selected');
       }
       console.log(this.dataset.type);
-      show(document.querySelector('.js-loading'));
+      show(htmlLoading);
       hideAll();
-      console.log(this.classList.add('c-selected'));
-      switch (this.dataset.type) {
-        case 'co2':
-          getHistoriekCo2();
-          break;
-        case 'temperature':
-          getHistoriekTemperature();
-          break;
-        case 'humidity':
-          getHistoriekHum();
-          break;
-        case 'pressure':
-          getHistoriekPressure();
-          break;
-        case 'pm':
-          getHistoriekPM();
-          break;
+      this.classList.add('c-selected');
+      if (this.dataset.is_loaded == 0) {
+        this.dataset.is_loaded = true;
+        let dateYesterday = new Date();
+        let dateNow = new Date();
+        dateNow = Math.round(dateNow.getTime() / 1000);
+        dateYesterday.setDate(dateYesterday.getDate() - 1);
+        dateYesterday = Math.round(dateYesterday.getTime() / 1000);
+        htmlChartType.dataset.active_graph = this.dataset.type;
+        resetGraphOptions('DAY');
+        switch (this.dataset.type) {
+          case 'co2':
+            getHistoriekCo2Filtered('DAY', dateYesterday, dateNow);
+            break;
+          case 'temperature':
+            getHistoriekTemperatureFiltered('DAY', dateYesterday, dateNow);
+            break;
+          case 'humidity':
+            getHistoriekHumFiltered('DAY', dateYesterday, dateNow);
+            break;
+          case 'pressure':
+            getHistoriekPressureFiltered('DAY', dateYesterday, dateNow);
+            break;
+          case 'pm':
+            getHistoriekPMFiltered('DAY', dateYesterday, dateNow);
+            break;
+        }
+      } else {
+        // just show the page and reset the graph options.
+        hideAll();
+        switch (this.dataset.type) {
+          case 'co2':
+            updateTitle('CO2');
+            show(htmlHistoriekCO2);
+            break;
+          case 'temperature':
+            updateTitle('Temperature');
+            show(htmlHistoriekTemp);
+            break;
+          case 'humidity':
+            updateTitle('Humidity');
+            show(htmlHistoriekHum);
+            break;
+          case 'pressure':
+            updateTitle('Pressure');
+            show(htmlHistoriekPressure);
+            break;
+          case 'pm':
+            updateTitle('Particulate Matter');
+            show(htmlHistoriekPM);
+            break;
+        }
+
+        hide(htmlLoading);
+        show(htmlChartType);
       }
     });
   }
 };
-
+const listenToReload = function () {
+  htmlReloadPage.addEventListener('click', function () {
+    SetReload();
+  });
+};
 // #endregion
 const SetReload = function () {
   document.location.reload(true);
@@ -738,9 +863,12 @@ const init = function () {
     htmlHistoriekPressure = document.querySelector('.js-historiek-pressure');
     htmlHistoriekPM = document.querySelector('.js-historiek-pm');
     htmlLoading = document.querySelector('.js-loading');
+    htmlReloadPage = document.querySelector('.js-reload-page');
+    htmlChartType = document.querySelector('.js-chart-type');
     listenToHistoryDropdown();
     listenToBtnSidebar();
     listenToMobileNav();
+    listenTographOptions();
   }
 };
 

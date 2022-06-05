@@ -255,7 +255,7 @@
           </div>
 
         </div>
-
+        <div class="js-reload-page">Force Reload Page</div>
       </div>
       <div class="js-historiek">
         <div class="js-loading c-hidden">
@@ -269,19 +269,27 @@
             </circle>
           </svg>
         </div>
-        <div class="js-historiek-co2">
+        <div class="js-chart-type c-hidden" data-active_graph = 'none'>
+          <input class = 'js-chartrange'type="radio" name="chartRange" value="YTD" id="YTD">
+          <label for="YTD">YTD</label><br>
+          <input class = 'js-chartrange' type="radio" name="chartRange" value="WEEK" id="WEEK">
+          <label for="WEEK">This Week</label><br>
+          <input class = 'js-chartrange' type="radio" name="chartRange" value="DAY" id="DAY" checked>
+          <label for="DAY">Today</label>
+        </div>
+        <div class="js-historiek-co2" data-range='DAY'>
           <div class="area-chart-co2 c-chart"></div>
         </div>
-        <div class="js-historiek-temp">
+        <div class="js-historiek-temp" data-range='DAY'>
           <div class="area-chart-temp c-chart"></div>
         </div>
-        <div class="js-historiek-hum">
+        <div class="js-historiek-hum" data-range='DAY'>
           <div class="area-chart-hum c-chart"></div>
         </div>
-        <div class="js-historiek-pressure">
+        <div class="js-historiek-pressure" data-range='DAY'>
           <div class="area-chart-pressure c-chart"></div>
         </div>
-        <div class="js-historiek-pm">
+        <div class="js-historiek-pm" data-range='DAY'>
           <div class="area-chart-pm c-chart"></div>
         </div>
       </div>
@@ -346,19 +354,19 @@
       </svg>
     </h3>
     <div class="js-sidebar-historiek c-sidebar-dropdown c-hidden">
-      <h4 class="js-dropdown-btn" data-type="co2">
+      <h4 class="js-dropdown-btn" data-type="co2" data-is_loaded="0">
         CO2
       </h4>
-      <h4 class="js-dropdown-btn" data-type="temperature">
+      <h4 class="js-dropdown-btn" data-type="temperature" data-is_loaded="0">
         Temperature
       </h4>
-      <h4 class="js-dropdown-btn" data-type="humidity">
+      <h4 class="js-dropdown-btn" data-type="humidity" data-is_loaded="0">
         Humidity
       </h4>
-      <h4 class="js-dropdown-btn" data-type="pressure">
+      <h4 class="js-dropdown-btn" data-type="pressure" data-is_loaded="0">
         Pressure
       </h4>
-      <h4 class="js-dropdown-btn" data-type="pm">
+      <h4 class="js-dropdown-btn" data-type="pm" data-is_loaded="0" >
         Particulate matter
       </h4>
     </div>
@@ -403,13 +411,13 @@
         </g>
       </svg>
       <p>HISTORY</p>
-      <svg class='c-dropdown-icon c-mobile-dropdown-icon' xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"
-        fill="#000000">
+      <svg class='c-dropdown-icon c-mobile-dropdown-icon' xmlns="http://www.w3.org/2000/svg" height="24px"
+        viewBox="0 0 24 24" width="24px" fill="#000000">
         <path d="M0 0h24v24H0V0z" fill="none" />
         <path d="M7 10l5 5 5-5H7z" />
       </svg>
-      <svg class='c-dropup-icon c-mobile-dropup-icon c-hidden' xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
-        width="24px" fill="#000000">
+      <svg class='c-dropup-icon c-mobile-dropup-icon c-hidden' xmlns="http://www.w3.org/2000/svg" height="24px"
+        viewBox="0 0 24 24" width="24px" fill="#000000">
         <path d="M0 0h24v24H0V0z" fill="none" />
         <path d="M7 14l5-5 5 5H7z" />
       </svg>

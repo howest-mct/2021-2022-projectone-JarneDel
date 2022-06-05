@@ -1,0 +1,7 @@
+- [x] chart type per hour, day, ytd
+- [ ] Header & content: Css grid ipv flexbox
+- [ ] inschuifbare sidebar
+- [ ] input start & enddate
+- [x] IF SWITCH CHART: UPDATE CHART SELECTION TYPE
+- [] nice to have: keep graph info afer switching graph
+- [] nice to have: show realtime dashboard on page load

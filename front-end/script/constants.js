@@ -691,3 +691,42 @@ const HistoriekOptions = {
     type: 'datetime',
   },
 };
+
+let HistoriekOptionsLineChart = {
+  chart: {
+    height: 360,
+    type: 'line',
+  },
+  dataLabels: {
+    enabled: false,
+  },
+  series: [
+    {
+      data: [
+        {
+          x: new Date('2018-02-12').getTime(),
+          y: 76,
+        },
+        {
+          x: new Date('2018-02-13').getTime(),
+          y: 78,
+        },
+      ],
+    },
+  ],
+  colors: ['#2699FB'],
+  stroke: {
+    curve: 'smooth',
+    width: 2,
+  },
+  xaxis: {
+    type: 'datetime',
+  },
+  yaxis: {
+    labels: {
+      formatter(value) {
+        return value.toFixed(0);
+      },
+    },
+  },
+};

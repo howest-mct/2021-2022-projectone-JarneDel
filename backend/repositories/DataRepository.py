@@ -84,14 +84,14 @@ class DataRepository:
     @staticmethod
     def get_historiek_per_hour(deviceEenheidID, begindate, enddate):
         """Provide begindate and enddate as unix timestamp"""
-        sql = "select unix_timestamp(Datum) * 1000 as 'x', avg(setWaarde) as 'y' from historiek where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s) group by hour(Datum)  order by Datum desc;"
+        sql = "select unix_timestamp(Datum) * 1000 as 'x', avg(setWaarde) as 'y' from historiek where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s) group by day(Datum), hour(Datum)  order by Datum desc;"
         params = [deviceEenheidID, begindate, enddate]
         return Database.get_rows(sql, params)
 
     @staticmethod
-    def get_historiek_per_minute(deviceEenheidID, begindate, enddate, limit=2500):
+    def get_historiek_per_minute(deviceEenheidID, begindate, enddate, limit=5000):
         """Provide begindate and enddate as unix timestamp"""
-        sql = "select unix_timestamp(Datum) * 1000 as 'x', avg(setWaarde) as 'y' from historiek where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s) group by hour(Datum), minute(Datum)   order by Datum desc limit %s;"
+        sql = "select unix_timestamp(Datum) * 1000 as 'x', avg(setWaarde) as 'y' from historiek where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s) group by day(datum), hour(Datum), minute(Datum)   order by Datum desc limit %s;"
         params = [deviceEenheidID, begindate, enddate, limit]
         return Database.get_rows(sql, params)
 
@@ -101,5 +101,17 @@ class DataRepository:
         params = [deviceEenheidID, begindate, enddate]
         return Database.get_rows(sql, params)
 
-    # @staticmethod
-    # def get_pm():
+    @staticmethod
+    def get_historiek_per_5_min(deviceEenheidID, begindate, enddate):
+        sql = """SELECT UNIX_TIMESTAMP(Datum) div (5 * 60) * (5 * 60) * 1000 AS x, avg(setWaarde) as 'y'
+                FROM historiek
+                where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s)
+                group BY `x`"""
+        params = [deviceEenheidID, begindate, enddate]
+        return Database.get_rows(sql, params)
+
+    @staticmethod
+    def get_date_first_entry(deviceEenheidID):
+        sql = "select unix_timestamp(Datum) *1000 as 'x' from historiek where DeviceEenheidID = %s order by datum asc limit 1;"
+        params = [deviceEenheidID]
+        return Database.get_one_row(sql, params)
