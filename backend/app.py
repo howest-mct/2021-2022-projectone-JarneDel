@@ -34,7 +34,7 @@ def setup_gpio():
 # logging setup
 logging.basicConfig(
     filename="logs/app_log.log",
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] - [%(filename)s > %(funcName)s() > %(lineno)s] - %(message)s",
 )
 logger = logging.getLogger("app")
@@ -115,6 +115,7 @@ def bme_main():
     while True:
         bsec_data = get_data(bme)
         if bsec_data is not None:
+            print(bsec_data)
             logging.debug(bsec_data)
             # print(bsec_data["temperature"], "temp")
             temperature = round(bsec_data["temperature"], 2)
@@ -135,6 +136,8 @@ def bme_main():
                     "pressure": raw_pressure,
                 },
             )
+        else:
+            print("NO data")
 
 
 def get_data(sensor):

@@ -84,20 +84,20 @@ class DataRepository:
     @staticmethod
     def get_historiek_per_hour(deviceEenheidID, begindate, enddate):
         """Provide begindate and enddate as unix timestamp"""
-        sql = "select unix_timestamp(Datum) * 1000 as 'x', avg(setWaarde) as 'y' from historiek where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s) group by day(Datum), hour(Datum)  order by Datum desc;"
+        sql = "select unix_timestamp(Datum) * 1000 as 'x', avg(setWaarde) as 'y' from historiek where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s) group by year(datum), month(datum), day(Datum), hour(Datum)  order by Datum desc;"
         params = [deviceEenheidID, begindate, enddate]
         return Database.get_rows(sql, params)
 
     @staticmethod
     def get_historiek_per_minute(deviceEenheidID, begindate, enddate, limit=5000):
         """Provide begindate and enddate as unix timestamp"""
-        sql = "select unix_timestamp(Datum) * 1000 as 'x', avg(setWaarde) as 'y' from historiek where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s) group by day(datum), hour(Datum), minute(Datum)   order by Datum desc limit %s;"
+        sql = "select unix_timestamp(Datum) * 1000 as 'x', avg(setWaarde) as 'y' from historiek where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s) group by  year(datum), month(datum), day(datum), hour(Datum), minute(Datum)   order by Datum desc limit %s;"
         params = [deviceEenheidID, begindate, enddate, limit]
         return Database.get_rows(sql, params)
 
     @staticmethod
     def get_historiek_per_day(deviceEenheidID, begindate, enddate):
-        sql = "select unix_timestamp(Datum) * 1000 as 'x', avg(setWaarde) as 'y' from historiek where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s) group by day(Datum) order by Datum desc;"
+        sql = "select unix_timestamp(Datum) * 1000 as 'x', avg(setWaarde) as 'y' from historiek where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s) group by  year(datum), month(datum), day(Datum) order by Datum desc;"
         params = [deviceEenheidID, begindate, enddate]
         return Database.get_rows(sql, params)
 
