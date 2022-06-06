@@ -18,7 +18,7 @@
 :root{
   --primary-color: #2699fb;
   --primary-color-dim:#3F76BA;
-  --gray-color: #7F7F7F;
+  --gray-color: #666666;
   --text-color: #0d1111;
   --hover-background: #ccc;
   --active-background: #aaa;
@@ -348,7 +348,7 @@ input:checked + .c-switch__slider:before{
   font-size: 30px;
   line-height: 0px;
   font-weight: 400;
-  color: #7F7F7F;
+  color: var(--gray-color);
   user-select: none;
 }
 .c-box__content{
@@ -598,7 +598,7 @@ th{
     padding-top: 8px;
     margin-right: 0px;
     margin: 0;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 300;
   }
   .js-dropdown-btn:hover{

@@ -1,7 +1,10 @@
 - [x] chart type per hour, day, ytd
+- [ ] PMNOP chart
 - [ ] Header & content: Css grid ipv flexbox
 - [ ] inschuifbare sidebar
 - [ ] input start & enddate
 - [x] IF SWITCH CHART: UPDATE CHART SELECTION TYPE
-- [] nice to have: keep graph info afer switching graph
+- [-] nice to have: keep graph info afer switching graph
+  - todo: update the chartoptions radiobtn when switching page.
 - [] nice to have: show realtime dashboard on page load
+- [] Refesh btn for graphs
