@@ -30,6 +30,7 @@ let co2Chart,
   areaPressure,
   areaPM;
 
+let selectedRange, activeGraph;
 let RPI = false;
 let selectedPage = 'actueel';
 // #region ***  DOM references                           ***********
@@ -53,7 +54,8 @@ let htmlActueel,
   htmlLoading,
   htmlDropDownHistoriekMobile,
   htmlReloadPage,
-  htmlChartType;
+  htmlChartType,
+  htmlRefeshGraph;
 
 // #endregion
 
@@ -79,6 +81,7 @@ const hideAll = function () {
     htmlHistoriekPM,
     htmlReloadPage,
     htmlChartType,
+    htmlRefeshGraph
   ];
   for (let element of htmlRefesh) {
     arrayDomObjects.push(element);
@@ -119,6 +122,13 @@ const listenTographOptions = function () {
       getGraphData(graph, this.value);
     });
   }
+  // const htmlSubmitTime = document.querySelector('.js-submit-date-range');
+  // htmlSubmitTime.addEventListener('click', function () {
+  //   console.log('hey');
+  //   let startDate = document.querySelector('.js-startdate').value;
+  //   let endDate = document.querySelector('.js-enddate').value;
+  //   console.log(startDate, endDate);
+  // });
 };
 
 // updates the graph depending on state
@@ -126,6 +136,8 @@ const getGraphData = function (graph, graphType) {
   let now = new Date();
   let dateNow = Math.round(now.getTime() / 1000);
   let beginDate;
+  activeGraph = graph
+  selectedRange = graphType
   switch (graphType) {
     case 'DAY':
       now.setDate(now.getDate() - 1);
@@ -145,18 +157,23 @@ const getGraphData = function (graph, graphType) {
   switch (graph) {
     case 'co2':
       getHistoriekCo2Filtered(graphType, beginDate, dateNow);
+      htmlHistoriekCO2.dataset.range = graphType;
       break;
     case 'temperature':
       getHistoriekTemperatureFiltered(graphType, beginDate, dateNow);
+      htmlHistoriekTemp.dataset.range = graphType;
       break;
     case 'humidity':
       getHistoriekHumFiltered(graphType, beginDate, dateNow);
+      htmlHistoriekHum.dataset.range = graphType;
       break;
     case 'pressure':
       getHistoriekPressureFiltered(graphType, beginDate, dateNow);
+      htmlHistoriekPressure.dataset.range = graphType;
       break;
     case 'pm':
       getHistoriekPMFiltered(graphType, beginDate, dateNow);
+      htmlHistoriekPM.dataset.range = graphType;
       break;
     default:
       console.error('Invalid Graph type');
@@ -254,6 +271,7 @@ const createStackedChart = function (dom, arrayJsonStacked, arrayNames) {
 const showHistoriekCo2 = function (historiek) {
   hideAll();
   updateTitle('CO2 History');
+  show(htmlRefeshGraph)
   show(htmlHistoriekCO2);
   show(htmlChartType);
   console.log(historiek);
@@ -282,6 +300,7 @@ const showHistoriekTemperature = function (tempJson) {
   console.log(tempJson);
   show(htmlHistoriekTemp);
   show(htmlChartType);
+  show(htmlRefeshGraph)
   console.log(tempJson);
   if (firstTimeTemp) {
     areaTemp = createChart(
@@ -304,6 +323,7 @@ const showHistoriekHumidity = function (humJson) {
   hideAll();
   show(htmlHistoriekHum);
   show(htmlChartType);
+  show(htmlRefeshGraph)
   updateTitle('Humidity');
   console.log(humJson);
 
@@ -324,6 +344,7 @@ const showHistoriekPressure = function (pressureJson) {
   hideAll();
   show(htmlHistoriekPressure);
   show(htmlChartType);
+  show(htmlRefeshGraph)
   updateTitle('Pressure');
   console.log(pressureJson);
 
@@ -346,6 +367,7 @@ const showHistoriekPM = function (jsonPM) {
   hideAll();
   show(htmlHistoriekPM);
   show(htmlChartType);
+  show(htmlRefeshGraph)
   updateTitle('Particulate Matter');
   if (firstTimePM) {
     areaPM = createStackedChart(
@@ -763,6 +785,7 @@ const listenToHistoryDropdown = function () {
       console.log(this.dataset.type);
       show(htmlLoading);
       hideAll();
+
       this.classList.add('c-selected');
       if (this.dataset.is_loaded == 0) {
         this.dataset.is_loaded = true;
@@ -772,7 +795,10 @@ const listenToHistoryDropdown = function () {
         dateYesterday.setDate(dateYesterday.getDate() - 1);
         dateYesterday = Math.round(dateYesterday.getTime() / 1000);
         htmlChartType.dataset.active_graph = this.dataset.type;
+        show(htmlRefeshGraph)
         resetGraphOptions('DAY');
+        activeGraph = this.dataset.type
+        selectedRange = 'DAY'
         switch (this.dataset.type) {
           case 'co2':
             getHistoriekCo2Filtered('DAY', dateYesterday, dateNow);
@@ -797,22 +823,27 @@ const listenToHistoryDropdown = function () {
           case 'co2':
             updateTitle('CO2');
             show(htmlHistoriekCO2);
+            resetGraphOptions(htmlHistoriekCO2.dataset.range);
             break;
           case 'temperature':
             updateTitle('Temperature');
             show(htmlHistoriekTemp);
+            resetGraphOptions(htmlHistoriekTemp.dataset.range);
             break;
           case 'humidity':
             updateTitle('Humidity');
             show(htmlHistoriekHum);
+            resetGraphOptions(htmlHistoriekHum.dataset.range);
             break;
           case 'pressure':
             updateTitle('Pressure');
             show(htmlHistoriekPressure);
+            resetGraphOptions(htmlHistoriekPressure.dataset.range);
             break;
           case 'pm':
             updateTitle('Particulate Matter');
             show(htmlHistoriekPM);
+            resetGraphOptions(htmlHistoriekPM.dataset.range);
             break;
         }
 
@@ -822,6 +853,14 @@ const listenToHistoryDropdown = function () {
     });
   }
 };
+
+const listenToRefeshGraphs = function () {
+  htmlRefeshGraph.addEventListener('click', function () {
+    getGraphData(activeGraph, selectedRange)
+  })
+}
+
+
 const listenToReload = function () {
   htmlReloadPage.addEventListener('click', function () {
     SetReload();
@@ -865,10 +904,12 @@ const init = function () {
     htmlLoading = document.querySelector('.js-loading');
     htmlReloadPage = document.querySelector('.js-reload-page');
     htmlChartType = document.querySelector('.js-chart-type');
+    htmlRefeshGraph = document.querySelector('.js-refesh-chart')
     listenToHistoryDropdown();
     listenToBtnSidebar();
     listenToMobileNav();
     listenTographOptions();
+    listenToRefeshGraphs();
   }
 };
 

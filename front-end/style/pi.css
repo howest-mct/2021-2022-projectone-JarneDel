@@ -162,6 +162,46 @@ input:checked + .c-switch__slider:before{
   padding-right: 16px;
 }
 
+
+
+.c-radio{
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: row-reverse;
+  gap: 8px;
+  margin-left: 16px;
+  justify-content: flex-end;
+}
+
+.c-range--input{
+  display: none !important;
+}
+
+.c-range--label{
+  font-size: 16px;
+  font-weight: normal;
+  color: black;
+}
+
+.c-range--input:checked + .c-range--label{
+  text-decoration: underline;
+  color: var(--primary-color);
+}
+
+
+.c-page-historiek{
+  margin: 24px 16px 0 16px; 
+}
+
+
+
+
+
+
+
+
+
+
 @media (min-width:900px) {
   /* Navigatie voor desktopwebsites */
   .c-logo {
@@ -292,6 +332,12 @@ input:checked + .c-switch__slider:before{
       bottom: 20px;
       width: calc(14.399375rem - 32px);
     }
+  .u-pos-top-right{
+    position: fixed;
+    top: 16px;
+    right: 32px;
+    z-index: 10;
+  }
 
 }
 
@@ -609,6 +655,11 @@ th{
     background-color: var(--primary-color-dim);
     color: #fff;
     fill: #fff;
+  }
+  .c-radio{
+    position: fixed;
+    top: 16px;
+    right: 96px;
   }
   
 }
