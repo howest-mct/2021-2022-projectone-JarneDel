@@ -195,10 +195,17 @@ input:checked + .c-switch__slider:before{
 
 
 
+.c-indicatie{
+  background-color:red;
+  border-radius: 8px;
+  width: 16px;
+  height: 16px;
+}
 
 
-
-
+.u-green{
+  background-color: green;
+}
 
 
 

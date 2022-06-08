@@ -55,7 +55,8 @@ let htmlActueel,
   htmlDropDownHistoriekMobile,
   htmlReloadPage,
   htmlChartType,
-  htmlRefeshGraph;
+  htmlRefeshGraph,
+  htmlIndicatieAll;
 
 // #endregion
 
@@ -434,7 +435,9 @@ const showCharts = function () {
 const showUpdatedCharts = function (jsonObject) {
   // console.log(jsonObject);
   const data = jsonObject.data;
-  let PM = {};
+  console.log(data)
+  let PMNop = {};
+  let pm1, pm2_5, pm10
   for (let sensorWaarde of data) {
     const setPoint = sensorWaarde.setwaarde;
     switch (sensorWaarde.beschrijving) {
@@ -450,16 +453,26 @@ const showUpdatedCharts = function (jsonObject) {
       case 'Pressure':
         updateOptionsCharts(setPoint, 'pressure');
         break;
+      case "PM1_AP":
+        pm1 = setPoint;
+        break;
+      case "PM2.5_AP":
+        pm2_5 = setPoint;
+        break;
+      case "PM10_AP1":
+        pm10 = setPoint;
+        break;
     }
     switch (sensorWaarde.devicenaam) {
       case 'PMS5003':
         // console.log('PMS');
         const beschrijving = sensorWaarde.beschrijving;
-        PM[beschrijving] = sensorWaarde.setwaarde;
+        PMNop[beschrijving] = sensorWaarde.setwaarde;
     }
   }
   // console.log(PM);
-  updatePMNOPcharts(PM);
+  updatePMCharts(pm1, pm2_5, pm10)
+  updatePMNOPcharts(PMNop);
 };
 
 // callback from when data is refeshed
@@ -473,6 +486,27 @@ const showFanSetting = function (jsonObject) {
     show(htmlSlider);
   }
 };
+
+const showNoNewLiveData = function (type_data) {
+  console.log(type_data, 'noNew')
+  for (let indicatie of htmlIndicatieAll) {
+
+    if (indicatie.dataset.name === type_data) {
+      indicatie.classList.remove('u-green')
+    }
+  }
+}
+
+const showNewLiveData = function (type_data) {
+  console.log(type_data, 'New')
+  for (let indicatie of htmlIndicatieAll) {
+    if (indicatie.dataset.name === type_data) {
+      console.log("Found it")
+      indicatie.classList.add('u-green')
+    }
+  }
+}
+
 //updates label and data
 const updateOptionsCharts = function (value, type) {
   let seriesValue, typeLabel, chart;
@@ -668,6 +702,8 @@ const listenToSocketCharts = function () {
     console.log('New co2 reading');
     const co2Reading = data['CO2'];
     updateOptionsCharts(co2Reading, 'CO2');
+    newData.co2 = new Date()
+    showNewLiveData('CO2')
   });
   socketio.on('B2F_PM', function (data) {
     // console.log(data);
@@ -676,12 +712,21 @@ const listenToSocketCharts = function () {
     const pm10 = data['PM10_AP1'];
     updatePMCharts(pm1, pm2_5, pm10);
     updatePMNOPcharts(data);
+    newData.pm = new Date()
+    newData.pmNop = new Date()
+    showNewLiveData('pm')
+    showNewLiveData('pmNop')
   });
   socketio.on('B2F_BME', function (bme_data) {
     let pressureVal = bme_data.pressure / 100;
     let humidityVal = bme_data.humidity;
     let temperatureVal = bme_data.temperature;
     // console.log(pressureVal, humidityVal, temperatureVal);
+    let datum = new Date()
+    newData.temp = newData.hum = newData.pressure = datum
+    showNewLiveData('pressure')
+    showNewLiveData('hum')
+    showNewLiveData('temp')
     updateOptionsCharts(pressureVal, 'pressure');
     updateOptionsCharts(humidityVal, 'humidity');
     updateOptionsCharts(temperatureVal, 'temperature');
@@ -860,12 +905,49 @@ const listenToRefeshGraphs = function () {
   })
 }
 
+const listenToNoNewData = async function () {
+  let datum
+  while (true) {
+    console.log('checking...')
+    datum = new Date() - 120000
+    if (datum > newData.co2) {
+      showNoNewLiveData('co2')
+      console.log('no new co2')
+    }
+    if (datum > newData.temp) {
+      showNoNewLiveData('temp')
+    }
+    if (datum > newData.hum) {
+      showNoNewLiveData('hum')
+    }
+    if (datum > newData.pressure) {
+      showNoNewLiveData('pressure')
+    }
+    if (datum > newData.voc) {
+      showNoNewLiveData('voc')
+    } if (datum > newData.pm) {
+      showNoNewLiveData('pm')
+    } if (datum > newData.pmNop) {
+      showNoNewLiveData('pmNop')
+    } else {
+      console.log('everything up to date')
+    }
+
+    await new Promise(done => setTimeout(() => done(), 5000));
+  }
+}
+
+
+
 
 const listenToReload = function () {
   htmlReloadPage.addEventListener('click', function () {
     SetReload();
   });
 };
+
+
+
 // #endregion
 const SetReload = function () {
   document.location.reload(true);
@@ -905,11 +987,13 @@ const init = function () {
     htmlReloadPage = document.querySelector('.js-reload-page');
     htmlChartType = document.querySelector('.js-chart-type');
     htmlRefeshGraph = document.querySelector('.js-refesh-chart')
+    htmlIndicatieAll = document.querySelectorAll(".js-indicatie")
     listenToHistoryDropdown();
     listenToBtnSidebar();
     listenToMobileNav();
     listenTographOptions();
     listenToRefeshGraphs();
+    listenToNoNewData();
   }
 };
 
