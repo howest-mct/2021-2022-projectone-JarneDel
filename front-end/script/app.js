@@ -911,7 +911,7 @@ const listenToNoNewData = async function () {
     // console.log('checking...')
     datum = new Date() - 120000
     if (datum > newData.co2) {
-      showNoNewLiveData('co2')
+      showNoNewLiveData('CO2')
       // console.log('no new co2')
     }
     if (datum > newData.temp) {
