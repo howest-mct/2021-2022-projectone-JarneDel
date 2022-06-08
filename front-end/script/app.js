@@ -488,7 +488,7 @@ const showFanSetting = function (jsonObject) {
 };
 
 const showNoNewLiveData = function (type_data) {
-  console.log(type_data, 'noNew')
+  // console.log(type_data, 'noNew')
   for (let indicatie of htmlIndicatieAll) {
 
     if (indicatie.dataset.name === type_data) {
@@ -498,7 +498,7 @@ const showNoNewLiveData = function (type_data) {
 }
 
 const showNewLiveData = function (type_data) {
-  console.log(type_data, 'New')
+  // console.log(type_data, 'New')
   for (let indicatie of htmlIndicatieAll) {
     if (indicatie.dataset.name === type_data) {
       console.log("Found it")
@@ -912,7 +912,7 @@ const listenToNoNewData = async function () {
     datum = new Date() - 120000
     if (datum > newData.co2) {
       showNoNewLiveData('co2')
-      console.log('no new co2')
+      // console.log('no new co2')
     }
     if (datum > newData.temp) {
       showNoNewLiveData('temp')
