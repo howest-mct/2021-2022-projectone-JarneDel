@@ -18,12 +18,11 @@
 :root{
   --primary-color: #2699fb;
   --primary-color-dim:#3F76BA;
-  --gray-color: #7F7F7F;
+  --gray-color: #666666;
   --text-color: #0d1111;
   --hover-background: #ccc;
   --active-background: #aaa;
   --line-color: #cfcfcf;
-
 }
 
 
@@ -75,6 +74,8 @@ h2 {
 }
 .c-sidebar{
   display:none;
+  user-select: none !important;
+
 }
 .c-sidebar__subtitle{
   text-transform: uppercase;
@@ -83,6 +84,8 @@ h2 {
   line-height: 0;
   color: #000;
   vertical-align: middle;
+  user-select: none !important;
+
 }
 
 .c-sidebar__subtitle svg,
@@ -149,6 +152,55 @@ input:checked + .c-switch__slider:before{
   border-radius: 50%;
 }
 
+.c-dropdown-icon,
+.c-dropup-icon{
+  float: right;
+  margin-right: 0;
+}
+.c-mobile-dropdown-icon,
+.c-mobile-dropup-icon{
+  padding-right: 16px;
+}
+
+
+
+.c-radio{
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: row-reverse;
+  gap: 8px;
+  margin-left: 16px;
+  justify-content: flex-end;
+}
+
+.c-range--input{
+  display: none !important;
+}
+
+.c-range--label{
+  font-size: 16px;
+  font-weight: normal;
+  color: black;
+}
+
+.c-range--input:checked + .c-range--label{
+  text-decoration: underline;
+  color: var(--primary-color);
+}
+
+
+.c-page-historiek{
+  margin: 24px 16px 0 16px; 
+}
+
+
+
+
+
+
+
+
+
 
 @media (min-width:900px) {
   /* Navigatie voor desktopwebsites */
@@ -156,7 +208,7 @@ input:checked + .c-switch__slider:before{
     position: fixed;
     top: 0px;
     left: 0px;
-    width: 14.4vw;
+    width: 14.399375rem;
     display: flex;
     justify-content: center;
     padding: 1rem 0;
@@ -169,7 +221,7 @@ input:checked + .c-switch__slider:before{
   .c-topbar {
     position: fixed;
     top: 0px;
-    left :14.4vw;
+    left :14.399375rem;
     right:0px;
     padding: 0 2rem;
     height: 72px;
@@ -216,7 +268,7 @@ input:checked + .c-switch__slider:before{
     position: fixed;
     box-sizing: border-box;
     padding: 1rem 0;
-    width: 14.4vw;
+    width: 14.399375rem;
     top: 72px;
     height: calc(100vh - 72px);
     overflow-y: auto;
@@ -254,7 +306,20 @@ input:checked + .c-switch__slider:before{
     /* will-change: opacity; */
     cursor: pointer;
   }
-  
+  .js-dropdown-btn{
+    padding-left: 48px;
+    padding-bottom: 8px;
+    padding-top: 8px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 300;
+  }
+  .js-dropdown-btn:hover{
+    background: var(--hover-background);
+  }
+  .js-dropdown-btn:active{
+    background-color: var(--active-background);
+  }
   .c-sidebar-button:hover {
     /* opacity: 1; */
   }
@@ -265,9 +330,15 @@ input:checked + .c-switch__slider:before{
     .c-sidebar .c-bottom{
       position:fixed;
       bottom: 20px;
-      width: calc(14.4vw - 32px);
+      width: calc(14.399375rem - 32px);
     }
-  
+  .u-pos-top-right{
+    position: fixed;
+    top: 16px;
+    right: 32px;
+    z-index: 10;
+  }
+
 }
 
 .chart{
@@ -323,7 +394,7 @@ input:checked + .c-switch__slider:before{
   font-size: 30px;
   line-height: 0px;
   font-weight: 400;
-  color: #7F7F7F;
+  color: var(--gray-color);
   user-select: none;
 }
 .c-box__content{
@@ -344,7 +415,7 @@ input:checked + .c-switch__slider:before{
 }
 .c-content{
   margin: auto;
-  padding-left: 14.4vw;
+  padding-left: 14.399375rem;
   padding-top: 80px;
   max-width: 80rem;
 
@@ -473,6 +544,10 @@ th{
   .c-mobile-nav .c-sidebar__title{
     display: none;
   }
+  .c-sidebar__subtitle{
+    user-select: none !important;
+  }
+
   .c-sidebar__subtitle:nth-child(2){
     /* padding-top: 24px; */
     margin-top: 24px;
@@ -554,10 +629,39 @@ th{
   .c-selected{
     background: var(--primary-color-dim);
     fill: white !important;
+    color: #fff;
   }
   .c-settings{
     margin-left: 16px;
   }
+  .c-sidebar-dropdown{
+    width: 100%;
+  }
+  .js-dropdown-btn{
+    width: 100%;
+    padding-left: 48px;
+    padding-bottom: 8px;
+    padding-top: 8px;
+    margin-right: 0px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 300;
+  }
+  .js-dropdown-btn:hover{
+    background: var(--hover-background);
+  }
+  .js-dropdown-btn:active,
+  .js-dropdown-btn.c-selected{
+    background-color: var(--primary-color-dim);
+    color: #fff;
+    fill: #fff;
+  }
+  .c-radio{
+    position: fixed;
+    top: 16px;
+    right: 96px;
+  }
+  
 }
 .c-clickable-icon{
   border-radius: 12px;

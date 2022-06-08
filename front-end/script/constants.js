@@ -453,15 +453,15 @@ let PMChartOptions = {
       data: [
         {
           x: 'PM1',
-          y: 10,
+          y: 0,
         },
         {
           x: 'PM2.5',
-          y: 18,
+          y: 0,
         },
         {
           x: 'PM10',
-          y: 13,
+          y: 0,
         },
       ],
     },
@@ -495,27 +495,27 @@ let PMNopChartOptions = {
       data: [
         {
           x: 'NOP 0.3 um',
-          y: 10,
+          y: 0,
         },
         {
           x: 'NOP 0.5 um',
-          y: 18,
+          y: 0,
         },
         {
           x: 'NOP 1 um',
-          y: 13,
+          y: 0,
         },
         {
           x: 'NOP 2.5 um',
-          y: 10,
+          y: 0,
         },
         {
           x: 'NOP 5 um',
-          y: 18,
+          y: 0,
         },
         {
           x: 'NOP 10 um',
-          y: 13,
+          y: 0,
         },
       ],
     },
@@ -609,14 +609,9 @@ const labels = {
       val: 'Too High!',
       color: '#E31E36',
     },
+
     {
-      min: 69,
       max: 70,
-      val: 'Bit wet',
-      color: '#CD00E1',
-    },
-    {
-      max: 68,
       min: 60,
       val: 'Bit high',
       color: '#ED7730', //#f27931
@@ -660,4 +655,73 @@ const labels = {
       color: '#2699FB',
     },
   ],
+};
+const HistoriekOptions = {
+  chart: {
+    height: 360,
+    type: 'area',
+  },
+  dataLabels: {
+    enabled: false,
+  },
+  series: [
+    {
+      data: [
+        {
+          x: new Date('2018-02-12').getTime(),
+          y: 76,
+        },
+        {
+          x: new Date('2018-02-13').getTime(),
+          y: 78,
+        },
+      ],
+    },
+  ],
+  colors: ['#2699FB'],
+  stroke: {
+    curve: 'smooth',
+  },
+  xaxis: {
+    type: 'datetime',
+  },
+};
+
+let HistoriekOptionsLineChart = {
+  chart: {
+    height: 360,
+    type: 'line',
+  },
+  dataLabels: {
+    enabled: false,
+  },
+  series: [
+    {
+      data: [
+        {
+          x: new Date('2018-02-12').getTime(),
+          y: 76,
+        },
+        {
+          x: new Date('2018-02-13').getTime(),
+          y: 78,
+        },
+      ],
+    },
+  ],
+  colors: ['#2699FB'],
+  stroke: {
+    curve: 'smooth',
+    width: 2,
+  },
+  xaxis: {
+    type: 'datetime',
+  },
+  yaxis: {
+    labels: {
+      formatter(value) {
+        return value.toFixed(0);
+      },
+    },
+  },
 };

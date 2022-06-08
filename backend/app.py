@@ -1,4 +1,6 @@
+import json
 import time
+from datetime import datetime
 from RPi import GPIO
 import threading
 from subprocess import check_output
@@ -9,15 +11,16 @@ from repositories.DataRepository import DataRepository
 from bme68x import BME68X
 import bme68xConstants as cst
 import bsecConstants as bsec
-from selenium import webdriver
+
+# from selenium import webdriver
 
 from serial import Serial, PARITY_NONE
 from model.pms5003 import Pms5003
 from model.Fan import Fan
 import logging
 
-# from selenium import webdriver
-# from selenium.webdriver.chrome.options import Options
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 
 # Code voor Hardware
@@ -34,7 +37,11 @@ logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] - [%(filename)s > %(funcName)s() > %(lineno)s] - %(message)s",
 )
+logger = logging.getLogger("app")
 
+# hieronder zeg je tegen mysql connector dat die enkel bij warn level mag printen, en voor geventwebsocket bij info
+logging.getLogger("mysql.connector.connection").setLevel("WARN")
+logging.getLogger("geventwebsocket.handler").setLevel("INFO")
 
 # Code voor Flask
 
@@ -104,18 +111,23 @@ def bme_main():
     print("\nTESTING FORCED MODE WITH BSEC")
     bme = BME68X(cst.BME68X_I2C_ADDR_LOW, 1)
     bme.set_sample_rate(bsec.BSEC_SAMPLE_RATE_LP)
+    start = time.time()
     while True:
         bsec_data = get_data(bme)
         if bsec_data is not None:
+            print(bsec_data)
             logging.debug(bsec_data)
             # print(bsec_data["temperature"], "temp")
             temperature = round(bsec_data["temperature"], 2)
             humidity = round(bsec_data["humidity"], 2)
             raw_pressure = round(bsec_data["raw_pressure"], 1)
             # print(temperature, humidity, raw_pressure)
-            DataRepository.add_data_point(temperature, 1, 15)
-            DataRepository.add_data_point(humidity, 1, 17)
-            DataRepository.add_data_point(raw_pressure, 1, 16)
+            if time.time() - start > 120:
+                start = time.time()
+                logging.debug("New data point")
+                DataRepository.add_data_point(temperature, 1, 15)
+                DataRepository.add_data_point(humidity, 1, 17)
+                DataRepository.add_data_point(raw_pressure, 1, 16)
             socketio.emit(
                 "B2F_BME",
                 {
@@ -124,6 +136,8 @@ def bme_main():
                     "pressure": raw_pressure,
                 },
             )
+        else:
+            print("NO data")
 
 
 def get_data(sensor):
@@ -149,7 +163,7 @@ def fan_thread():
     while True:
         socketio.emit("B2F_fan_speed", {"rpm": fan.rpm})
         dt = start - time.time()
-        time.sleep(0.2)
+        time.sleep(2)
         if dt > 60:
             start = time.time()
             # Log fan speed every 60s
@@ -345,6 +359,127 @@ def fan_rpm():
         return jsonify(fan_speed=data), 200
 
 
+def get_historiek_filtered(unit, timeType, daterange, limit=2500):
+    try:
+        begin, end = daterange.split("-")
+        if begin == "start":
+            begin = DataRepository.get_date_first_entry(unit)["x"] // 1000
+        data = None
+        beginTimestamp, endTimeStamp = int(begin), int(end)
+        if timeType == "WEEK":
+            data = DataRepository.get_historiek_per_5_min(
+                unit, beginTimestamp, endTimeStamp
+            )
+            print(data)
+        elif timeType == "DAY":
+            data = DataRepository.get_historiek_per_minute(
+                unit, beginTimestamp, endTimeStamp
+            )
+        elif timeType == "YTD":
+            data = DataRepository.get_historiek_per_hour(
+                unit, beginTimestamp, endTimeStamp
+            )
+
+        elif timeType == "any":
+            data = DataRepository.get_historiek(unit)
+        else:
+            logging.warning("TimeType not correct")
+        if data is None:
+            logging.error("geen data")
+        return data
+    except TypeError as ex:
+        return None
+
+
+# depricated
+@app.route(endpoint + "/historiek/co2/")
+def get_historiek_co2():
+    data = DataRepository.get_historiek(2)
+    return jsonify(data=data), 200
+
+
+# depricated
+@app.route(endpoint + "/historiek/temperature/")
+def get_historiek_temp():
+    data = DataRepository.get_historiek(15)
+    return jsonify(data=data), 200
+
+
+# depricated
+@app.route(endpoint + "/historiek/humidity/")
+def get_historiek_humidity():
+    data = DataRepository.get_historiek(17)
+    return jsonify(data=data), 200
+
+
+# depricated
+@app.route(endpoint + "/historiek/pressure/")
+def get_historiek_pressrue():
+    data = DataRepository.get_historiek(16)
+    return jsonify(data=data), 200
+
+
+# depricated
+@app.route(endpoint + "/historiek/pm/")
+def get_historiek_pm():
+    limit = 2500
+    pm1 = DataRepository.get_historiek(6, limit=limit)
+    pm2_5 = DataRepository.get_historiek(7, limit=limit)
+    pm10 = DataRepository.get_historiek(8, limit=limit)
+    data = [pm1, pm2_5, pm10]
+    return jsonify(data=data), 200
+
+
+@app.route(endpoint + "/historiek/co2/<time_type>/<range>/")
+def get_historiek_co2_filtered(time_type, range):
+    data = get_historiek_filtered(2, time_type, range)
+    if data is not None:
+        return jsonify(data=data), 200
+    else:
+        return jsonify(message="No return data"), 400
+
+
+@app.route(endpoint + "/historiek/temperature/<time_type>/<range>/")
+def get_historiek_temperature_filtered(time_type, range):
+    data = get_historiek_filtered(15, time_type, range)
+    if data is not None:
+        return jsonify(data=data), 200
+    else:
+        return jsonify(message="No return data"), 400
+
+
+@app.route(endpoint + "/historiek/humidity/<time_type>/<range>/")
+def get_historiek_humidity_filtered(time_type, range):
+    data = get_historiek_filtered(17, time_type, range)
+    if data is not None:
+        return jsonify(data=data), 200
+    else:
+        return jsonify(message="No return data"), 400
+
+
+@app.route(endpoint + "/historiek/pressure/<time_type>/<range>/")
+def get_historiek_pressure_filtered(time_type, range):
+    print(f"{time_type}, {range}")
+    data = get_historiek_filtered(16, time_type, range)
+    print(data)
+    if data is not None:
+        return jsonify(data=data), 200
+    else:
+        return jsonify(message="No return data"), 400
+
+
+@app.route(endpoint + "/historiek/pm/<time_type>/<range>/")
+def get_historiek_pm_filtered(time_type, range):
+    pm1 = get_historiek_filtered(6, time_type, range)
+    pm2_5 = get_historiek_filtered(7, time_type, range)
+    pm10 = get_historiek_filtered(8, time_type, range)
+    if (pm1 and pm2_5 and pm10) is not None:
+        data = [pm1, pm2_5, pm10]
+        return jsonify(data=data), 200
+    else:
+        return jsonify(message="No return data"), 400
+
+
 @socketio.on("connect")
 def initial_connection():
     print("A new client connect")
@@ -400,12 +535,12 @@ def start_chrome_kiosk():
     driver = webdriver.Chrome(options=options)
     driver.get("http://localhost")
     while True:
-        pass
+        time.sleep(120000)
 
 
 def start_chrome_thread():
     print("**** Starting CHROME ****")
-    chromeThread = threading.Thread(target=start_chrome_kiosk, args=())
+    chromeThread = threading.Thread(target=start_chrome_kiosk, args=(), daemon=True)
     chromeThread.start()
 
 

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import logging
+from sqlite3 import paramstyle
 from mysqlx import DatabaseError
 from .Database import Database
 
@@ -65,6 +66,7 @@ class DataRepository:
         sql = "select setWaarde from historiek where DeviceEenheidID = 1 order by GebeurtenisID desc limit 1"
         return Database.get_one_row(sql)
 
+    @staticmethod
     def get_last_fan_setting():
         sql = """select h.setwaarde from historiek h
                     join acties a on h.actieID = a.ActieID
@@ -72,3 +74,44 @@ class DataRepository:
                     order by h.GebeurtenisID desc
                     limit 1;"""
         return Database.get_one_row(sql)
+
+    @staticmethod
+    def get_historiek(deviceEenheidID, limit=10000):
+        sql = """select unix_timestamp(Datum) * 1000 as 'x', setWaarde as 'y' from historiek where DeviceEenheidID = %s order by `x` desc limit %s"""
+        params = [deviceEenheidID, limit]
+        return Database.get_rows(sql, params)
+
+    @staticmethod
+    def get_historiek_per_hour(deviceEenheidID, begindate, enddate):
+        """Provide begindate and enddate as unix timestamp"""
+        sql = "select unix_timestamp(Datum) * 1000 as 'x', avg(setWaarde) as 'y' from historiek where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s) group by year(datum), month(datum), day(Datum), hour(Datum)  order by Datum desc;"
+        params = [deviceEenheidID, begindate, enddate]
+        return Database.get_rows(sql, params)
+
+    @staticmethod
+    def get_historiek_per_minute(deviceEenheidID, begindate, enddate, limit=5000):
+        """Provide begindate and enddate as unix timestamp"""
+        sql = "select unix_timestamp(Datum) * 1000 as 'x', avg(setWaarde) as 'y' from historiek where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s) group by  year(datum), month(datum), day(datum), hour(Datum), minute(Datum)   order by Datum desc limit %s;"
+        params = [deviceEenheidID, begindate, enddate, limit]
+        return Database.get_rows(sql, params)
+
+    @staticmethod
+    def get_historiek_per_day(deviceEenheidID, begindate, enddate):
+        sql = "select unix_timestamp(Datum) * 1000 as 'x', avg(setWaarde) as 'y' from historiek where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s) group by  year(datum), month(datum), day(Datum) order by Datum desc;"
+        params = [deviceEenheidID, begindate, enddate]
+        return Database.get_rows(sql, params)
+
+    @staticmethod
+    def get_historiek_per_5_min(deviceEenheidID, begindate, enddate):
+        sql = """SELECT UNIX_TIMESTAMP(Datum) div (5 * 60) * (5 * 60) * 1000 AS x, avg(setWaarde) as 'y'
+                FROM historiek
+                where DeviceEenheidID = %s and Datum between from_unixtime(%s) and from_unixtime(%s)
+                group BY `x`"""
+        params = [deviceEenheidID, begindate, enddate]
+        return Database.get_rows(sql, params)
+
+    @staticmethod
+    def get_date_first_entry(deviceEenheidID):
+        sql = "select unix_timestamp(Datum) *1000 as 'x' from historiek where DeviceEenheidID = %s order by datum asc limit 1;"
+        params = [deviceEenheidID]
+        return Database.get_one_row(sql, params)
