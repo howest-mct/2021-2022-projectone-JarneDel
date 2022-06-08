@@ -908,7 +908,7 @@ const listenToRefeshGraphs = function () {
 const listenToNoNewData = async function () {
   let datum
   while (true) {
-    console.log('checking...')
+    // console.log('checking...')
     datum = new Date() - 120000
     if (datum > newData.co2) {
       showNoNewLiveData('co2')
@@ -930,7 +930,7 @@ const listenToNoNewData = async function () {
     } if (datum > newData.pmNop) {
       showNoNewLiveData('pmNop')
     } else {
-      console.log('everything up to date')
+      // console.log('everything up to date')
     }
 
     await new Promise(done => setTimeout(() => done(), 5000));
