@@ -72,7 +72,7 @@
             </svg>
             <p class="c-inhoud-titel">CO2 [PPM]</p>
             <div class="c-right">
-              <svg class='c-historiek' xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px"
+              <svg class='c-historiek js-to-historiek' data-name="co2"  xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px"
                 fill="#7f7f7f">
                 <path d="M0 0h24v24H0V0z" fill="none" />
                 <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" />
@@ -94,7 +94,7 @@
             </svg>
             <p class="c-inhoud-titel">Temperature [°C]</p>
             <div class="c-right">
-              <svg class='c-historiek' xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px"
+              <svg class='c-historiek js-to-historiek' data-name="temperature" xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px"
                 fill="#7f7f7f">
                 <path d="M0 0h24v24H0V0z" fill="none" />
                 <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" />
@@ -118,7 +118,7 @@
             <p class="c-inhoud-titel">Humidity [%]</p>
             <!-- <div class="c-spacing" style="width: 50px"></div>-->
             <div class="c-right">
-              <svg class='c-historiek' xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px"
+              <svg class='c-historiek js-to-historiek' data-name="humidity" xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px"
                 fill="#7f7f7f">
                 <path d="M0 0h24v24H0V0z" fill="none" />
                 <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" />
@@ -145,7 +145,7 @@
             <p class="c-inhoud-titel">pressure [hPa]</p>
             <!-- <div class="c-spacing" style="width: 50px"></div> -->
             <div class="c-right">
-              <svg class='c-historiek' xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px"
+              <svg class='c-historiek js-to-historiek' data-name="pressure" xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px"
               fill="#7f7f7f">
               <path d="M0 0h24v24H0V0z" fill="none" />
               <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" />
@@ -166,7 +166,7 @@
             <p class="c-inhoud-titel">VOC [?]</p>
             <!-- <div class="c-spacing" style="width: 50px"></div> -->
             <div class="c-right">
-              <svg class='c-historiek' xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px"
+              <svg class='c-historiek js-to-historiek' data-name="voc" xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px"
                 fill="#7f7f7f">
                 <path d="M0 0h24v24H0V0z" fill="none" />
                 <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" />
@@ -193,7 +193,7 @@
             <p class="c-inhoud-titel">PM [PPM]</p>
             <!-- <div class="c-spacing" style="width: 50px"></div> -->
             <div class="c-right">
-              <svg class='c-historiek' xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px"
+              <svg class='c-historiek js-to-historiek' data-name="pm" xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px"
                 fill="#7f7f7f">
                 <path d="M0 0h24v24H0V0z" fill="none" />
                 <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" />
@@ -220,7 +220,7 @@
             <p class="c-inhoud-titel">PM [µg/m³]</p>
             <!-- <div class="c-spacing" style="width: 50px"></div> -->
             <div class="c-right">
-              <svg class='c-historiek' xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px"
+              <svg class='c-historiek js-to-historiek' data-name="pmNop"  xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 24 24" width="48px"
                 fill="#7f7f7f">
                 <path d="M0 0h24v24H0V0z" fill="none" />
                 <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" />
@@ -274,7 +274,7 @@
           <input class = 'c-range--input js-chartrange' type="radio" name="chartRange" value="DAY" id="DAY" checked>
           <label class = "c-range--label" for="DAY">1D</label>
         </div>
-        <svg class="js-refesh-chart u-pos-top-right c-hidden" xmlns="http://www.w3.org/2000/svg" height="48" width="48">
+        <svg class="js-refesh-chart c-clickable-icon u-pos-top-right c-hidden" xmlns="http://www.w3.org/2000/svg" height="48" width="48">
           <path
             d="M24 40Q17.35 40 12.675 35.325Q8 30.65 8 24Q8 17.35 12.675 12.675Q17.35 8 24 8Q28.25 8 31.45 9.725Q34.65 11.45 37 14.45V8H40V20.7H27.3V17.7H35.7Q33.8 14.7 30.85 12.85Q27.9 11 24 11Q18.55 11 14.775 14.775Q11 18.55 11 24Q11 29.45 14.775 33.225Q18.55 37 24 37Q28.15 37 31.6 34.625Q35.05 32.25 36.4 28.35H39.5Q38.05 33.6 33.75 36.8Q29.45 40 24 40Z" />
         </svg>
@@ -364,19 +364,19 @@
       </svg>
     </h3>
     <div class="js-sidebar-historiek c-sidebar-dropdown c-hidden">
-      <h4 class="js-dropdown-btn" data-type="co2" data-is_loaded="0">
+      <h4 class="js-dropdown-btn" data-type="co2" >
         CO2
       </h4>
-      <h4 class="js-dropdown-btn" data-type="temperature" data-is_loaded="0">
+      <h4 class="js-dropdown-btn" data-type="temperature" >
         Temperature
       </h4>
-      <h4 class="js-dropdown-btn" data-type="humidity" data-is_loaded="0">
+      <h4 class="js-dropdown-btn" data-type="humidity" >
         Humidity
       </h4>
-      <h4 class="js-dropdown-btn" data-type="pressure" data-is_loaded="0">
+      <h4 class="js-dropdown-btn" data-type="pressure" >
         Pressure
       </h4>
-      <h4 class="js-dropdown-btn" data-type="pm" data-is_loaded="0" >
+      <h4 class="js-dropdown-btn" data-type="pm"  >
         Particulate matter
       </h4>
     </div>
@@ -433,19 +433,19 @@
       </svg>
     </h3>
     <div class="js-mobile-sidebar-historiek c-sidebar-dropdown c-hidden">
-      <h4 class="js-dropdown-btn" data-type="co2" data-is_loaded="0">
+      <h4 class="js-dropdown-btn" data-type="co2" >
         CO2
       </h4>
-      <h4 class="js-dropdown-btn" data-type="temperature" data-is_loaded="0">
+      <h4 class="js-dropdown-btn" data-type="temperature" >
         Temperature
       </h4>
-      <h4 class="js-dropdown-btn" data-type="humidity" data-is_loaded="0">
+      <h4 class="js-dropdown-btn" data-type="humidity" >
         Humidity
       </h4>
-      <h4 class="js-dropdown-btn" data-type="pressure"data-is_loaded="0" >
+      <h4 class="js-dropdown-btn" data-type="pressure" >
         Pressure
       </h4>
-      <h4 class="js-dropdown-btn" data-type="pm"data-is_loaded="0">
+      <h4 class="js-dropdown-btn" data-type="pm">
         Particulate matter
       </h4>
     </div>

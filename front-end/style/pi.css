@@ -43,8 +43,8 @@ html {
 }
 
 ::selection {
-  color: #fff;
-  fill: #fff;
+  color: #ccc;
+  fill: #ccc;
   background: var(--primary-color);
 }
 
