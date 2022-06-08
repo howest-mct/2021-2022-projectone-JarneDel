@@ -8,4 +8,5 @@
   - [x] todo: update the chartoptions radiobtn when switching page.
 - [] nice to have: show realtime dashboard on page load
 - [] Refesh btn for graphs
-- [ ] indication if sensorvalues are live
+- [x] indication if sensorvalues are live
+- [ ] naar historiek gaan door klikken op pijltje

@@ -725,3 +725,15 @@ let HistoriekOptionsLineChart = {
     },
   },
 };
+
+
+
+let newData = {
+  co2: new Date(),
+  temp: new Date(),
+  hum: new Date(),
+  pressure: new Date(),
+  voc: new Date(),
+  pm: new Date(),
+  pmNop: new Date()
+}
