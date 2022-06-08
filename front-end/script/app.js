@@ -746,6 +746,7 @@ const listenToBtnSidebar = function () {
         toggleClass(document.querySelector('.c-mobile-dropdown-icon'));
         toggleClass(document.querySelector('.c-mobile-dropup-icon'));
       } else {
+        hide(htmlHistoriek)
         const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
         for (let btn2 of btns) {
           btn2.classList.remove('c-selected');
@@ -818,6 +819,7 @@ const listenToHistoryDropdown = function () {
   let dropdown = document.querySelectorAll('.js-dropdown-btn');
   for (const page of dropdown) {
     page.addEventListener('click', function () {
+      show(htmlHistoriek)
       toggleSidebar();
       let dropdown = document.querySelectorAll('.js-dropdown-btn');
       for (let dropdownBtn of dropdown) {
