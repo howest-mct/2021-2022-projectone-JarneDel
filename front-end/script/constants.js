@@ -739,6 +739,7 @@ let newData = {
 }
 
 let loaded_historiek = {
+  mobile: false,
   co2: false,
   temperature: false,
   humidity: false,

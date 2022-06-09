@@ -832,4 +832,37 @@ background: var(--hover-background);
     width: 20vw;
     margin-left: 0 !important;
   }
+  .c-dropdown-range{
+    display:  none;
+  }
+}
+
+
+@media (max-width: 900px) and (min-height: 500px){
+  .js-dropdown-btn{
+    display: none !important;
+  }
+  .c-dropdown-range{
+    display: unset;
+    width: 100%;
+  }
+  .c-dropdown-range h4{
+    width: 100%;
+    padding-left: 48px;
+    padding-bottom: 8px;
+    padding-top: 8px;
+    margin-right: 0px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 300;
+  }
+  .c-dropdown-range h4:hover{
+    background: var(--hover-background);
+  }
+  .c-dropdown-range h4:active,
+  .c-dropdown-range h4.c-selected{
+    background-color: var(--primary-color-dim);
+    color: #fff;
+    fill: #fff;
+  }
 }
