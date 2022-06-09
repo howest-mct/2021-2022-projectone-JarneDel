@@ -168,11 +168,6 @@ def fan_thread():
 
 # endregion
 
-# region ip
-
-
-# endregion
-
 
 # Region SENSORS
 def read_pms():
@@ -244,6 +239,18 @@ def refesh():
 def ip():
     ip = CMD.get_ip()
     return jsonify(ip=ip), 200
+
+
+@app.route(endpoint + "/poweroff/")
+def power_off():
+    msg = CMD.power_off()
+    return jsonify(msg=msg), 200
+
+
+@app.route(endpoint + "/reboot/")
+def reboot():
+    msg = CMD.reboot()
+    return jsonify(msg=msg), 200
 
 
 @app.route(endpoint + "/fan/mode/", methods=["GET", "POST"])

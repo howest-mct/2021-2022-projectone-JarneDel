@@ -1,4 +1,5 @@
 from subprocess import check_output
+import os
 
 
 class CMD:
@@ -22,13 +23,21 @@ class CMD:
         return out
 
     @staticmethod
-    def get_ip(self):
+    def get_ip():
         wlan0 = check_output(["ip", "addr", "show", "wlan0"])
         lan = check_output(["ip", "addr", "show", "eth0"])
-        wlan = self.format_ip(
+        wlan = CMD.format_ip(
             wlan0.decode("utf-8")
         )  # Informatie uit command halen in format functie
-        lan = self.format_ip(lan.decode("utf-8"))
+        lan = CMD.format_ip(lan.decode("utf-8"))
         ip_dict = {"lan": lan, "wlan": wlan}
 
         return ip_dict
+
+    @staticmethod
+    def power_off():
+        return os.system("sudo shutdown now")
+
+    @staticmethod
+    def reboot():
+        return os.system("sudo shutdown -r now")
