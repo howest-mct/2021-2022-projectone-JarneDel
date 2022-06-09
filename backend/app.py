@@ -1,9 +1,6 @@
-import json
 import time
-from datetime import datetime
 from RPi import GPIO
 import threading
-from subprocess import check_output
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, send
 from flask import Flask, jsonify, request
@@ -12,15 +9,13 @@ from bme68x import BME68X
 import bme68xConstants as cst
 import bsecConstants as bsec
 
-# from selenium import webdriver
-
-from serial import Serial, PARITY_NONE
+from model.cmd import CMD
+from model.Mhz19B import Mhz19B
 from model.pms5003 import Pms5003
 from model.Fan import Fan
+from repositories.historiekRepository import HistoriekRepository as HR
+from helpers.chrome_kiosk import start_chrome_kiosk
 import logging
-
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 
 
 # Code voor Hardware
@@ -174,35 +169,6 @@ def fan_thread():
 # endregion
 
 # region ip
-def format_ip(ifstring):
-    out = []
-    count = ifstring.count("inet ")  # controleren of er meerdere ip adressen zijn
-    if count > 1:
-        print("multiple addresses found!")
-    if "inet" in ifstring:
-        while count:
-
-            count = ifstring.count("inet ")
-            index = ifstring.find("inet ")
-            index += 5
-            ifstring = ifstring[index:]
-            if count >= 1:
-                out.append(ifstring.split("/")[0])
-    else:
-        print("No IP addresses found")
-    return out
-
-
-def get_ip():
-    wlan0 = check_output(["ip", "addr", "show", "wlan0"])
-    lan = check_output(["ip", "addr", "show", "eth0"])
-    wlan = format_ip(
-        wlan0.decode("utf-8")
-    )  # Informatie uit command halen in format functie
-    lan = format_ip(lan.decode("utf-8"))
-    ip_dict = {"lan": lan, "wlan": wlan}
-
-    return ip_dict
 
 
 # endregion
@@ -220,38 +186,9 @@ def read_pms():
 def read_mhz19b():
     GPIO.output(trans_pin_mhz, 1)
     GPIO.output(trans_pin_PMS, 0)
-    data = serial_send_and_receive(b"\xff\x01\x86\x00\x00\x00\x00\x00\x79")
+    val = Mhz19B.read()
     GPIO.output(trans_pin_mhz, 0)
-    val = int.from_bytes(data[2:4], "big")
     return val
-
-
-def calibrate_mhz10b():
-    # zero point calibration
-    data = serial_send_and_receive(b"\xff\x01\x86\x00\x00\x00\x00\x00\x79")
-    val = int.from_bytes(data[2:4], "big")
-    if val < 420:
-        serial_send_and_receive(b"\xff\x01\x87\x00\x00\x00\x00\x00")
-        print("calibrated")
-
-
-def serial_send_and_receive(msg):
-
-    with Serial(
-        "/dev/ttyS0",
-        9600,
-        bytesize=8,
-        parity=PARITY_NONE,
-        stopbits=1,
-        timeout=3,
-    ) as port:
-        try:
-            port.write(msg)
-            return port.read(9)
-
-        except Exception as ex:
-            print(f"Er is een fout opgetreden: {ex}")
-            return " "
 
 
 def refesh_sensor():
@@ -305,7 +242,7 @@ def refesh():
 
 @app.route(endpoint + "/ip/")
 def ip():
-    ip = get_ip()
+    ip = CMD.get_ip()
     return jsonify(ip=ip), 200
 
 
@@ -359,38 +296,6 @@ def fan_rpm():
         return jsonify(fan_speed=data), 200
 
 
-def get_historiek_filtered(unit, timeType, daterange, limit=2500):
-    try:
-        begin, end = daterange.split("-")
-        if begin == "start":
-            begin = DataRepository.get_date_first_entry(unit)["x"] // 1000
-        data = None
-        beginTimestamp, endTimeStamp = int(begin), int(end)
-        if timeType == "WEEK":
-            data = DataRepository.get_historiek_per_5_min(
-                unit, beginTimestamp, endTimeStamp
-            )
-            print(data)
-        elif timeType == "DAY":
-            data = DataRepository.get_historiek_per_minute(
-                unit, beginTimestamp, endTimeStamp
-            )
-        elif timeType == "YTD":
-            data = DataRepository.get_historiek_per_hour(
-                unit, beginTimestamp, endTimeStamp
-            )
-
-        elif timeType == "any":
-            data = DataRepository.get_historiek(unit)
-        else:
-            logging.warning("TimeType not correct")
-        if data is None:
-            logging.error("geen data")
-        return data
-    except TypeError as ex:
-        return None
-
-
 # depricated
 @app.route(endpoint + "/historiek/co2/")
 def get_historiek_co2():
@@ -432,7 +337,7 @@ def get_historiek_pm():
 
 @app.route(endpoint + "/historiek/co2/<time_type>/<range>/")
 def get_historiek_co2_filtered(time_type, range):
-    data = get_historiek_filtered(2, time_type, range)
+    data = HR.get_historiek_filtered(2, time_type, range)
     if data is not None:
         return jsonify(data=data), 200
     else:
@@ -441,7 +346,7 @@ def get_historiek_co2_filtered(time_type, range):
 
 @app.route(endpoint + "/historiek/temperature/<time_type>/<range>/")
 def get_historiek_temperature_filtered(time_type, range):
-    data = get_historiek_filtered(15, time_type, range)
+    data = HR.get_historiek_filtered(15, time_type, range)
     if data is not None:
         return jsonify(data=data), 200
     else:
@@ -450,7 +355,7 @@ def get_historiek_temperature_filtered(time_type, range):
 
 @app.route(endpoint + "/historiek/humidity/<time_type>/<range>/")
 def get_historiek_humidity_filtered(time_type, range):
-    data = get_historiek_filtered(17, time_type, range)
+    data = HR.get_historiek_filtered(17, time_type, range)
     if data is not None:
         return jsonify(data=data), 200
     else:
@@ -460,7 +365,7 @@ def get_historiek_humidity_filtered(time_type, range):
 @app.route(endpoint + "/historiek/pressure/<time_type>/<range>/")
 def get_historiek_pressure_filtered(time_type, range):
     print(f"{time_type}, {range}")
-    data = get_historiek_filtered(16, time_type, range)
+    data = HR.get_historiek_filtered(16, time_type, range)
     print(data)
     if data is not None:
         return jsonify(data=data), 200
@@ -470,9 +375,9 @@ def get_historiek_pressure_filtered(time_type, range):
 
 @app.route(endpoint + "/historiek/pm/<time_type>/<range>/")
 def get_historiek_pm_filtered(time_type, range):
-    pm1 = get_historiek_filtered(6, time_type, range)
-    pm2_5 = get_historiek_filtered(7, time_type, range)
-    pm10 = get_historiek_filtered(8, time_type, range)
+    pm1 = HR.get_historiek_filtered(6, time_type, range)
+    pm2_5 = HR.get_historiek_filtered(7, time_type, range)
+    pm10 = HR.get_historiek_filtered(8, time_type, range)
     if (pm1 and pm2_5 and pm10) is not None:
         data = [pm1, pm2_5, pm10]
         return jsonify(data=data), 200
@@ -505,37 +410,6 @@ def start_thread():
     obj_fan_thread.start()
     bme_thread = threading.Thread(target=bme_main, args=())
     bme_thread.start()
-
-
-def start_chrome_kiosk():
-    import os
-
-    os.environ["DISPLAY"] = ":0.0"
-    options = webdriver.ChromeOptions()
-    # options.headless = True
-    # options.add_argument("--window-size=1920,1080")
-    options.add_argument(
-        "user-agent=Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36"
-    )
-    options.add_argument("--ignore-certificate-errors")
-    options.add_argument("--allow-running-insecure-content")
-    options.add_argument("--disable-extensions")
-    # options.add_argument("--proxy-server='direct://'")
-    options.add_argument("--proxy-bypass-list=*")
-    options.add_argument("--start-maximized")
-    options.add_argument("--disable-gpu")
-    # options.add_argument('--disable-dev-shm-usage')
-    options.add_argument("--no-sandbox")
-    options.add_argument("--kiosk")
-    # chrome_options.add_argument('--no-sandbox')
-    # options.add_argument("disable-infobars")
-    options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    options.add_experimental_option("useAutomationExtension", False)
-
-    driver = webdriver.Chrome(options=options)
-    driver.get("http://localhost")
-    while True:
-        time.sleep(120000)
 
 
 def start_chrome_thread():

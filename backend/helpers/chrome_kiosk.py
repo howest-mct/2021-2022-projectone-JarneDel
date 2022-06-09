@@ -1,6 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-import time
+from time import sleep
 
 
 def start_chrome_kiosk():
@@ -31,8 +31,4 @@ def start_chrome_kiosk():
     driver = webdriver.Chrome(options=options)
     driver.get("http://localhost")
     while True:
-        time.sleep(12000)
-
-
-if __name__ == "__main__":
-    start_chrome_kiosk()
+        sleep(120000)
