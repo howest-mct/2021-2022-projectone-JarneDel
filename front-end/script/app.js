@@ -974,6 +974,20 @@ const listenToNavigateToHistoriek = function () {
 }
 
 
+const listenToPowerMenu = function () {
+  document.querySelector('.js-power-management-dropdown-btn').addEventListener('click', function () {
+    toggleClass(document.querySelector('.js-power-management-dropdown'));
+  })
+  document.querySelector('.js-reboot').addEventListener('click', function () {
+    const url = backend + '/reboot/'
+    handleData(url, SetReload, callbackError)
+  })
+  document.querySelector('.js-power-down').addEventListener('click', function () {
+    const url = backend + '/poweroff/'
+    handleData(url, SetReload, callbackError)
+  })
+}
+
 const listenToReload = function () {
   htmlReloadPage.addEventListener('click', function () {
     SetReload();
@@ -1029,6 +1043,7 @@ const init = function () {
     listenToRefeshGraphs();
     listenToNoNewData();
     listenToNavigateToHistoriek();
+    listenToPowerMenu();
   }
 };
 
