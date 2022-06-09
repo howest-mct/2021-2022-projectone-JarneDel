@@ -737,3 +737,13 @@ let newData = {
   pm: new Date(),
   pmNop: new Date()
 }
+
+let loaded_historiek = {
+  co2: false,
+  temperature: false,
+  humidity: false,
+  pressure: false,
+  voc: false,
+  pm: false,
+  pmNop: false
+}
