@@ -602,7 +602,7 @@ const updateTitle = function (newTitle) {
 const showHistoriekGrafiek = function (type) {
   console.log(type)
   show(htmlHistoriek)
-  showSelectedSidebar(type)
+
   toggleSidebar();
   let dropdown = document.querySelectorAll('.js-dropdown-btn');
   for (let dropdownBtn of dropdown) {
@@ -612,6 +612,7 @@ const showHistoriekGrafiek = function (type) {
   for (let btn2 of btns) {
     btn2.classList.remove('c-selected');
   }
+  showSelectedSidebar(type)
   show(htmlLoading);
   hideAll();
 
@@ -684,18 +685,24 @@ const showHistoriekGrafiek = function (type) {
 }
 
 const showSelectedSidebar = function (type) {
+  console.log(type)
+  let succes = false
   let dropdown = document.querySelectorAll('.js-dropdown-btn');
   for (let dropdownBtn of dropdown) {
     if (dropdownBtn.dataset.type == type) {
       dropdownBtn.classList.add('c-selected')
+      succes = true
     }
   }
   const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
   for (let btn of btns) {
     if (btn.dataset.type == type) {
       btn.classList.add('c-selected')
+      succes = true
     }
+
   }
+  return succes
 }
 // #endregion
 
