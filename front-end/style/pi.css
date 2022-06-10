@@ -283,6 +283,7 @@ input:checked + .c-switch__slider:before{
 
     .c-mobile-nav{
       display: none;
+
     }
   .c-topbar {
     position: fixed;
@@ -618,7 +619,6 @@ th{
     right: -100vw;
     height: calc(100vh - 57.594px);
     background: #fafafa;
-    z-index: 0;
     transition: transform .3s;
   }
   .c-show-nav{
@@ -821,6 +821,7 @@ background: var(--hover-background);
     gap: 8px;
   }
   .c-mobile-nav{
+    z-index: 1000;
     width: 40vw;
     right: -40vw;
   }

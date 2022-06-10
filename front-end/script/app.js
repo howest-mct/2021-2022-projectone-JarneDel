@@ -608,50 +608,49 @@ const showHistoriekGrafiek = function (type) {
   if (typesMobile.includes(type)) {
     console.log('mobile')
     show(htmlLoading)
+    let selectedNav = document.querySelectorAll('.c-selected')
+    for (let i of selectedNav) {
+      i.classList.remove('c-selected')
+    }
     let dropdown = document.querySelectorAll('.js-dropdown-btn-mobile')
     for (let btn of dropdown) {
       if (btn.dataset.type === type) {
         btn.classList.add('c-selected')
-      } else {
-        btn.classList.remove('c-selected')
       }
     }
 
     hideAll()
-    if (loaded_historiek.mobile == false) {
-      selectedRange = type
-      let beginDate = new Date();
-      let dateNow = new Date();
-      dateNow = Math.round(dateNow.getTime() / 1000);
-      switch (type) {
-        case 'DAY':
-          beginDate.setDate(beginDate.getDate() - 1);
-          beginDate = Math.round(beginDate.getTime() / 1000);
-          break
-        case 'WEEK':
-          beginDate.setDate(beginDate.getDate() - 7);
-          beginDate = Math.round(beginDate.getTime() / 1000);
-          break;
-        case 'YTD':
-          beginDate.setDate(beginDate.getDate() - 10000);
-          beginDate = Math.round(beginDate.getTime() / 1000);
-      }
-      getHistoriekCo2Filtered(type, beginDate, dateNow)
-      getHistoriekTemperatureFiltered(type, beginDate, dateNow)
-      getHistoriekHumFiltered(type, beginDate, dateNow)
-      getHistoriekPressureFiltered(type, beginDate, dateNow)
-      getHistoriekPMFiltered(type, beginDate, dateNow)
+    console.log(type, loaded_historiek.mobile[type])
+
+    selectedRange = type
+    let beginDate = new Date();
+    let dateNow = new Date();
+    dateNow = Math.round(dateNow.getTime() / 1000);
+    switch (type) {
+      case 'DAY':
+        beginDate.setDate(beginDate.getDate() - 1);
+        beginDate = Math.round(beginDate.getTime() / 1000);
+        break
+      case 'WEEK':
+        beginDate.setDate(beginDate.getDate() - 7);
+        beginDate = Math.round(beginDate.getTime() / 1000);
+        break;
+      case 'YTD':
+        beginDate.setDate(beginDate.getDate() - 10000);
+        beginDate = Math.round(beginDate.getTime() / 1000);
     }
+    getHistoriekCo2Filtered(type, beginDate, dateNow)
+    getHistoriekTemperatureFiltered(type, beginDate, dateNow)
+    getHistoriekHumFiltered(type, beginDate, dateNow)
+    getHistoriekPressureFiltered(type, beginDate, dateNow)
+    getHistoriekPMFiltered(type, beginDate, dateNow)
+
+
   } else {
     console.log(type)
-
-    let dropdown = document.querySelectorAll('.js-dropdown-btn');
-    for (let dropdownBtn of dropdown) {
-      dropdownBtn.classList.remove('c-selected');
-    }
-    const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
-    for (let btn2 of btns) {
-      btn2.classList.remove('c-selected');
+    let selectedNav = document.querySelectorAll('.c-selected')
+    for (let i of selectedNav) {
+      i.classList.remove('c-selected')
     }
     showSelectedSidebar(type)
     show(htmlLoading);
@@ -897,16 +896,22 @@ const listenToBtnSidebar = function () {
         toggleClass(document.querySelector('.c-dropdown-icon'));
         toggleClass(document.querySelector('.c-mobile-dropdown-icon'));
         toggleClass(document.querySelector('.c-mobile-dropup-icon'));
+        toggleClass(document.querySelector('.js-sidebar-historiek-mobile'));
       } else {
         hide(htmlHistoriek)
-        const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
-        for (let btn2 of btns) {
-          btn2.classList.remove('c-selected');
+        let selectedNav = document.querySelectorAll('.c-selected')
+        for (let i of selectedNav) {
+          i.classList.remove('c-selected')
         }
-        let dropdown = document.querySelectorAll('.js-dropdown-btn');
-        for (let dropdownBtn of dropdown) {
-          dropdownBtn.classList.remove('c-selected');
-        }
+
+        // const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
+        // for (let btn2 of btns) {
+        //   btn2.classList.remove('c-selected');
+        // }
+        // let dropdown = document.querySelectorAll('.js-dropdown-btn');
+        // for (let dropdownBtn of dropdown) {
+        //   dropdownBtn.classList.remove('c-selected');
+        // }
         toggleSidebar();
         this.classList.add('c-selected');
         const type = this.dataset.type;

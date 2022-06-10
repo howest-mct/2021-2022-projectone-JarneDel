@@ -757,7 +757,11 @@ let newData = {
 }
 
 let loaded_historiek = {
-  mobile: false,
+  mobile: {
+    DAY: false,
+    WEEK: false,
+    YTD: false
+  },
   co2: false,
   temperature: false,
   humidity: false,
