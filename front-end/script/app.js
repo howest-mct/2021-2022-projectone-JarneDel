@@ -224,7 +224,7 @@ const showIP = function (jsonIP) {
   let wlanIps = jsonIP.ip.wlan;
   const htmlIP = document.querySelector('.js-ip');
   let html =
-    '<table><tr><th class ="u-table-title"colspan=2>Device IP Adress</th></tr><tr><th>Interface</th><th>IP</th></tr>';
+    '<table><tr><th>Interface</th><th>IP</th></tr>';
   for (let lanIP of lanIps) {
     html += `<tr><td>LAN</td><td>${lanIP}</td></tr>`;
   }
