@@ -271,7 +271,6 @@ const createStackedChart = function (dom, arrayJsonStacked, arrayNames) {
 };
 
 const showHistoriekCo2 = function (historiek) {
-  hideAll();
   updateTitle('CO2 History');
   show(htmlRefeshGraph)
   show(htmlHistoriekCO2);
@@ -297,7 +296,6 @@ const showHistoriekCo2 = function (historiek) {
   hide(htmlLoading);
 };
 const showHistoriekTemperature = function (tempJson) {
-  hideAll();
   updateTitle('Temperature');
   console.log(tempJson);
   show(htmlHistoriekTemp);
@@ -322,7 +320,6 @@ const showHistoriekTemperature = function (tempJson) {
   hide(htmlLoading);
 };
 const showHistoriekHumidity = function (humJson) {
-  hideAll();
   show(htmlHistoriekHum);
   show(htmlChartType);
   show(htmlRefeshGraph)
@@ -343,7 +340,6 @@ const showHistoriekHumidity = function (humJson) {
   hide(htmlLoading);
 };
 const showHistoriekPressure = function (pressureJson) {
-  hideAll();
   show(htmlHistoriekPressure);
   show(htmlChartType);
   show(htmlRefeshGraph)
@@ -366,7 +362,6 @@ const showHistoriekPressure = function (pressureJson) {
 
 const showHistoriekPM = function (jsonPM) {
   console.log(jsonPM);
-  hideAll();
   show(htmlHistoriekPM);
   show(htmlChartType);
   show(htmlRefeshGraph)
@@ -508,6 +503,13 @@ const showNewLiveData = function (type_data) {
   }
 }
 
+const showAcuteleDataOnLoad = function () {
+  let event = new CustomEvent('click')
+  console.log(event)
+  document.querySelector('.js-button-acuteel').dispatchEvent(event)
+  toggleSidebar()
+}
+
 //updates label and data
 const updateOptionsCharts = function (value, type) {
   let seriesValue, typeLabel, chart;
@@ -634,6 +636,11 @@ const showHistoriekGrafiek = function (type) {
           beginDate.setDate(beginDate.getDate() - 10000);
           beginDate = Math.round(beginDate.getTime() / 1000);
       }
+      getHistoriekCo2Filtered(type, beginDate, dateNow)
+      getHistoriekTemperatureFiltered(type, beginDate, dateNow)
+      getHistoriekHumFiltered(type, beginDate, dateNow)
+      getHistoriekPressureFiltered(type, beginDate, dateNow)
+      getHistoriekPMFiltered(type, beginDate, dateNow)
     }
   } else {
     console.log(type)
@@ -1100,6 +1107,8 @@ const init = function () {
     listenToNoNewData();
     listenToNavigateToHistoriek();
     listenToPowerMenu();
+    hideAll();
+    showAcuteleDataOnLoad()
   }
 };
 

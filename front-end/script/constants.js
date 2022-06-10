@@ -685,6 +685,15 @@ const HistoriekOptions = {
   xaxis: {
     type: 'datetime',
   },
+  responsive: [
+    {
+      breakpoint: 700,
+      options: {
+        chart: { height: '192px' },
+
+      },
+    },
+  ],
 };
 
 let HistoriekOptionsLineChart = {
@@ -724,6 +733,15 @@ let HistoriekOptionsLineChart = {
       },
     },
   },
+  responsive: [
+    {
+      breakpoint: 700,
+      options: {
+        chart: { height: '192px' },
+
+      },
+    },
+  ],
 };
 
 

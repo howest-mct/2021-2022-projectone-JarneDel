@@ -263,6 +263,9 @@ input:checked + .c-switch__slider:before{
   background: var(--active-background);
   color: var(--text-color);
 }
+.c-chart-title{
+  display: none;
+}
 
 
 @media (min-width:900px) {
@@ -425,8 +428,9 @@ input:checked + .c-switch__slider:before{
   
 }
 .c-box--wide{
-  flex-basis: 96%;
+  width: 826px;
 }
+
 
 .c-box__header{
   border-bottom: 1px solid #a5a5a5;
@@ -864,5 +868,9 @@ background: var(--hover-background);
     background-color: var(--primary-color-dim);
     color: #fff;
     fill: #fff;
+  }
+  .c-chart-title{
+    display: block;
+    text-align: center;
   }
 }
