@@ -271,7 +271,6 @@ const createStackedChart = function (dom, arrayJsonStacked, arrayNames) {
 };
 
 const showHistoriekCo2 = function (historiek) {
-  hideAll();
   updateTitle('CO2 History');
   show(htmlRefeshGraph)
   show(htmlHistoriekCO2);
@@ -297,7 +296,6 @@ const showHistoriekCo2 = function (historiek) {
   hide(htmlLoading);
 };
 const showHistoriekTemperature = function (tempJson) {
-  hideAll();
   updateTitle('Temperature');
   console.log(tempJson);
   show(htmlHistoriekTemp);
@@ -322,7 +320,6 @@ const showHistoriekTemperature = function (tempJson) {
   hide(htmlLoading);
 };
 const showHistoriekHumidity = function (humJson) {
-  hideAll();
   show(htmlHistoriekHum);
   show(htmlChartType);
   show(htmlRefeshGraph)
@@ -343,7 +340,6 @@ const showHistoriekHumidity = function (humJson) {
   hide(htmlLoading);
 };
 const showHistoriekPressure = function (pressureJson) {
-  hideAll();
   show(htmlHistoriekPressure);
   show(htmlChartType);
   show(htmlRefeshGraph)
@@ -366,7 +362,6 @@ const showHistoriekPressure = function (pressureJson) {
 
 const showHistoriekPM = function (jsonPM) {
   console.log(jsonPM);
-  hideAll();
   show(htmlHistoriekPM);
   show(htmlChartType);
   show(htmlRefeshGraph)
@@ -508,6 +503,13 @@ const showNewLiveData = function (type_data) {
   }
 }
 
+const showAcuteleDataOnLoad = function () {
+  let event = new CustomEvent('click')
+  console.log(event)
+  document.querySelector('.js-button-acuteel').dispatchEvent(event)
+  toggleSidebar()
+}
+
 //updates label and data
 const updateOptionsCharts = function (value, type) {
   let seriesValue, typeLabel, chart;
@@ -600,102 +602,150 @@ const updateTitle = function (newTitle) {
 
 
 const showHistoriekGrafiek = function (type) {
-  console.log(type)
+  let typesMobile = ['DAY', 'WEEK', 'YTD']
   show(htmlHistoriek)
-  showSelectedSidebar(type)
   toggleSidebar();
-  let dropdown = document.querySelectorAll('.js-dropdown-btn');
-  for (let dropdownBtn of dropdown) {
-    dropdownBtn.classList.remove('c-selected');
-  }
-  const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
-  for (let btn2 of btns) {
-    btn2.classList.remove('c-selected');
-  }
-  show(htmlLoading);
-  hideAll();
+  if (typesMobile.includes(type)) {
+    console.log('mobile')
+    show(htmlLoading)
+    let selectedNav = document.querySelectorAll('.c-selected')
+    for (let i of selectedNav) {
+      i.classList.remove('c-selected')
+    }
+    let dropdown = document.querySelectorAll('.js-dropdown-btn-mobile')
+    for (let btn of dropdown) {
+      if (btn.dataset.type === type) {
+        btn.classList.add('c-selected')
+      }
+    }
 
-  // this.classList.add('c-selected');
-  if (loaded_historiek[type] == false) {
-    console.log("Loading for first time", type)
-    loaded_historiek[type] = true;
-    let dateYesterday = new Date();
+    hideAll()
+    console.log(type, loaded_historiek.mobile[type])
+
+    selectedRange = type
+    let beginDate = new Date();
     let dateNow = new Date();
     dateNow = Math.round(dateNow.getTime() / 1000);
-    dateYesterday.setDate(dateYesterday.getDate() - 1);
-    dateYesterday = Math.round(dateYesterday.getTime() / 1000);
-    activeGraph = type
-    show(htmlRefeshGraph)
-    resetGraphOptions('DAY');
-    selectedRange = 'DAY'
     switch (type) {
-      case 'co2':
-        getHistoriekCo2Filtered('DAY', dateYesterday, dateNow);
+      case 'DAY':
+        beginDate.setDate(beginDate.getDate() - 1);
+        beginDate = Math.round(beginDate.getTime() / 1000);
+        break
+      case 'WEEK':
+        beginDate.setDate(beginDate.getDate() - 7);
+        beginDate = Math.round(beginDate.getTime() / 1000);
         break;
-      case 'temperature':
-        getHistoriekTemperatureFiltered('DAY', dateYesterday, dateNow);
-        break;
-      case 'humidity':
-        getHistoriekHumFiltered('DAY', dateYesterday, dateNow);
-        break;
-      case 'pressure':
-        getHistoriekPressureFiltered('DAY', dateYesterday, dateNow);
-        break;
-      case 'pm':
-        getHistoriekPMFiltered('DAY', dateYesterday, dateNow);
-        break;
+      case 'YTD':
+        beginDate.setDate(beginDate.getDate() - 10000);
+        beginDate = Math.round(beginDate.getTime() / 1000);
     }
+    getHistoriekCo2Filtered(type, beginDate, dateNow)
+    getHistoriekTemperatureFiltered(type, beginDate, dateNow)
+    getHistoriekHumFiltered(type, beginDate, dateNow)
+    getHistoriekPressureFiltered(type, beginDate, dateNow)
+    getHistoriekPMFiltered(type, beginDate, dateNow)
+
+
   } else {
-    // just show the page and reset the graph options.
+    console.log(type)
+    let selectedNav = document.querySelectorAll('.c-selected')
+    for (let i of selectedNav) {
+      i.classList.remove('c-selected')
+    }
+    showSelectedSidebar(type)
+    show(htmlLoading);
     hideAll();
-    switch (type) {
-      case 'co2':
-        updateTitle('CO2');
-        show(htmlHistoriekCO2);
-        resetGraphOptions(htmlHistoriekCO2.dataset.range);
-        break;
-      case 'temperature':
-        updateTitle('Temperature');
-        show(htmlHistoriekTemp);
-        resetGraphOptions(htmlHistoriekTemp.dataset.range);
-        break;
-      case 'humidity':
-        updateTitle('Humidity');
-        show(htmlHistoriekHum);
-        resetGraphOptions(htmlHistoriekHum.dataset.range);
-        break;
-      case 'pressure':
-        updateTitle('Pressure');
-        show(htmlHistoriekPressure);
-        resetGraphOptions(htmlHistoriekPressure.dataset.range);
-        break;
-      case 'pm':
-        updateTitle('Particulate Matter');
-        show(htmlHistoriekPM);
-        resetGraphOptions(htmlHistoriekPM.dataset.range);
-        break;
+
+    // this.classList.add('c-selected');
+    if (loaded_historiek[type] == false) {
+      console.log("Loading for first time", type)
+      loaded_historiek[type] = true;
+      let dateYesterday = new Date();
+      let dateNow = new Date();
+      dateNow = Math.round(dateNow.getTime() / 1000);
+      dateYesterday.setDate(dateYesterday.getDate() - 1);
+      dateYesterday = Math.round(dateYesterday.getTime() / 1000);
+      activeGraph = type
+      show(htmlRefeshGraph)
+      resetGraphOptions('DAY');
+      selectedRange = 'DAY'
+      switch (type) {
+        case 'co2':
+          getHistoriekCo2Filtered('DAY', dateYesterday, dateNow);
+          break;
+        case 'temperature':
+          getHistoriekTemperatureFiltered('DAY', dateYesterday, dateNow);
+          break;
+        case 'humidity':
+          getHistoriekHumFiltered('DAY', dateYesterday, dateNow);
+          break;
+        case 'pressure':
+          getHistoriekPressureFiltered('DAY', dateYesterday, dateNow);
+          break;
+        case 'pm':
+          getHistoriekPMFiltered('DAY', dateYesterday, dateNow);
+          break;
+      }
+    } else {
+      // just show the page and reset the graph options.
+      hideAll();
+      switch (type) {
+        case 'co2':
+          updateTitle('CO2');
+          show(htmlHistoriekCO2);
+          resetGraphOptions(htmlHistoriekCO2.dataset.range);
+          break;
+        case 'temperature':
+          updateTitle('Temperature');
+          show(htmlHistoriekTemp);
+          resetGraphOptions(htmlHistoriekTemp.dataset.range);
+          break;
+        case 'humidity':
+          updateTitle('Humidity');
+          show(htmlHistoriekHum);
+          resetGraphOptions(htmlHistoriekHum.dataset.range);
+          break;
+        case 'pressure':
+          updateTitle('Pressure');
+          show(htmlHistoriekPressure);
+          resetGraphOptions(htmlHistoriekPressure.dataset.range);
+          break;
+        case 'pm':
+          updateTitle('Particulate Matter');
+          show(htmlHistoriekPM);
+          resetGraphOptions(htmlHistoriekPM.dataset.range);
+          break;
+      }
+
+      hide(htmlLoading);
+      show(htmlChartType);
+
     }
 
-    hide(htmlLoading);
-    show(htmlChartType);
   }
 
 
 }
 
 const showSelectedSidebar = function (type) {
+  console.log(type)
+  let succes = false
   let dropdown = document.querySelectorAll('.js-dropdown-btn');
   for (let dropdownBtn of dropdown) {
     if (dropdownBtn.dataset.type == type) {
       dropdownBtn.classList.add('c-selected')
+      succes = true
     }
   }
   const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
   for (let btn of btns) {
     if (btn.dataset.type == type) {
       btn.classList.add('c-selected')
+      succes = true
     }
+
   }
+  return succes
 }
 // #endregion
 
@@ -846,16 +896,22 @@ const listenToBtnSidebar = function () {
         toggleClass(document.querySelector('.c-dropdown-icon'));
         toggleClass(document.querySelector('.c-mobile-dropdown-icon'));
         toggleClass(document.querySelector('.c-mobile-dropup-icon'));
+        toggleClass(document.querySelector('.js-sidebar-historiek-mobile'));
       } else {
         hide(htmlHistoriek)
-        const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
-        for (let btn2 of btns) {
-          btn2.classList.remove('c-selected');
+        let selectedNav = document.querySelectorAll('.c-selected')
+        for (let i of selectedNav) {
+          i.classList.remove('c-selected')
         }
-        let dropdown = document.querySelectorAll('.js-dropdown-btn');
-        for (let dropdownBtn of dropdown) {
-          dropdownBtn.classList.remove('c-selected');
-        }
+
+        // const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
+        // for (let btn2 of btns) {
+        //   btn2.classList.remove('c-selected');
+        // }
+        // let dropdown = document.querySelectorAll('.js-dropdown-btn');
+        // for (let dropdownBtn of dropdown) {
+        //   dropdownBtn.classList.remove('c-selected');
+        // }
         toggleSidebar();
         this.classList.add('c-selected');
         const type = this.dataset.type;
@@ -924,6 +980,17 @@ const listenToHistoryDropdown = function () {
     })
   }
 };
+
+const listenToHistoriekDropdownMobile = function () {
+  let dropdown = document.querySelectorAll('.js-dropdown-btn-mobile')
+  for (let range of dropdown) {
+    range.addEventListener('click', function () {
+      let type = range.dataset.type
+      console.log(type)
+      showHistoriekGrafiek(type)
+    })
+  }
+}
 
 const listenToRefeshGraphs = function () {
   htmlRefeshGraph.addEventListener('click', function () {
@@ -1037,6 +1104,7 @@ const init = function () {
     htmlRefeshGraph = document.querySelector('.js-refesh-chart')
     htmlIndicatieAll = document.querySelectorAll(".js-indicatie")
     listenToHistoryDropdown();
+    listenToHistoriekDropdownMobile();
     listenToBtnSidebar();
     listenToMobileNav();
     listenTographOptions();
@@ -1044,6 +1112,8 @@ const init = function () {
     listenToNoNewData();
     listenToNavigateToHistoriek();
     listenToPowerMenu();
+    hideAll();
+    showAcuteleDataOnLoad()
   }
 };
 

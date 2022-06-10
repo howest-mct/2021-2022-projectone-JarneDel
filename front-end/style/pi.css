@@ -263,6 +263,9 @@ input:checked + .c-switch__slider:before{
   background: var(--active-background);
   color: var(--text-color);
 }
+.c-chart-title{
+  display: none;
+}
 
 
 @media (min-width:900px) {
@@ -280,6 +283,7 @@ input:checked + .c-switch__slider:before{
 
     .c-mobile-nav{
       display: none;
+
     }
   .c-topbar {
     position: fixed;
@@ -425,8 +429,9 @@ input:checked + .c-switch__slider:before{
   
 }
 .c-box--wide{
-  width: 834px;
+  width: 826px;
 }
+
 
 .c-box__header{
   border-bottom: 1px solid #a5a5a5;
@@ -542,21 +547,36 @@ th{
   .c-mobile{
     display: block;
   }
+  .c-box{
+    flex-basis: 48%;
+  }
+  .c-box--wide{
+    flex-basis: 96%;
+  } 
+  .c-box__content{
+    max-height: 160px;
+  }
+  
+
   .c-mobile--logo{
     background-color: white;
-    width: 20vw;
     display: flex;
     justify-content: center;
     padding: 0;
+    max-width: 50vw;
+    margin-left: 16px !important;
     /* background: var(--primary-color); */
   }
   .c-mobile--topbar{
+    position: fixed;
+    top: 0px;
+    background-color: #fff;
+    z-index: 1000;
     height: 57.594px;
     width: 100vw;
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
-    justify-content: unset;
     justify-content: space-between;
     gap:32px;
     border-bottom: 1px solid #cfcfcf !important;
@@ -567,6 +587,7 @@ th{
   }
   .c-mobile--topbar h2{
     color: var(--gray-color);
+    display: none;
     /* margin: auto; */
   }
   .c-topbar--right{
@@ -590,20 +611,20 @@ th{
     position: fixed;
     z-index: 1000;
     top: 57.594px;
-    right: -40vw;
+    width: 100vw;
     display: flex;
     align-items: flex-start;
     flex-direction: column;
     margin:0;
-    width: 40vw;
+    right: -100vw;
     height: calc(100vh - 57.594px);
     background: #fafafa;
-    z-index: 0;
     transition: transform .3s;
   }
   .c-show-nav{
-    transform: translateX(-40vw);
+    transform: translateX(-100vw);
   }
+
 
   .c-mobile-nav .c-sidebar__subtitle{
     width: 100%;
@@ -647,11 +668,9 @@ th{
   }
   .c-content{
     padding: 0px ;
+    margin-top: 60px;
   }
-  .c-box{
-    width: 23vw;
-    border-radius: 4px;
-  }
+
   .c-box__header{
     display: flex;
     margin-bottom: 8px;
@@ -676,19 +695,9 @@ th{
   .c-box__header svg, .c-box__header img{
     display: none;
   }
-  .c-box__content{
-    height: 30vh;
-  }
-  .c-actueel{
-    display: flex;
-    flex-wrap: wrap;
-    margin-top: 16px;
-    margin-left: 16px;
-    gap: 8px;
-  }
-  .c-box--wide{
-    width: 47vw;
-  }
+
+
+
   .c-chart{
     margin-bottom: 8px;
   }
@@ -749,6 +758,12 @@ th{
     top: 4px;
     right: 88px;
   }
+  .c-actueel{
+    margin-left: 4px;
+    margin-top:16px;display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
   
 } 
 .c-clickable-icon{
@@ -770,10 +785,93 @@ background: var(--hover-background);
   text-align: center;
 }
 
-@media (max-height: 800px){
+@media (max-height: 500px){
 
+  .c-mobile--topbar{
+    position: static;
+    height: 57.594px;
+    width: 100vw;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap:32px;
+    border-bottom: 1px solid #cfcfcf !important;
+  }
   .c-content{
     overflow-y: hidden !important;
+    margin-top: 0px;
+  }
 
+  .c-box__content{
+    height: 30vh;
+  }
+  .c-box{
+    flex-basis: 24%;
+    border-radius: 4px;
+  }
+  .c-box--wide{
+    flex-basis: 48%;
+  } 
+  .c-actueel{
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    margin-left: 16px;
+    gap: 8px;
+  }
+  .c-mobile-nav{
+    z-index: 1000;
+    width: 40vw;
+    right: -40vw;
+  }
+  .c-show-nav{
+    transform: translateX(-40vw);
+  }
+  .c-mobile--topbar h2{
+    display: unset;
+    color: var(--gray-color);
+    /* margin: auto; */
+  }
+  .c-mobile--logo{
+    width: 20vw;
+    margin-left: 0 !important;
+  }
+  .c-dropdown-range{
+    display:  none;
+  }
+}
+
+
+@media (max-width: 900px) and (min-height: 500px){
+  .js-dropdown-btn{
+    display: none !important;
+  }
+  .c-dropdown-range{
+    display: unset;
+    width: 100%;
+  }
+  .c-dropdown-range h4{
+    width: 100%;
+    padding-left: 48px;
+    padding-bottom: 8px;
+    padding-top: 8px;
+    margin-right: 0px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 300;
+  }
+  .c-dropdown-range h4:hover{
+    background: var(--hover-background);
+  }
+  .c-dropdown-range h4:active,
+  .c-dropdown-range h4.c-selected{
+    background-color: var(--primary-color-dim);
+    color: #fff;
+    fill: #fff;
+  }
+  .c-chart-title{
+    display: block;
+    text-align: center;
   }
 }

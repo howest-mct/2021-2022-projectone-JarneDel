@@ -334,18 +334,32 @@
         </div> -->
 
         <div class="js-historiek-co2" data-range='DAY'>
+          <h2 class="c-chart-title">
+            Co2 [PPM]
+          </h2>
           <div class="area-chart-co2 c-chart"></div>
         </div>
         <div class="js-historiek-temp" data-range='DAY'>
+          <h2 class="c-chart-title">
+            Temperature [°C]
+          </h2>
           <div class="area-chart-temp c-chart"></div>
         </div>
         <div class="js-historiek-hum" data-range='DAY'>
+          <h2 class="c-chart-title">
+            Humidity [%]
+          </h2>
           <div class="area-chart-hum c-chart"></div>
         </div>
         <div class="js-historiek-pressure" data-range='DAY'>
+          <h2 class="c-chart-title">
+            Pressure [Pa]
+          </h2>
           <div class="area-chart-pressure c-chart"></div>
         </div>
         <div class="js-historiek-pm" data-range='DAY'>
+
+          <h2 class="c-chart-title">Particulate matter [PPM]</h2>
           <div class="area-chart-pm c-chart"></div>
         </div>
       </div>
@@ -369,7 +383,7 @@
   </div>
   <aside class="c-sidebar">
 
-    <h3 class="c-sidebar__subtitle js-btn-bg-blue-sidebar" data-type="actueel">
+    <h3 class="c-sidebar__subtitle js-btn-bg-blue-sidebar js-button-acuteel" data-type="actueel">
       <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24"
         width="24px" fill="#000000">
         <g>
@@ -494,6 +508,18 @@
       <h4 class="js-dropdown-btn" data-type="pm">
         Particulate matter
       </h4>
+    </div>
+    <div class="c-dropdown-range js-sidebar-historiek-mobile">
+      <h4 class="js-dropdown-btn-mobile" data-type="DAY">
+        TODAY
+      </h4>
+      <h4 class="js-dropdown-btn-mobile" data-type="WEEK">
+        THIS WEEK
+      </h4>
+      <h4 class="js-dropdown-btn-mobile" data-type="YTD">
+        ALL RECORDS
+      </h4>
+
     </div>
 
     <h3 class="c-sidebar__subtitle c-bottom js-btn-bg-blue-sidebar" data-type="settings">
