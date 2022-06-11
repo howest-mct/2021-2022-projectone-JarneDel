@@ -315,7 +315,7 @@ class Bme680:
         start = time.time()
         while not (self.__read_register(0x1D) & 0x80):
             print("no new data yet")
-            time.sleep(0.05)
+            time.sleep(0.01)
             if time.time() - self.timeout_duration > start:
                 raise TimeoutError("No new data...")
         print("NEW DATA!")
