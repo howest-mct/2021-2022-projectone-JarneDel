@@ -69,6 +69,7 @@ fan = Fan(6, 13, 2, initial=fan_pwm)
 # region Main Thread
 def main_thread():
     global sensor_active
+    DataRepository.add_data_point(1, 3, 20)
     while True:
         if not sensor_active:
             sensor_active = True
@@ -116,6 +117,9 @@ def bme_main():
             temperature = round(bsec_data["temperature"], 2)
             humidity = round(bsec_data["humidity"], 2)
             raw_pressure = round(bsec_data["raw_pressure"], 1)
+            voc_percentage = int(bsec_data["gas_percentage"])
+            accuracy = bsec_data["iaq_accuracy"]
+            iaq = round(bsec_data["iaq"])
             # print(temperature, humidity, raw_pressure)
             if time.time() - start > 120:
                 start = time.time()
@@ -123,12 +127,18 @@ def bme_main():
                 DataRepository.add_data_point(temperature, 1, 15)
                 DataRepository.add_data_point(humidity, 1, 17)
                 DataRepository.add_data_point(raw_pressure, 1, 16)
+                DataRepository.add_data_point(iaq, 1, 18)
+                DataRepository.add_data_point(voc_percentage, 1, 23)
+                DataRepository.add_data_point(accuracy, 1, 22)
             socketio.emit(
                 "B2F_BME",
                 {
                     "temperature": temperature,
                     "humidity": humidity,
                     "pressure": raw_pressure,
+                    "VOC": voc_percentage,
+                    "iaq": iaq,
+                    "accuracy": accuracy,
                 },
             )
         else:
@@ -244,12 +254,14 @@ def ip():
 @app.route(endpoint + "/poweroff/")
 def power_off():
     msg = CMD.power_off()
+    DataRepository.add_data_point("0", 3, 20)
     return jsonify(msg=msg), 200
 
 
 @app.route(endpoint + "/reboot/")
 def reboot():
     msg = CMD.reboot()
+    DataRepository.add_data_point("0", 3, 20)
     return jsonify(msg=msg), 200
 
 
@@ -342,68 +354,113 @@ def get_historiek_pm():
     return jsonify(data=data), 200
 
 
-@app.route(endpoint + "/historiek/co2/<time_type>/<range>/")
-def get_historiek_co2_filtered(time_type, range):
-    data = HR.get_historiek_filtered(2, time_type, range)
+@app.route(endpoint + "/historiek/<unit_type>/<time_type>/<range>/")
+def get_historiek(unit_type, time_type, range):
+    data_list = []
+    if unit_type == "co2":
+        unit = 2
+    elif unit_type == "temperature":
+        unit = 15
+    elif unit_type == "humidity":
+        unit = 17
+    elif unit_type == "pressure":
+        unit = 16
+
+    elif unit_type == "iaq":
+        unit = 18
+    elif unit_type == "voc":
+        unit = 23
+    elif unit_type == "pm":
+        unit = [6, 7, 8]
+    elif unit_type == "pmnop":
+        unit = [9, 10, 11, 12, 13, 14]
+
+    if type(unit) == int:
+        data = HR.get_historiek_filtered(unit, time_type, range)
+
+    if isinstance(unit, list):
+        for item in unit:
+            data_list.append(HR.get_historiek_filtered(item, time_type, range))
+
     if data is not None:
         return jsonify(data=data), 200
-    else:
-        return jsonify(message="No return data"), 400
 
-
-@app.route(endpoint + "/historiek/temperature/<time_type>/<range>/")
-def get_historiek_temperature_filtered(time_type, range):
-    data = HR.get_historiek_filtered(15, time_type, range)
-    if data is not None:
+    elif data_list is not None:
         return jsonify(data=data), 200
+
     else:
-        return jsonify(message="No return data"), 400
+        return jsonify(message="error"), 400
 
 
-@app.route(endpoint + "/historiek/humidity/<time_type>/<range>/")
-def get_historiek_humidity_filtered(time_type, range):
-    data = HR.get_historiek_filtered(17, time_type, range)
-    if data is not None:
-        return jsonify(data=data), 200
-    else:
-        return jsonify(message="No return data"), 400
+# @app.route(endpoint + "/historiek/co2/<time_type>/<range>/")
+# def get_historiek_co2_filtered(time_type, range):
+#     data = HR.get_historiek_filtered(2, time_type, range)
+#     if data is not None:
+#         return jsonify(data=data), 200
+#     else:
+#         return jsonify(message="No return data"), 400
 
 
-@app.route(endpoint + "/historiek/pressure/<time_type>/<range>/")
-def get_historiek_pressure_filtered(time_type, range):
-    print(f"{time_type}, {range}")
-    data = HR.get_historiek_filtered(16, time_type, range)
-    print(data)
-    if data is not None:
-        return jsonify(data=data), 200
-    else:
-        return jsonify(message="No return data"), 400
+# @app.route(endpoint + "/historiek/temperature/<time_type>/<range>/")
+# def get_historiek_temperature_filtered(time_type, range):
+#     data = HR.get_historiek_filtered(15, time_type, range)
+#     if data is not None:
+#         return jsonify(data=data), 200
+#     else:
+#         return jsonify(message="No return data"), 400
 
 
-@app.route(endpoint + "/historiek/pm/<time_type>/<range>/")
-def get_historiek_pm_filtered(time_type, range):
-    pm1 = HR.get_historiek_filtered(6, time_type, range)
-    pm2_5 = HR.get_historiek_filtered(7, time_type, range)
-    pm10 = HR.get_historiek_filtered(8, time_type, range)
-    data = [pm1, pm2_5, pm10]
-    if None not in data:
-        return jsonify(data=data), 200
-    else:
-        return jsonify(message="No return data"), 400
+# @app.route(endpoint + "/historiek/humidity/<time_type>/<range>/")
+# def get_historiek_humidity_filtered(time_type, range):
+#     data = HR.get_historiek_filtered(17, time_type, range)
+#     if data is not None:
+#         return jsonify(data=data), 200
+#     else:
+#         return jsonify(message="No return data"), 400
 
 
-# gets the number of particles beyond a particle size in .1 l of air
-@app.route(endpoint + "/historiek/pmnop/<time_type>/<range>/")
-def get_histoeriek_pmnop_filtered(time_type, range):
-    nop = []
-    nop.append(HR.get_historiek_filtered(9, time_type, range))
-    nop.append(HR.get_historiek_filtered(11, time_type, range))
-    nop.append(HR.get_historiek_filtered(10, time_type, range))
-    nop.append(HR.get_historiek_filtered(12, time_type, range))
-    nop.append(HR.get_historiek_filtered(13, time_type, range))
-    nop.append(HR.get_historiek_filtered(14, time_type, range))
-    if None not in nop:
-        return jsonify(data=nop), 200
+# @app.route(endpoint + "/historiek/pressure/<time_type>/<range>/")
+# def get_historiek_pressure_filtered(time_type, range):
+#     print(f"{time_type}, {range}")
+#     data = HR.get_historiek_filtered(16, time_type, range)
+#     print(data)
+#     if data is not None:
+#         return jsonify(data=data), 200
+#     else:
+#         return jsonify(message="No return data"), 400
+
+
+# @app.route(endpoint + "/historiek/pm/<time_type>/<range>/")
+# def get_historiek_pm_filtered(time_type, range):
+#     pm1 = HR.get_historiek_filtered(6, time_type, range)
+#     pm2_5 = HR.get_historiek_filtered(7, time_type, range)
+#     pm10 = HR.get_historiek_filtered(8, time_type, range)
+#     data = [pm1, pm2_5, pm10]
+#     if None not in data:
+#         return jsonify(data=data), 200
+#     else:
+#         return jsonify(message="No return data"), 400
+
+
+# # gets the number of particles beyond a particle size in .1 l of air
+# @app.route(endpoint + "/historiek/pmnop/<time_type>/<range>/")
+# def get_histoeriek_pmnop_filtered(time_type, range):
+#     nop = []
+#     nop.append(HR.get_historiek_filtered(9, time_type, range))
+#     nop.append(HR.get_historiek_filtered(11, time_type, range))
+#     nop.append(HR.get_historiek_filtered(10, time_type, range))
+#     nop.append(HR.get_historiek_filtered(12, time_type, range))
+#     nop.append(HR.get_historiek_filtered(13, time_type, range))
+#     nop.append(HR.get_historiek_filtered(14, time_type, range))
+#     if None not in nop:
+#         return jsonify(data=nop), 200
+
+# @app.route(endpoint + '/historiek/iaq/<time_type>/<range>/')
+# def get_historiek_iaq_filtered(time_type, range):
+#     data= HR.get_historiek_filtered(18, time_type, range)
+#     if data is None:
+#         return jsonify(error=data), 400
+#     return jsonify(data=data), 200
 
 
 @socketio.on("connect")
