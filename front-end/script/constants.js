@@ -785,8 +785,6 @@ const chartTitles = {
   temperature: 'temperature [°C]',
   humidity: 'Relative humidity [%]',
   pressure: 'pressure [Pa]',
-  pm: 'Particulate Matter',
-  pmnop: 'Particulate Matter: Number of particles',
 };
 
 const pageTitles = {
@@ -794,4 +792,6 @@ const pageTitles = {
   temperature: 'Temperature',
   humidity: 'humidity',
   pressure: 'Pressure',
+  pm: 'Particulate Matter',
+  pmnop: 'Number of particles / 100ml',
 };
