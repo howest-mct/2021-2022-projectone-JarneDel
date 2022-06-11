@@ -98,13 +98,13 @@ def main_thread():
 
 def bme_main():
     print("TESTING FORCED MODE WITHOUT BSEC")
-    bme = BME68X(cst.BME68X_I2C_ADDR_LOW, 1)
+    bme = BME68X(cst.BME68X_I2C_ADDR_HIGH, 1)
     # Configure sensor to measure at 320 degC for 100 millisec
     bme.set_heatr_conf(cst.BME68X_FORCED_MODE, 320, 100, cst.BME68X_ENABLE)
     print(bme.get_data())
     time.sleep(3)
     print("\nTESTING FORCED MODE WITH BSEC")
-    bme = BME68X(cst.BME68X_I2C_ADDR_LOW, 1)
+    bme = BME68X(cst.BME68X_I2C_ADDR_HIGH, 1)
     bme.set_sample_rate(bsec.BSEC_SAMPLE_RATE_LP)
     start = time.time()
     while True:
@@ -385,11 +385,25 @@ def get_historiek_pm_filtered(time_type, range):
     pm1 = HR.get_historiek_filtered(6, time_type, range)
     pm2_5 = HR.get_historiek_filtered(7, time_type, range)
     pm10 = HR.get_historiek_filtered(8, time_type, range)
-    if (pm1 and pm2_5 and pm10) is not None:
-        data = [pm1, pm2_5, pm10]
+    data = [pm1, pm2_5, pm10]
+    if None not in data:
         return jsonify(data=data), 200
     else:
         return jsonify(message="No return data"), 400
+
+
+# gets the number of particles beyond a particle size in .1 l of air
+@app.route(endpoint + "/historiek/pmnop/<time_type>/<range>/")
+def get_histoeriek_pmnop_filtered(time_type, range):
+    nop = []
+    nop.append(HR.get_historiek_filtered(9, time_type, range))
+    nop.append(HR.get_historiek_filtered(11, time_type, range))
+    nop.append(HR.get_historiek_filtered(10, time_type, range))
+    nop.append(HR.get_historiek_filtered(12, time_type, range))
+    nop.append(HR.get_historiek_filtered(13, time_type, range))
+    nop.append(HR.get_historiek_filtered(14, time_type, range))
+    if None not in nop:
+        return jsonify(data=nop), 200
 
 
 @socketio.on("connect")

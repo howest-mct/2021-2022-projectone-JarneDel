@@ -12,11 +12,6 @@ try {
 let OnlyOneListener = true;
 let onlyOneListenerHistoriek = true;
 let OnlyOneListenersettings = true;
-let firstTimeTemp = true;
-let firstTimeCo2 = true;
-let firstTimeHum = true;
-let firstTimePressure = true;
-let firstTimePM = true;
 let co2Chart,
   tempChart,
   humidityChart,
@@ -28,7 +23,8 @@ let co2Chart,
   areaTemp,
   areaHum,
   areaPressure,
-  areaPM;
+  areaPM,
+  areaPmNop;
 
 let selectedRange, activeGraph;
 let RPI = false;
@@ -51,13 +47,13 @@ let htmlActueel,
   htmlHistoriekHum,
   htmlHistoriekPressure,
   htmlHistoriekPM,
+  htmlHistoriekPmNop,
   htmlLoading,
   htmlDropDownHistoriekMobile,
   htmlReloadPage,
   htmlChartType,
   htmlRefeshGraph,
-  htmlIndicatieAll
-  ;
+  htmlIndicatieAll;
 
 // #endregion
 
@@ -81,9 +77,10 @@ const hideAll = function () {
     htmlHistoriekHum,
     htmlHistoriekPressure,
     htmlHistoriekPM,
+    htmlHistoriekPmNop,
     htmlReloadPage,
     htmlChartType,
-    htmlRefeshGraph
+    htmlRefeshGraph,
   ];
   for (let element of htmlRefesh) {
     arrayDomObjects.push(element);
@@ -105,7 +102,7 @@ const resetGraphOptions = function (type) {
   let chartranges = document.querySelectorAll('.js-chartrange');
   for (let chartrange of chartranges) {
     let chartType = chartrange.value;
-    console.log(chartType, type);
+    // console.log(chartType, type);
     if (chartType == type) {
       chartrange.checked = true;
     } else {
@@ -120,7 +117,7 @@ const listenTographOptions = function () {
   for (let chartRange of htmlChartRange) {
     chartRange.addEventListener('change', function () {
       let graph = activeGraph;
-      console.log(graph, this.value);
+      // console.log(graph, this.value);
       getGraphData(graph, this.value);
     });
   }
@@ -138,8 +135,8 @@ const getGraphData = function (graph, graphType) {
   let now = new Date();
   let dateNow = Math.round(now.getTime() / 1000);
   let beginDate;
-  activeGraph = graph
-  selectedRange = graphType
+  activeGraph = graph;
+  selectedRange = graphType;
   switch (graphType) {
     case 'DAY':
       now.setDate(now.getDate() - 1);
@@ -176,6 +173,10 @@ const getGraphData = function (graph, graphType) {
     case 'pm':
       getHistoriekPMFiltered(graphType, beginDate, dateNow);
       htmlHistoriekPM.dataset.range = graphType;
+      break;
+    case 'pmnop':
+      getHistoriekPmNopFiltered(graphType, beginDate, dateNow);
+      htmlHistoriekPmNop.dataset.range = graphType;
       break;
     default:
       console.error('Invalid Graph');
@@ -223,8 +224,7 @@ const showIP = function (jsonIP) {
   let lanIps = jsonIP.ip.lan;
   let wlanIps = jsonIP.ip.wlan;
   const htmlIP = document.querySelector('.js-ip');
-  let html =
-    '<table><tr><th>Interface</th><th>IP</th></tr>';
+  let html = '<table><tr><th>Interface</th><th>IP</th></tr>';
   for (let lanIP of lanIps) {
     html += `<tr><td>LAN</td><td>${lanIP}</td></tr>`;
   }
@@ -255,9 +255,16 @@ const createChart = function (data, name, dom) {
 };
 
 // creates a linechart with 3 rows -- called by showHistoriekPM
-const createStackedChart = function (dom, arrayJsonStacked, arrayNames) {
-  let tempOptions = HistoriekOptionsLineChart;
-  tempOptions.colors = ['#2699FB', '#00E396', '#504DE6'];
+const createLineChart = function (dom, arrayJsonStacked, arrayNames) {
+  let tempOptions = JSON.parse(JSON.stringify(HistoriekOptionsLineChart));
+  tempOptions.colors = [
+    '#2699FB',
+    '#00E396',
+    '#504DE6',
+    '#FA9E0C',
+    '#FA3EDD',
+    '#4FFA19',
+  ];
   console.log(arrayJsonStacked.data.length);
   for (let i = 0; i < arrayJsonStacked.data.length; i++) {
     tempOptions.series[i] = {
@@ -265,20 +272,33 @@ const createStackedChart = function (dom, arrayJsonStacked, arrayNames) {
       name: arrayNames[i],
     };
   }
+  tempOptions.yaxis = {
+    labels: {
+      formatter(value) {
+        return Math.round(value);
+      },
+    },
+  };
   console.log(tempOptions);
   let chart = new ApexCharts(dom, tempOptions);
   return chart;
 };
 
-const showHistoriekCo2 = function (historiek) {
-  updateTitle('CO2 History');
-  show(htmlRefeshGraph)
-  show(htmlHistoriekCO2);
+const prepareCharts = function (domObject, title) {
+  updateTitle(title);
+  show(htmlRefeshGraph);
+  show(domObject);
   show(htmlChartType);
-  console.log(historiek);
-  if (firstTimeCo2) {
-    console.log('first time historiek');
-    firstTimeCo2 = false;
+};
+
+const updateChartData = function (chart, data) {
+  chart.updateSeries([{ data: data }]);
+};
+
+const showHistoriekCo2 = function (historiek) {
+  prepareCharts(htmlHistoriekCO2, 'CO2 History');
+  if (firstTime.co2) {
+    firstTime.co2 = false;
     areaCO2 = createChart(
       historiek.data,
       'Co2 concentration [ppm]',
@@ -286,74 +306,51 @@ const showHistoriekCo2 = function (historiek) {
     );
     areaCO2.render();
   } else {
-    console.log('update');
-    areaCO2.updateSeries([
-      {
-        data: historiek.data,
-      },
-    ]);
+    updateChartData(areaCO2, historiek.data);
   }
   hide(htmlLoading);
 };
+
 const showHistoriekTemperature = function (tempJson) {
-  updateTitle('Temperature');
-  console.log(tempJson);
-  show(htmlHistoriekTemp);
-  show(htmlChartType);
-  show(htmlRefeshGraph)
-  console.log(tempJson);
-  if (firstTimeTemp) {
+  prepareCharts(htmlHistoriekTemp, 'Temperature');
+  if (firstTime.temp) {
     areaTemp = createChart(
       tempJson.data,
       'temperature [°C]',
       document.querySelector('.area-chart-temp')
     );
     areaTemp.render();
-    firstTimeTemp = false;
+    firstTime.temp = false;
   } else {
-    areaTemp.updateSeries([
-      {
-        data: tempJson.data,
-      },
-    ]);
+    updateChartData(areaTemp, tempJson.data);
   }
   hide(htmlLoading);
 };
 const showHistoriekHumidity = function (humJson) {
-  show(htmlHistoriekHum);
-  show(htmlChartType);
-  show(htmlRefeshGraph)
-  updateTitle('Humidity');
-  console.log(humJson);
-
-  if (firstTimeHum) {
+  prepareCharts(htmlHistoriekHum, 'humidity');
+  if (firstTime.humidity) {
     areaHum = createChart(
       humJson.data,
       'Relative humidity [%]',
       document.querySelector('.area-chart-hum')
     );
     areaHum.render();
-    firstTimeHum = false;
+    firstTime.humidity = false;
   } else {
     areaHum.updateSeries([{ data: humJson.data }]);
   }
   hide(htmlLoading);
 };
 const showHistoriekPressure = function (pressureJson) {
-  show(htmlHistoriekPressure);
-  show(htmlChartType);
-  show(htmlRefeshGraph)
-  updateTitle('Pressure');
-  console.log(pressureJson);
-
-  if (firstTimePressure) {
+  prepareCharts(htmlHistoriekPressure, 'Pressure');
+  if (firstTime.pressure) {
     areaPressure = createChart(
       pressureJson.data,
       'pressure [Pa]',
       document.querySelector('.area-chart-pressure')
     );
     areaPressure.render();
-    firstTimePressure = false;
+    firstTime.pressure = false;
   } else {
     areaPressure.updateSeries([{ data: pressureJson.data }]);
   }
@@ -361,27 +358,49 @@ const showHistoriekPressure = function (pressureJson) {
 };
 
 const showHistoriekPM = function (jsonPM) {
-  console.log(jsonPM);
-  show(htmlHistoriekPM);
-  show(htmlChartType);
-  show(htmlRefeshGraph)
-  updateTitle('Particulate Matter');
-  if (firstTimePM) {
-    areaPM = createStackedChart(
-      document.querySelector('.area-chart-pm'),
-      jsonPM,
-      ['pm1', 'pm2.5', 'pm10']
-    );
+  prepareCharts(htmlHistoriekPM, 'Particulate Matter');
+  if (firstTime.pm) {
+    areaPM = createLineChart(document.querySelector('.area-chart-pm'), jsonPM, [
+      'pm1',
+      'pm2.5',
+      'pm10',
+    ]);
     areaPM.render();
-    console.log(areaPM);
+    firstTime.pm = false;
   } else {
-    for (let i = 0; i < arrayJsonStacked.data.length; i++) {
-      data = {
-        data: arrayJsonStacked.data[i],
+    const arrayNames = ['pm1', 'pm2.5', 'pm10'];
+    let data = [];
+    for (let i = 0; i < jsonPM.data.length; i++) {
+      data[i] = {
+        data: jsonPM.data[i],
         name: arrayNames[i],
       };
     }
-    areaPM.updateSeries([{ data: data }]);
+    areaPM.updateSeries(data);
+  }
+  hide(htmlLoading);
+};
+
+const showHistoriekPmNop = function (jsonPmNop) {
+  console.log(jsonPmNop);
+  prepareCharts(htmlHistoriekPmNop, 'Particulate Matter: Number of particles');
+  if (firstTime.pmNop) {
+    firstTime.pmNop = false;
+    areaPmNop = createLineChart(
+      document.querySelector('.area-chart-pmnop'),
+      jsonPmNop,
+      namesPmnop
+    );
+    areaPmNop.render();
+  } else {
+    let data = [];
+    for (let i = 0; i < jsonPmNop.data.length; i++) {
+      data[i] = {
+        data: jsonPmNop.data[i],
+        name: namesPmnop[i],
+      };
+    }
+    areaPmNop.updateSeries(data);
   }
   hide(htmlLoading);
 };
@@ -431,9 +450,9 @@ const showCharts = function () {
 const showUpdatedCharts = function (jsonObject) {
   // console.log(jsonObject);
   const data = jsonObject.data;
-  console.log(data)
+  console.log(data);
   let PMNop = {};
-  let pm1, pm2_5, pm10
+  let pm1, pm2_5, pm10;
   for (let sensorWaarde of data) {
     const setPoint = sensorWaarde.setwaarde;
     switch (sensorWaarde.beschrijving) {
@@ -449,13 +468,13 @@ const showUpdatedCharts = function (jsonObject) {
       case 'Pressure':
         updateOptionsCharts(setPoint, 'pressure');
         break;
-      case "PM1_AP":
+      case 'PM1_AP':
         pm1 = setPoint;
         break;
-      case "PM2.5_AP":
+      case 'PM2.5_AP':
         pm2_5 = setPoint;
         break;
-      case "PM10_AP1":
+      case 'PM10_AP1':
         pm10 = setPoint;
         break;
     }
@@ -467,7 +486,7 @@ const showUpdatedCharts = function (jsonObject) {
     }
   }
   // console.log(PM);
-  updatePMCharts(pm1, pm2_5, pm10)
+  updatePMCharts(pm1, pm2_5, pm10);
   updatePMNOPcharts(PMNop);
 };
 
@@ -486,29 +505,28 @@ const showFanSetting = function (jsonObject) {
 const showNoNewLiveData = function (type_data) {
   // console.log(type_data, 'noNew')
   for (let indicatie of htmlIndicatieAll) {
-
     if (indicatie.dataset.name === type_data) {
-      indicatie.classList.remove('u-green')
+      indicatie.classList.remove('u-green');
     }
   }
-}
+};
 
 const showNewLiveData = function (type_data) {
   // console.log(type_data, 'New')
   for (let indicatie of htmlIndicatieAll) {
     if (indicatie.dataset.name === type_data) {
       // console.log("Found it")
-      indicatie.classList.add('u-green')
+      indicatie.classList.add('u-green');
     }
   }
-}
+};
 
 const showAcuteleDataOnLoad = function () {
-  let event = new CustomEvent('click')
-  console.log(event)
-  document.querySelector('.js-button-acuteel').dispatchEvent(event)
-  toggleSidebar()
-}
+  let event = new CustomEvent('click');
+  console.log(event);
+  document.querySelector('.js-button-acuteel').dispatchEvent(event);
+  toggleSidebar();
+};
 
 //updates label and data
 const updateOptionsCharts = function (value, type) {
@@ -600,29 +618,29 @@ const updateTitle = function (newTitle) {
   }
 };
 
-
 const showHistoriekGrafiek = function (type) {
-  let typesMobile = ['DAY', 'WEEK', 'YTD']
-  show(htmlHistoriek)
+  let typesMobile = ['DAY', 'WEEK', 'YTD'];
+  show(htmlHistoriek);
   toggleSidebar();
+  activeGraph = type;
   if (typesMobile.includes(type)) {
-    console.log('mobile')
-    show(htmlLoading)
-    let selectedNav = document.querySelectorAll('.c-selected')
+    console.log('mobile');
+    show(htmlLoading);
+    let selectedNav = document.querySelectorAll('.c-selected');
     for (let i of selectedNav) {
-      i.classList.remove('c-selected')
+      i.classList.remove('c-selected');
     }
-    let dropdown = document.querySelectorAll('.js-dropdown-btn-mobile')
+    let dropdown = document.querySelectorAll('.js-dropdown-btn-mobile');
     for (let btn of dropdown) {
       if (btn.dataset.type === type) {
-        btn.classList.add('c-selected')
+        btn.classList.add('c-selected');
       }
     }
 
-    hideAll()
-    console.log(type, loaded_historiek.mobile[type])
+    hideAll();
+    console.log(type, loaded_historiek.mobile[type]);
 
-    selectedRange = type
+    selectedRange = type;
     let beginDate = new Date();
     let dateNow = new Date();
     dateNow = Math.round(dateNow.getTime() / 1000);
@@ -630,7 +648,7 @@ const showHistoriekGrafiek = function (type) {
       case 'DAY':
         beginDate.setDate(beginDate.getDate() - 1);
         beginDate = Math.round(beginDate.getTime() / 1000);
-        break
+        break;
       case 'WEEK':
         beginDate.setDate(beginDate.getDate() - 7);
         beginDate = Math.round(beginDate.getTime() / 1000);
@@ -639,36 +657,35 @@ const showHistoriekGrafiek = function (type) {
         beginDate.setDate(beginDate.getDate() - 10000);
         beginDate = Math.round(beginDate.getTime() / 1000);
     }
-    getHistoriekCo2Filtered(type, beginDate, dateNow)
-    getHistoriekTemperatureFiltered(type, beginDate, dateNow)
-    getHistoriekHumFiltered(type, beginDate, dateNow)
-    getHistoriekPressureFiltered(type, beginDate, dateNow)
-    getHistoriekPMFiltered(type, beginDate, dateNow)
-
-
+    getHistoriekCo2Filtered(type, beginDate, dateNow);
+    getHistoriekTemperatureFiltered(type, beginDate, dateNow);
+    getHistoriekHumFiltered(type, beginDate, dateNow);
+    getHistoriekPressureFiltered(type, beginDate, dateNow);
+    getHistoriekPMFiltered(type, beginDate, dateNow);
+    getHistoriekPmNopFiltered(type, beginDate, dateNow);
   } else {
-    console.log(type)
-    let selectedNav = document.querySelectorAll('.c-selected')
+    console.log(type);
+    let selectedNav = document.querySelectorAll('.c-selected');
     for (let i of selectedNav) {
-      i.classList.remove('c-selected')
+      i.classList.remove('c-selected');
     }
-    showSelectedSidebar(type)
+    showSelectedSidebar(type);
     show(htmlLoading);
     hideAll();
 
     // this.classList.add('c-selected');
     if (loaded_historiek[type] == false) {
-      console.log("Loading for first time", type)
+      console.log('Loading for first time', type);
       loaded_historiek[type] = true;
       let dateYesterday = new Date();
       let dateNow = new Date();
       dateNow = Math.round(dateNow.getTime() / 1000);
       dateYesterday.setDate(dateYesterday.getDate() - 1);
       dateYesterday = Math.round(dateYesterday.getTime() / 1000);
-      activeGraph = type
-      show(htmlRefeshGraph)
+      activeGraph = type;
+      show(htmlRefeshGraph);
       resetGraphOptions('DAY');
-      selectedRange = 'DAY'
+      selectedRange = 'DAY';
       switch (type) {
         case 'co2':
           getHistoriekCo2Filtered('DAY', dateYesterday, dateNow);
@@ -684,6 +701,10 @@ const showHistoriekGrafiek = function (type) {
           break;
         case 'pm':
           getHistoriekPMFiltered('DAY', dateYesterday, dateNow);
+          break;
+        case 'pmnop':
+          console.log('pmnop keuze gemaakt');
+          getHistoriekPmNopFiltered('DAY', dateYesterday, dateNow);
           break;
       }
     } else {
@@ -715,38 +736,37 @@ const showHistoriekGrafiek = function (type) {
           show(htmlHistoriekPM);
           resetGraphOptions(htmlHistoriekPM.dataset.range);
           break;
+        case 'pmnop':
+          updateTitle('Particulate Matter: Number of particles');
+          show(htmlHistoriekPmNop);
+          resetGraphOptions(htmlHistoriekPmNop.dataset.range);
       }
 
       hide(htmlLoading);
       show(htmlChartType);
-
     }
-
   }
-
-
-}
+};
 
 const showSelectedSidebar = function (type) {
-  console.log(type)
-  let succes = false
+  console.log(type);
+  let succes = false;
   let dropdown = document.querySelectorAll('.js-dropdown-btn');
   for (let dropdownBtn of dropdown) {
     if (dropdownBtn.dataset.type == type) {
-      dropdownBtn.classList.add('c-selected')
-      succes = true
+      dropdownBtn.classList.add('c-selected');
+      succes = true;
     }
   }
   const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
   for (let btn of btns) {
     if (btn.dataset.type == type) {
-      btn.classList.add('c-selected')
-      succes = true
+      btn.classList.add('c-selected');
+      succes = true;
     }
-
   }
-  return succes
-}
+  return succes;
+};
 // #endregion
 
 // #region ***  Callback-No Visualisation - callback___  ***********
@@ -812,6 +832,11 @@ const getHistoriekPMFiltered = function (type, begin, end) {
   const url = backend + `/historiek/pm/${type}/${begin}-${end}/`;
   handleData(url, showHistoriekPM, callbackError);
 };
+
+const getHistoriekPmNopFiltered = function (type, begin, end) {
+  const url = backend + `/historiek/pmnop/${type}/${begin}-${end}/`;
+  handleData(url, showHistoriekPmNop, callbackError);
+};
 const getBrowerSize = function () {
   const vw = Math.max(
     document.documentElement.clientWidth || 0,
@@ -853,8 +878,8 @@ const listenToSocketCharts = function () {
     console.log('New co2 reading');
     const co2Reading = data['CO2'];
     updateOptionsCharts(co2Reading, 'CO2');
-    newData.co2 = new Date()
-    showNewLiveData('CO2')
+    newData.co2 = new Date();
+    showNewLiveData('CO2');
   });
   socketio.on('B2F_PM', function (data) {
     // console.log(data);
@@ -863,21 +888,21 @@ const listenToSocketCharts = function () {
     const pm10 = data['PM10_AP1'];
     updatePMCharts(pm1, pm2_5, pm10);
     updatePMNOPcharts(data);
-    newData.pm = new Date()
-    newData.pmNop = new Date()
-    showNewLiveData('pm')
-    showNewLiveData('pmNop')
+    newData.pm = new Date();
+    newData.pmNop = new Date();
+    showNewLiveData('pm');
+    showNewLiveData('pmNop');
   });
   socketio.on('B2F_BME', function (bme_data) {
     let pressureVal = bme_data.pressure / 100;
     let humidityVal = bme_data.humidity;
     let temperatureVal = bme_data.temperature;
     // console.log(pressureVal, humidityVal, temperatureVal);
-    let datum = new Date()
-    newData.temp = newData.hum = newData.pressure = datum
-    showNewLiveData('pressure')
-    showNewLiveData('hum')
-    showNewLiveData('temp')
+    let datum = new Date();
+    newData.temp = newData.hum = newData.pressure = datum;
+    showNewLiveData('pressure');
+    showNewLiveData('hum');
+    showNewLiveData('temp');
     updateOptionsCharts(pressureVal, 'pressure');
     updateOptionsCharts(humidityVal, 'humidity');
     updateOptionsCharts(temperatureVal, 'temperature');
@@ -898,10 +923,10 @@ const listenToBtnSidebar = function () {
         toggleClass(document.querySelector('.c-mobile-dropup-icon'));
         toggleClass(document.querySelector('.js-sidebar-historiek-mobile'));
       } else {
-        hide(htmlHistoriek)
-        let selectedNav = document.querySelectorAll('.c-selected')
+        hide(htmlHistoriek);
+        let selectedNav = document.querySelectorAll('.c-selected');
         for (let i of selectedNav) {
-          i.classList.remove('c-selected')
+          i.classList.remove('c-selected');
         }
 
         // const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
@@ -976,92 +1001,95 @@ const listenToHistoryDropdown = function () {
   let dropdown = document.querySelectorAll('.js-dropdown-btn');
   for (const page of dropdown) {
     page.addEventListener('click', function () {
-      showHistoriekGrafiek(this.dataset.type)
-    })
+      showHistoriekGrafiek(this.dataset.type);
+    });
   }
 };
 
 const listenToHistoriekDropdownMobile = function () {
-  let dropdown = document.querySelectorAll('.js-dropdown-btn-mobile')
+  let dropdown = document.querySelectorAll('.js-dropdown-btn-mobile');
   for (let range of dropdown) {
     range.addEventListener('click', function () {
-      let type = range.dataset.type
-      console.log(type)
-      showHistoriekGrafiek(type)
-    })
+      let type = range.dataset.type;
+      console.log(type);
+      showHistoriekGrafiek(type);
+    });
   }
-}
+};
 
 const listenToRefeshGraphs = function () {
   htmlRefeshGraph.addEventListener('click', function () {
-    getGraphData(activeGraph, selectedRange)
-  })
-}
+    getGraphData(activeGraph, selectedRange);
+  });
+};
 
 const listenToNoNewData = async function () {
-  let datum
+  let datum;
   while (true) {
     // console.log('checking...')
-    datum = new Date() - 120000
+    datum = new Date() - 120000;
     if (datum > newData.co2) {
-      showNoNewLiveData('CO2')
+      showNoNewLiveData('CO2');
       // console.log('no new co2')
     }
     if (datum > newData.temp) {
-      showNoNewLiveData('temp')
+      showNoNewLiveData('temp');
     }
     if (datum > newData.hum) {
-      showNoNewLiveData('hum')
+      showNoNewLiveData('hum');
     }
     if (datum > newData.pressure) {
-      showNoNewLiveData('pressure')
+      showNoNewLiveData('pressure');
     }
     if (datum > newData.voc) {
-      showNoNewLiveData('voc')
-    } if (datum > newData.pm) {
-      showNoNewLiveData('pm')
-    } if (datum > newData.pmNop) {
-      showNoNewLiveData('pmNop')
+      showNoNewLiveData('voc');
+    }
+    if (datum > newData.pm) {
+      showNoNewLiveData('pm');
+    }
+    if (datum > newData.pmNop) {
+      showNoNewLiveData('pmNop');
     } else {
       // console.log('everything up to date')
     }
 
-    await new Promise(done => setTimeout(() => done(), 5000));
+    await new Promise((done) => setTimeout(() => done(), 5000));
   }
-}
+};
 
 const listenToNavigateToHistoriek = function () {
-  const html = document.querySelectorAll('.js-to-historiek')
+  const html = document.querySelectorAll('.js-to-historiek');
   for (let link of html) {
     link.addEventListener('click', function () {
-      console.log(this.dataset.name)
-      showHistoriekGrafiek(this.dataset.name)
-    })
+      // console.log(this.dataset.name);
+      showHistoriekGrafiek(this.dataset.name);
+    });
   }
-}
-
+};
 
 const listenToPowerMenu = function () {
-  document.querySelector('.js-power-management-dropdown-btn').addEventListener('click', function () {
-    toggleClass(document.querySelector('.js-power-management-dropdown'));
-  })
+  document
+    .querySelector('.js-power-management-dropdown-btn')
+    .addEventListener('click', function () {
+      toggleClass(document.querySelector('.js-power-management-dropdown'));
+    });
   document.querySelector('.js-reboot').addEventListener('click', function () {
-    const url = backend + '/reboot/'
-    handleData(url, SetReload, callbackError)
-  })
-  document.querySelector('.js-power-down').addEventListener('click', function () {
-    const url = backend + '/poweroff/'
-    handleData(url, SetReload, callbackError)
-  })
-}
+    const url = backend + '/reboot/';
+    handleData(url, SetReload, callbackError);
+  });
+  document
+    .querySelector('.js-power-down')
+    .addEventListener('click', function () {
+      const url = backend + '/poweroff/';
+      handleData(url, SetReload, callbackError);
+    });
+};
 
 const listenToReload = function () {
   htmlReloadPage.addEventListener('click', function () {
     SetReload();
   });
 };
-
-
 
 // #endregion
 const SetReload = function () {
@@ -1098,11 +1126,12 @@ const init = function () {
     htmlHistoriekHum = document.querySelector('.js-historiek-hum');
     htmlHistoriekPressure = document.querySelector('.js-historiek-pressure');
     htmlHistoriekPM = document.querySelector('.js-historiek-pm');
+    htmlHistoriekPmNop = document.querySelector('.js-historiek-pmnop');
     htmlLoading = document.querySelector('.js-loading');
     htmlReloadPage = document.querySelector('.js-reload-page');
     htmlChartType = document.querySelector('.js-chart-type');
-    htmlRefeshGraph = document.querySelector('.js-refesh-chart')
-    htmlIndicatieAll = document.querySelectorAll(".js-indicatie")
+    htmlRefeshGraph = document.querySelector('.js-refesh-chart');
+    htmlIndicatieAll = document.querySelectorAll('.js-indicatie');
     listenToHistoryDropdown();
     listenToHistoriekDropdownMobile();
     listenToBtnSidebar();
@@ -1113,7 +1142,7 @@ const init = function () {
     listenToNavigateToHistoriek();
     listenToPowerMenu();
     hideAll();
-    showAcuteleDataOnLoad()
+    showAcuteleDataOnLoad();
   }
 };
 

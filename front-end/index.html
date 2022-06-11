@@ -196,7 +196,7 @@
             </svg>
 
 
-            <p class="c-inhoud-titel">PM [PPM]</p>
+            <p class="c-inhoud-titel">PM [µg/m³]</p>
             <!-- <div class="c-spacing" style="width: 50px"></div> -->
             <div class="c-right">
               <svg class='c-historiek js-to-historiek' data-name="pm" xmlns="http://www.w3.org/2000/svg" height="48px"
@@ -226,15 +226,15 @@
             </svg>
 
 
-            <p class="c-inhoud-titel">PM [µg/m³]</p>
+            <p class="c-inhoud-titel">PM [#particles/100ml]</p>
             <!-- <div class="c-spacing" style="width: 50px"></div> -->
             <div class="c-right">
-              <svg class='c-historiek js-to-historiek' data-name="pmNop" xmlns="http://www.w3.org/2000/svg"
+              <svg class='c-historiek js-to-historiek' data-name="pmnop" xmlns="http://www.w3.org/2000/svg"
                 height="48px" viewBox="0 0 24 24" width="48px" fill="#7f7f7f">
                 <path d="M0 0h24v24H0V0z" fill="none" />
                 <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" />
               </svg>
-              <div class="c-indicatie js-indicatie" data-name="pmNop"></div>
+              <div class="c-indicatie js-indicatie" data-name="pmnop"></div>
             </div>
           </div>
           <div class="c-box__content">
@@ -384,8 +384,12 @@
         </div>
         <div class="js-historiek-pm" data-range='DAY'>
 
-          <h2 class="c-chart-title">Particulate matter [PPM]</h2>
+          <h2 class="c-chart-title">Particulate matter [μg/m³]</h2>
           <div class="area-chart-pm c-chart"></div>
+        </div>
+        <div class="js-historiek-pmnop" data-range="DAY">
+          <h2 class="c-chart-title">Particulate Matter [Parts per 100ml]</h2>
+          <div class="area-chart-pmnop c-chart"></div>
         </div>
       </div>
   </div>
@@ -464,6 +468,7 @@
       <h4 class="js-dropdown-btn" data-type="pm">
         Particulate matter
       </h4>
+      <h4 class="js-dropdown-btn" data-type="pmnop">Particulate Matter (nop)</h4>
     </div>
     <h3 class="c-sidebar__subtitle c-bottom js-btn-bg-blue-sidebar" data-type="settings">
       <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
@@ -533,6 +538,7 @@
       <h4 class="js-dropdown-btn" data-type="pm">
         Particulate matter
       </h4>
+      <h4 class="js-dropdown-btn" data-type="pmnop">Particulate Matter (nop)</h4>
     </div>
     <div class="c-dropdown-range js-sidebar-historiek-mobile">
       <h4 class="js-dropdown-btn-mobile" data-type="DAY">

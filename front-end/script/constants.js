@@ -690,7 +690,6 @@ const HistoriekOptions = {
       breakpoint: 700,
       options: {
         chart: { height: '192px' },
-
       },
     },
   ],
@@ -738,13 +737,10 @@ let HistoriekOptionsLineChart = {
       breakpoint: 700,
       options: {
         chart: { height: '192px' },
-
       },
     },
   ],
 };
-
-
 
 let newData = {
   co2: new Date(),
@@ -753,14 +749,14 @@ let newData = {
   pressure: new Date(),
   voc: new Date(),
   pm: new Date(),
-  pmNop: new Date()
-}
+  pmNop: new Date(),
+};
 
 let loaded_historiek = {
   mobile: {
     DAY: false,
     WEEK: false,
-    YTD: false
+    YTD: false,
   },
   co2: false,
   temperature: false,
@@ -768,5 +764,16 @@ let loaded_historiek = {
   pressure: false,
   voc: false,
   pm: false,
-  pmNop: false
-}
+  pmnop: false,
+};
+
+let firstTime = {
+  co2: true,
+  temp: true,
+  pressure: true,
+  humidity: true,
+  pm: true,
+  pmNop: true,
+};
+
+let namesPmnop = ['300nm', '500nm', '1μm', '2.5μm', '5μm', '10μm'];
