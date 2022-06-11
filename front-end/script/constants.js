@@ -769,7 +769,7 @@ let loaded_historiek = {
 
 let firstTime = {
   co2: true,
-  temp: true,
+  temperature: true,
   pressure: true,
   humidity: true,
   pm: true,
@@ -777,3 +777,21 @@ let firstTime = {
 };
 
 let namesPmnop = ['300nm', '500nm', '1μm', '2.5μm', '5μm', '10μm'];
+
+let historiekChart = {};
+
+const chartTitles = {
+  co2: 'Co2 concentration [ppm]',
+  temperature: 'temperature [°C]',
+  humidity: 'Relative humidity [%]',
+  pressure: 'pressure [Pa]',
+  pm: 'Particulate Matter',
+  pmnop: 'Particulate Matter: Number of particles',
+};
+
+const pageTitles = {
+  co2: 'CO2 History',
+  temperature: 'Temperature',
+  humidity: 'humidity',
+  pressure: 'Pressure',
+};

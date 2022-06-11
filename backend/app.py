@@ -376,18 +376,19 @@ def get_historiek(unit_type, time_type, range):
     elif unit_type == "pmnop":
         unit = [9, 10, 11, 12, 13, 14]
 
-    if type(unit) == int:
+    if isinstance(unit, dict):
         data = HR.get_historiek_filtered(unit, time_type, range)
 
     if isinstance(unit, list):
         for item in unit:
             data_list.append(HR.get_historiek_filtered(item, time_type, range))
 
+    logging.info(f"{(unit_type, unit, data, data_list)}")
     if data is not None:
-        return jsonify(data=data), 200
+        return jsonify(data=data, unit=unit_type), 200
 
     elif data_list is not None:
-        return jsonify(data=data), 200
+        return jsonify(data=data_list, unit=unit_type), 200
 
     else:
         return jsonify(message="error"), 400

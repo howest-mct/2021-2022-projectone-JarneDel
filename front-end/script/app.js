@@ -152,35 +152,35 @@ const getGraphData = function (graph, graphType) {
     default:
       console.error('Invalid GraphType');
   }
-
-  switch (graph) {
-    case 'co2':
-      getHistoriekCo2Filtered(graphType, beginDate, dateNow);
-      htmlHistoriekCO2.dataset.range = graphType;
-      break;
-    case 'temperature':
-      getHistoriekTemperatureFiltered(graphType, beginDate, dateNow);
-      htmlHistoriekTemp.dataset.range = graphType;
-      break;
-    case 'humidity':
-      getHistoriekHumFiltered(graphType, beginDate, dateNow);
-      htmlHistoriekHum.dataset.range = graphType;
-      break;
-    case 'pressure':
-      getHistoriekPressureFiltered(graphType, beginDate, dateNow);
-      htmlHistoriekPressure.dataset.range = graphType;
-      break;
-    case 'pm':
-      getHistoriekPMFiltered(graphType, beginDate, dateNow);
-      htmlHistoriekPM.dataset.range = graphType;
-      break;
-    case 'pmnop':
-      getHistoriekPmNopFiltered(graphType, beginDate, dateNow);
-      htmlHistoriekPmNop.dataset.range = graphType;
-      break;
-    default:
-      console.error('Invalid Graph');
-  }
+  getHistoriek(graph, graphType, beginDate, dateNow);
+  // switch (graph) {
+  //   case 'co2':
+  //     getHistoriekCo2Filtered(graphType, beginDate, dateNow);
+  //     htmlHistoriekCO2.dataset.range = graphType;
+  //     break;
+  //   case 'temperature':
+  //     getHistoriekTemperatureFiltered(graphType, beginDate, dateNow);
+  //     htmlHistoriekTemp.dataset.range = graphType;
+  //     break;
+  //   case 'humidity':
+  //     getHistoriekHumFiltered(graphType, beginDate, dateNow);
+  //     htmlHistoriekHum.dataset.range = graphType;
+  //     break;
+  //   case 'pressure':
+  //     getHistoriekPressureFiltered(graphType, beginDate, dateNow);
+  //     htmlHistoriekPressure.dataset.range = graphType;
+  //     break;
+  //   case 'pm':
+  //     getHistoriekPMFiltered(graphType, beginDate, dateNow);
+  //     htmlHistoriekPM.dataset.range = graphType;
+  //     break;
+  //   case 'pmnop':
+  //     getHistoriekPmNopFiltered(graphType, beginDate, dateNow);
+  //     htmlHistoriekPmNop.dataset.range = graphType;
+  //     break;
+  //   default:
+  //     console.error('Invalid Graph');
+  // }
 };
 
 // #region ***  Callback-Visualisation - show___         ***********
@@ -295,70 +295,34 @@ const updateChartData = function (chart, data) {
   chart.updateSeries([{ data: data }]);
 };
 
-const showHistoriekCo2 = function (historiek) {
-  prepareCharts(htmlHistoriekCO2, 'CO2 History');
-  if (firstTime.co2) {
-    firstTime.co2 = false;
-    areaCO2 = createChart(
-      historiek.data,
-      'Co2 concentration [ppm]',
-      document.querySelector('.area-chart-co2')
-    );
-    areaCO2.render();
+const showHistoriek = function (historiek) {
+  const unit = historiek.unit;
+  console.log(historiek);
+  prepareCharts(
+    document.querySelector(`.js-historiek-${unit}`),
+    pageTitles[unit]
+  );
+  if (unit == 'pm') {
+    showHistoriekPM(historiek);
+  } else if (unit == 'pmnop') {
+    showHistoriekPmNop(historiek);
   } else {
-    updateChartData(areaCO2, historiek.data);
-  }
-  hide(htmlLoading);
-};
-
-const showHistoriekTemperature = function (tempJson) {
-  prepareCharts(htmlHistoriekTemp, 'Temperature');
-  if (firstTime.temp) {
-    areaTemp = createChart(
-      tempJson.data,
-      'temperature [°C]',
-      document.querySelector('.area-chart-temp')
-    );
-    areaTemp.render();
-    firstTime.temp = false;
-  } else {
-    updateChartData(areaTemp, tempJson.data);
-  }
-  hide(htmlLoading);
-};
-const showHistoriekHumidity = function (humJson) {
-  prepareCharts(htmlHistoriekHum, 'humidity');
-  if (firstTime.humidity) {
-    areaHum = createChart(
-      humJson.data,
-      'Relative humidity [%]',
-      document.querySelector('.area-chart-hum')
-    );
-    areaHum.render();
-    firstTime.humidity = false;
-  } else {
-    areaHum.updateSeries([{ data: humJson.data }]);
-  }
-  hide(htmlLoading);
-};
-const showHistoriekPressure = function (pressureJson) {
-  prepareCharts(htmlHistoriekPressure, 'Pressure');
-  if (firstTime.pressure) {
-    areaPressure = createChart(
-      pressureJson.data,
-      'pressure [Pa]',
-      document.querySelector('.area-chart-pressure')
-    );
-    areaPressure.render();
-    firstTime.pressure = false;
-  } else {
-    areaPressure.updateSeries([{ data: pressureJson.data }]);
+    if (firstTime[unit]) {
+      firstTime[unit] = false;
+      historiekChart[unit] = createChart(
+        historiek.data,
+        chartTitles[unit],
+        document.querySelector(`.area-chart-${unit}`)
+      );
+      historiekChart[unit].render();
+    } else {
+      updateChartData(historiekChart[unit], historiek.data);
+    }
   }
   hide(htmlLoading);
 };
 
 const showHistoriekPM = function (jsonPM) {
-  prepareCharts(htmlHistoriekPM, 'Particulate Matter');
   if (firstTime.pm) {
     areaPM = createLineChart(document.querySelector('.area-chart-pm'), jsonPM, [
       'pm1',
@@ -378,12 +342,9 @@ const showHistoriekPM = function (jsonPM) {
     }
     areaPM.updateSeries(data);
   }
-  hide(htmlLoading);
 };
 
 const showHistoriekPmNop = function (jsonPmNop) {
-  console.log(jsonPmNop);
-  prepareCharts(htmlHistoriekPmNop, 'Particulate Matter: Number of particles');
   if (firstTime.pmNop) {
     firstTime.pmNop = false;
     areaPmNop = createLineChart(
@@ -402,7 +363,6 @@ const showHistoriekPmNop = function (jsonPmNop) {
     }
     areaPmNop.updateSeries(data);
   }
-  hide(htmlLoading);
 };
 
 // renders the realtime charts
@@ -657,12 +617,16 @@ const showHistoriekGrafiek = function (type) {
         beginDate.setDate(beginDate.getDate() - 10000);
         beginDate = Math.round(beginDate.getTime() / 1000);
     }
-    getHistoriekCo2Filtered(type, beginDate, dateNow);
-    getHistoriekTemperatureFiltered(type, beginDate, dateNow);
-    getHistoriekHumFiltered(type, beginDate, dateNow);
-    getHistoriekPressureFiltered(type, beginDate, dateNow);
-    getHistoriekPMFiltered(type, beginDate, dateNow);
-    getHistoriekPmNopFiltered(type, beginDate, dateNow);
+    for (let i of [
+      'co2',
+      'temperature',
+      'humidity',
+      'pressure',
+      'pm',
+      'pmnop',
+    ]) {
+      getHistoriek(i, type, beginDate, dateNow);
+    }
   } else {
     console.log(type);
     let selectedNav = document.querySelectorAll('.c-selected');
@@ -686,27 +650,7 @@ const showHistoriekGrafiek = function (type) {
       show(htmlRefeshGraph);
       resetGraphOptions('DAY');
       selectedRange = 'DAY';
-      switch (type) {
-        case 'co2':
-          getHistoriekCo2Filtered('DAY', dateYesterday, dateNow);
-          break;
-        case 'temperature':
-          getHistoriekTemperatureFiltered('DAY', dateYesterday, dateNow);
-          break;
-        case 'humidity':
-          getHistoriekHumFiltered('DAY', dateYesterday, dateNow);
-          break;
-        case 'pressure':
-          getHistoriekPressureFiltered('DAY', dateYesterday, dateNow);
-          break;
-        case 'pm':
-          getHistoriekPMFiltered('DAY', dateYesterday, dateNow);
-          break;
-        case 'pmnop':
-          console.log('pmnop keuze gemaakt');
-          getHistoriekPmNopFiltered('DAY', dateYesterday, dateNow);
-          break;
-      }
+      getHistoriek(type, 'DAY', dateYesterday, dateNow);
     } else {
       // just show the page and reset the graph options.
       hideAll();
@@ -808,35 +752,11 @@ const getFanSetting = function () {
   handleData(url, showFanSetting, callbackError);
 };
 
-const getHistoriekCo2Filtered = function (type, begin, end) {
-  const url = backend + `/historiek/co2/${type}/${begin}-${end}/`;
-  handleData(url, showHistoriekCo2, callbackError);
+const getHistoriek = function (unit, type, begin, end) {
+  const url = backend + `/historiek/${unit}/${type}/${begin}-${end}/`;
+  handleData(url, showHistoriek, callbackError);
 };
 
-const getHistoriekTemperatureFiltered = function (type, begin, end) {
-  const url = backend + `/historiek/temperature/${type}/${begin}-${end}/`;
-  handleData(url, showHistoriekTemperature, callbackError);
-};
-
-const getHistoriekHumFiltered = function (type, begin, end) {
-  const url = backend + `/historiek/humidity/${type}/${begin}-${end}/`;
-  handleData(url, showHistoriekHumidity, callbackError);
-};
-
-const getHistoriekPressureFiltered = function (type, begin, end) {
-  const url = backend + `/historiek/pressure/${type}/${begin}-${end}/`;
-  handleData(url, showHistoriekPressure, callbackError);
-};
-
-const getHistoriekPMFiltered = function (type, begin, end) {
-  const url = backend + `/historiek/pm/${type}/${begin}-${end}/`;
-  handleData(url, showHistoriekPM, callbackError);
-};
-
-const getHistoriekPmNopFiltered = function (type, begin, end) {
-  const url = backend + `/historiek/pmnop/${type}/${begin}-${end}/`;
-  handleData(url, showHistoriekPmNop, callbackError);
-};
 const getBrowerSize = function () {
   const vw = Math.max(
     document.documentElement.clientWidth || 0,
@@ -891,12 +811,13 @@ const listenToSocketCharts = function () {
     newData.pm = new Date();
     newData.pmNop = new Date();
     showNewLiveData('pm');
-    showNewLiveData('pmNop');
+    showNewLiveData('pmnop');
   });
   socketio.on('B2F_BME', function (bme_data) {
     let pressureVal = bme_data.pressure / 100;
     let humidityVal = bme_data.humidity;
     let temperatureVal = bme_data.temperature;
+    console.log(bme_data);
     // console.log(pressureVal, humidityVal, temperatureVal);
     let datum = new Date();
     newData.temp = newData.hum = newData.pressure = datum;
@@ -928,15 +849,6 @@ const listenToBtnSidebar = function () {
         for (let i of selectedNav) {
           i.classList.remove('c-selected');
         }
-
-        // const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
-        // for (let btn2 of btns) {
-        //   btn2.classList.remove('c-selected');
-        // }
-        // let dropdown = document.querySelectorAll('.js-dropdown-btn');
-        // for (let dropdownBtn of dropdown) {
-        //   dropdownBtn.classList.remove('c-selected');
-        // }
         toggleSidebar();
         this.classList.add('c-selected');
         const type = this.dataset.type;
@@ -1122,8 +1034,8 @@ const init = function () {
     );
     htmlHistoriekCO2 = document.querySelector('.js-historiek-co2');
     htmlTopBarTitle = document.querySelectorAll('.js-topbar-title');
-    htmlHistoriekTemp = document.querySelector('.js-historiek-temp');
-    htmlHistoriekHum = document.querySelector('.js-historiek-hum');
+    htmlHistoriekTemp = document.querySelector('.js-historiek-temperature');
+    htmlHistoriekHum = document.querySelector('.js-historiek-humidity');
     htmlHistoriekPressure = document.querySelector('.js-historiek-pressure');
     htmlHistoriekPM = document.querySelector('.js-historiek-pm');
     htmlHistoriekPmNop = document.querySelector('.js-historiek-pmnop');
