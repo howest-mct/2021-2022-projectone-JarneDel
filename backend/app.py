@@ -112,7 +112,7 @@ def bme_main():
         bsec_data = get_data(bme)
         if bsec_data is not None:
             print(bsec_data)
-            logging.debug(bsec_data)
+            # logging.debug(bsec_data)
             # print(bsec_data["temperature"], "temp")
             temperature = round(bsec_data["temperature"], 2)
             humidity = round(bsec_data["humidity"], 2)
@@ -356,6 +356,7 @@ def get_historiek_pm():
 
 @app.route(endpoint + "/historiek/<unit_type>/<time_type>/<range>/")
 def get_historiek(unit_type, time_type, range):
+    logging.info(f"{unit_type, time_type, range}")
     data_list = []
     data = None
     if unit_type == "co2":
@@ -366,7 +367,6 @@ def get_historiek(unit_type, time_type, range):
         unit = 17
     elif unit_type == "pressure":
         unit = 16
-
     elif unit_type == "iaq":
         unit = 18
     elif unit_type == "voc":
@@ -376,10 +376,12 @@ def get_historiek(unit_type, time_type, range):
     elif unit_type == "pmnop":
         unit = [9, 10, 11, 12, 13, 14]
 
-    if isinstance(unit, dict):
+    if isinstance(unit, int):
+        logging.info(unit, "Een waarde")
         data = HR.get_historiek_filtered(unit, time_type, range)
 
     if isinstance(unit, list):
+        logging.info(unit, "meerdere waardes")
         for item in unit:
             data_list.append(HR.get_historiek_filtered(item, time_type, range))
 

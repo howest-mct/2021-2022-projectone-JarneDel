@@ -18,7 +18,7 @@ let co2Chart,
   pressureChart,
   PMchart,
   PMNopChart,
-  VOCchart,
+  iaqchart,
   areaCO2,
   areaTemp,
   areaHum,
@@ -398,11 +398,11 @@ const showCharts = function () {
     PMNopChartOptions
   );
   PMNopChart.render();
-  VOCchart = new ApexCharts(
-    document.querySelector('.js-voc-chart'),
-    VOCChartOptions
+  iaqchart = new ApexCharts(
+    document.querySelector('.js-iaq-chart'),
+    iaqChartOptions
   );
-  VOCchart.render();
+  iaqchart.render();
   listenToSocketCharts();
   getActueleData();
 };
@@ -512,6 +512,12 @@ const updateOptionsCharts = function (value, type) {
       seriesValue = valueToPercentTemp(value);
       typeLabel = labels.temperature;
       break;
+    case 'iaq':
+      chart = iaqchart;
+      seriesValue = valueToPercentIaq(value);
+      typeLabel = labels.iaq;
+      console.log(typeLabel, seriesValue);
+      break;
   }
   // console.log(seriesValue, typeLabel);
 
@@ -579,6 +585,7 @@ const updateTitle = function (newTitle) {
 };
 
 const showHistoriekGrafiek = function (type) {
+  console.log('showHisoriekGrafiek');
   let typesMobile = ['DAY', 'WEEK', 'YTD'];
   show(htmlHistoriek);
   toggleSidebar();
@@ -628,7 +635,7 @@ const showHistoriekGrafiek = function (type) {
       getHistoriek(i, type, beginDate, dateNow);
     }
   } else {
-    console.log(type);
+    console.log('desktop', type);
     let selectedNav = document.querySelectorAll('.c-selected');
     for (let i of selectedNav) {
       i.classList.remove('c-selected');
@@ -650,6 +657,7 @@ const showHistoriekGrafiek = function (type) {
       show(htmlRefeshGraph);
       resetGraphOptions('DAY');
       selectedRange = 'DAY';
+      // console.log(type, 'DAY', dateYesterday, dateNow);
       getHistoriek(type, 'DAY', dateYesterday, dateNow);
     } else {
       // just show the page and reset the graph options.
@@ -817,6 +825,8 @@ const listenToSocketCharts = function () {
     let pressureVal = bme_data.pressure / 100;
     let humidityVal = bme_data.humidity;
     let temperatureVal = bme_data.temperature;
+    let iaqVal = bme_data.iaq;
+    let iaq = bme_data.iaq;
     console.log(bme_data);
     // console.log(pressureVal, humidityVal, temperatureVal);
     let datum = new Date();
@@ -824,9 +834,11 @@ const listenToSocketCharts = function () {
     showNewLiveData('pressure');
     showNewLiveData('hum');
     showNewLiveData('temp');
+    showNewLiveData('iaq');
     updateOptionsCharts(pressureVal, 'pressure');
     updateOptionsCharts(humidityVal, 'humidity');
     updateOptionsCharts(temperatureVal, 'temperature');
+    updateOptionsCharts(iaq, 'iaq');
   });
 };
 
@@ -953,8 +965,8 @@ const listenToNoNewData = async function () {
     if (datum > newData.pressure) {
       showNoNewLiveData('pressure');
     }
-    if (datum > newData.voc) {
-      showNoNewLiveData('voc');
+    if (datum > newData.iaq) {
+      showNoNewLiveData('iaq');
     }
     if (datum > newData.pm) {
       showNoNewLiveData('pm');

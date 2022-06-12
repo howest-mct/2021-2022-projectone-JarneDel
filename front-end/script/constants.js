@@ -9,7 +9,9 @@ const valueToPercentHum = function (value) {
 };
 const valueToPercentPressure = function (value) {
   return ((value - 940) * 100) / (1060 - 940);
-  s;
+};
+const valueToPercentIaq = function (value) {
+  return value / 3;
 };
 const CO2ChartOptions = {
   chart: {
@@ -297,7 +299,7 @@ let PressureChartOptions = {
   ],
 };
 
-let VOCChartOptions = {
+let iaqChartOptions = {
   chart: {
     height: 280,
     type: 'radialBar',
@@ -328,7 +330,7 @@ let VOCChartOptions = {
           color: '#7F7F7F',
         },
         value: {
-          formatter: (val) => val.toFixed(0),
+          formatter: (val) => (val * 3).toFixed(0),
           fontSize: '40px',
           fontWeight: 700,
           fontFamily: 'proxima-nova',
@@ -655,6 +657,20 @@ const labels = {
       color: '#2699FB',
     },
   ],
+  iaq: [
+    {
+      min: 0,
+      max: 100,
+      val: 'idk',
+      color: '#2699FB',
+    },
+    {
+      min: 100,
+      max: 300,
+      val: 'bad',
+      color: '#E31E36',
+    },
+  ],
 };
 const HistoriekOptions = {
   chart: {
@@ -747,7 +763,7 @@ let newData = {
   temp: new Date(),
   hum: new Date(),
   pressure: new Date(),
-  voc: new Date(),
+  iaq: new Date(),
   pm: new Date(),
   pmNop: new Date(),
 };
@@ -762,7 +778,7 @@ let loaded_historiek = {
   temperature: false,
   humidity: false,
   pressure: false,
-  voc: false,
+  iaq: false,
   pm: false,
   pmnop: false,
 };
