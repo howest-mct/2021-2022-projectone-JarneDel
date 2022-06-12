@@ -1,3 +1,53 @@
+let OnlyOneListener = true;
+let onlyOneListenerHistoriek = true;
+let OnlyOneListenersettings = true;
+let co2Chart,
+  tempChart,
+  humidityChart,
+  pressureChart,
+  PMchart,
+  PMNopChart,
+  iaqchart,
+  areaCO2,
+  areaTemp,
+  areaHum,
+  areaPressure,
+  areaPM,
+  areaPmNop;
+
+let selectedRange, activeGraph;
+let RPI = false;
+let selectedPage = 'actueel';
+// #region ***  DOM references                           ***********
+let hmtlPM, htmlOnBoot;
+let htmlActueel,
+  htmlSettings,
+  htmlRefesh,
+  htmlMobileNav,
+  htmlCloseHamburger,
+  htmlhamburger,
+  htmlSlider,
+  htmlRPM,
+  htmlHistoriek,
+  HTMLDropDownHistoriek,
+  htmlHistoriekCO2,
+  htmlTopBarTitle,
+  htmlHistoriekTemp,
+  htmlHistoriekHum,
+  htmlHistoriekPressure,
+  htmlHistoriekIaq,
+  htmlHistoriekPM,
+  htmlHistoriekPmNop,
+  htmlLoading,
+  htmlDropDownHistoriekMobile,
+  htmlReloadPage,
+  htmlChartType,
+  htmlRefeshGraph,
+  htmlIndicatieAll;
+// #endregion
+
+// #region formatters
+
 const valueToPercentCO2 = function (value) {
   return (value * 100) / 2000;
 };
@@ -13,6 +63,10 @@ const valueToPercentPressure = function (value) {
 const valueToPercentIaq = function (value) {
   return value / 3;
 };
+
+// #endregion
+
+// # region chartoptions
 const CO2ChartOptions = {
   chart: {
     height: 280,
@@ -371,72 +425,6 @@ let iaqChartOptions = {
     },
   ],
 };
-// let PMChartOptions = {
-//   chart: {
-//     height: 280,
-//     type: 'radialBar',
-//   },
-//   series: [8, 11, 12],
-//   plotOptions: {
-//     radialBar: {
-//       startAngle: -135,
-//       endAngle: 135,
-//       track: {
-//         background: '#BCE0FD',
-//         startAngle: -135,
-//         endAngle: 135,
-//         // strokeWidth: '75%',
-//       },
-//       dataLabels: {
-//         total: {
-//           show: false,
-//           label: 'IAQ',
-//         },
-//       },
-//     },
-//   },
-//   labels: ['PM1', 'PM2.5', 'PM10'],
-//   stroke: {
-//     lineCap: 'round',
-//   },
-// };
-
-// let PMNopChartOptions = {
-//   chart: {
-//     height: 280,
-//     type: 'radialBar',
-//   },
-//   series: [8, 11, 12, 77, 4, 0],
-//   plotOptions: {
-//     radialBar: {
-//       startAngle: -135,
-//       endAngle: 135,
-//       track: {
-//         background: '#BCE0FD',
-//         startAngle: -135,
-//         endAngle: 135,
-//         // strokeWidth: '75%',
-//       },
-//       dataLabels: {
-//         total: {
-//           show: false,
-//           label: 'IAQ',
-//         },
-//       },
-//     },
-//   },
-//   labels: [
-//     'NOP 0.3 um',
-//     'NOP 0.5 um',
-//     'NOP 1 um',
-//     'NOP 2.5um',
-//     'NOP 5 um',
-//     'NOP 10 um',
-//   ],
-//   stroke: {
-//     lineCap: 'round',
-//   },
-// };
 
 let PMChartOptions = {
   chart: {
@@ -532,146 +520,6 @@ let PMNopChartOptions = {
     },
   ],
 };
-
-const labels = {
-  co2: [
-    {
-      min: 0,
-      max: 900,
-      val: 'Good!',
-      color: '#0F9942',
-    },
-    {
-      min: 900,
-      max: 1500,
-      val: 'ventilate!',
-      color: '#f27931',
-    },
-    {
-      min: 1500,
-      max: 5000,
-      val: 'Very bad!',
-      color: '#db1a32',
-    },
-  ],
-  temperature: [
-    {
-      min: -10,
-      max: 14,
-      val: 'Cold 🥶',
-      color: '#0432ff',
-    },
-    {
-      min: 14,
-      max: 17,
-      val: 'chilly',
-      color: '#50a7f9',
-    },
-    {
-      min: 17,
-      max: 20,
-      val: 'cool',
-      color: '#009193',
-    },
-    {
-      min: 20,
-      max: 22,
-      val: 'ideal',
-      color: '#2699FB',
-    },
-    {
-      min: 22,
-      max: 24,
-      val: 'Tepid',
-      color: '#70bf40',
-    },
-    {
-      min: 24,
-      max: 28,
-      val: 'warm',
-      color: '#f5d328',
-    },
-    {
-      min: 28,
-      max: 32,
-      val: 'Very Warm',
-      color: '#df6a10',
-    },
-    {
-      min: 32,
-      max: 100,
-      val: 'Hot 🔥',
-      color: '#d92808',
-    },
-  ],
-  humidity: [
-    {
-      max: 100,
-      min: 70,
-      val: 'Too High!',
-      color: '#E31E36',
-    },
-
-    {
-      max: 70,
-      min: 60,
-      val: 'Bit high',
-      color: '#ED7730', //#f27931
-    },
-    {
-      max: 60,
-      min: 30,
-      val: 'Healthy',
-      color: '#0F9942',
-    },
-    {
-      max: 30,
-      min: 25,
-      val: 'Bit low',
-      color: '#ED7730', //#f27931
-    },
-    {
-      max: 25,
-      min: 0,
-      val: 'Too low!',
-      color: '#E31E36',
-    },
-  ],
-  pressure: [
-    {
-      min: 1022.689,
-      max: 1060,
-      val: 'High Pressure',
-      color: '#2699FB',
-    },
-    {
-      min: 1009.144,
-      max: 1022.689,
-      val: 'Normal',
-      color: '#2699FB',
-    },
-    {
-      max: 1009.144,
-      min: 940,
-      val: 'Low pressure',
-      color: '#2699FB',
-    },
-  ],
-  iaq: [
-    {
-      min: 0,
-      max: 100,
-      val: 'idk',
-      color: '#2699FB',
-    },
-    {
-      min: 100,
-      max: 300,
-      val: 'bad',
-      color: '#E31E36',
-    },
-  ],
-};
 const HistoriekOptions = {
   chart: {
     height: 360,
@@ -757,7 +605,192 @@ let HistoriekOptionsLineChart = {
     },
   ],
 };
+// #endregion
 
+//# region labels
+const colors = {
+  lightGreen: '#70bf40',
+  green: '#0F9942',
+  yellow: '#f5d328',
+  orange: '#df6a10',
+  red: '#db1a32',
+  darkRed: '#99004C',
+  brown: '#663300',
+};
+
+const labels = {
+  co2: [
+    {
+      min: 0,
+      max: 900,
+      val: 'Good!',
+      color: colors.green,
+    },
+    {
+      min: 900,
+      max: 1500,
+      val: 'ventilate!',
+      color: colors.orange,
+    },
+    {
+      min: 1500,
+      max: 5000,
+      val: 'Very bad!',
+      color: colors.red,
+    },
+  ],
+  temperature: [
+    {
+      min: -10,
+      max: 14,
+      val: 'Cold 🥶',
+      color: '#0432ff',
+    },
+    {
+      min: 14,
+      max: 17,
+      val: 'chilly',
+      color: '#50a7f9',
+    },
+    {
+      min: 17,
+      max: 20,
+      val: 'cool',
+      color: '#009193',
+    },
+    {
+      min: 20,
+      max: 22,
+      val: 'ideal',
+      color: '#2699FB',
+    },
+    {
+      min: 22,
+      max: 24,
+      val: 'Tepid',
+      color: '#70bf40',
+    },
+    {
+      min: 24,
+      max: 28,
+      val: 'warm',
+      color: '#f5d328',
+    },
+    {
+      min: 28,
+      max: 32,
+      val: 'Very Warm',
+      color: '#df6a10',
+    },
+    {
+      min: 32,
+      max: 100,
+      val: 'Hot 🔥',
+      color: '#d92808',
+    },
+  ],
+  humidity: [
+    {
+      max: 100,
+      min: 70,
+      val: 'Too High!',
+      color: colors.red,
+    },
+
+    {
+      max: 70,
+      min: 60,
+      val: 'Bit high',
+      color: colors.orange, //#f27931
+    },
+    {
+      max: 60,
+      min: 30,
+      val: 'Healthy',
+      color: colors.green,
+    },
+    {
+      max: 30,
+      min: 25,
+      val: 'Bit low',
+      color: colors.orange, //#f27931
+    },
+    {
+      max: 25,
+      min: 0,
+      val: 'Too low!',
+      color: colors.red,
+    },
+  ],
+  pressure: [
+    {
+      min: 1022.689,
+      max: 1060,
+      val: 'High Pressure',
+      color: '#2699FB',
+    },
+    {
+      min: 1009.144,
+      max: 1022.689,
+      val: 'Normal',
+      color: '#2699FB',
+    },
+    {
+      max: 1009.144,
+      min: 940,
+      val: 'Low pressure',
+      color: '#2699FB',
+    },
+  ],
+  iaq: [
+    {
+      min: 0,
+      max: 50,
+      val: 'exellent',
+      color: colors.lightGreen,
+    },
+    {
+      min: 50,
+      max: 100,
+      val: 'good',
+      color: colors.green,
+    },
+    {
+      min: 100,
+      max: 150,
+      val: 'lightly polluted',
+      color: colors.yellow,
+    },
+    {
+      min: 150,
+      max: 200,
+      val: 'Moderatly polluted',
+      color: colors.orange,
+    },
+    {
+      min: 200,
+      max: 250,
+      val: 'Heavily polluted',
+      color: colors.red,
+    },
+    {
+      min: 250,
+      max: 350,
+      val: 'Severely polluted',
+      color: colors.darkRed,
+    },
+    {
+      min: 350,
+      max: 1000,
+      val: 'Extremely polluted',
+      colors: colors.brown,
+    },
+  ],
+};
+
+//#endregion
+
+//# region variables
 let newData = {
   co2: new Date(),
   temp: new Date(),
@@ -814,3 +847,37 @@ const pageTitles = {
   pm: 'Particulate Matter',
   pmnop: 'Number of particles / 100ml',
 };
+
+//#endregion
+
+//#region queryselectors
+const loadQuerySelectors = function () {
+  htmlRefesh = document.querySelectorAll('.js-refesh');
+  htmlSettings = document.querySelector('.js-settings');
+  htmlActueel = document.querySelector('.js-actueel');
+  htmlhamburger = document.querySelector('.c-hamburger-menu');
+  htmlCloseHamburger = document.querySelector('.c-close-hamburger');
+  htmlMobileNav = document.querySelector('.js-mobile-nav');
+  htmlSlider = document.querySelector('.js-slider');
+  htmlRPM = document.querySelector('.js-fan-rpm');
+  htmlHistoriek = document.querySelector('.js-historiek');
+  HTMLDropDownHistoriek = document.querySelector('.js-sidebar-historiek');
+  htmlDropDownHistoriekMobile = document.querySelector(
+    '.js-mobile-sidebar-historiek'
+  );
+  htmlHistoriekCO2 = document.querySelector('.js-historiek-co2');
+  htmlTopBarTitle = document.querySelectorAll('.js-topbar-title');
+  htmlHistoriekTemp = document.querySelector('.js-historiek-temperature');
+  htmlHistoriekHum = document.querySelector('.js-historiek-humidity');
+  htmlHistoriekPressure = document.querySelector('.js-historiek-pressure');
+  htmlHistoriekIaq = document.querySelector('.js-historiek-iaq');
+  htmlHistoriekPM = document.querySelector('.js-historiek-pm');
+  htmlHistoriekPmNop = document.querySelector('.js-historiek-pmnop');
+  htmlLoading = document.querySelector('.js-loading');
+  htmlReloadPage = document.querySelector('.js-reload-page');
+  htmlChartType = document.querySelector('.js-chart-type');
+  htmlRefeshGraph = document.querySelector('.js-refesh-chart');
+  htmlIndicatieAll = document.querySelectorAll('.js-indicatie');
+};
+
+//# endregion

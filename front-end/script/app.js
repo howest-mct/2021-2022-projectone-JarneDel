@@ -9,52 +9,6 @@ try {
 } catch {
   console.log('geen socketio');
 }
-let OnlyOneListener = true;
-let onlyOneListenerHistoriek = true;
-let OnlyOneListenersettings = true;
-let co2Chart,
-  tempChart,
-  humidityChart,
-  pressureChart,
-  PMchart,
-  PMNopChart,
-  iaqchart,
-  areaCO2,
-  areaTemp,
-  areaHum,
-  areaPressure,
-  areaPM,
-  areaPmNop;
-
-let selectedRange, activeGraph;
-let RPI = false;
-let selectedPage = 'actueel';
-// #region ***  DOM references                           ***********
-let hmtlPM, htmlOnBoot;
-let htmlActueel,
-  htmlSettings,
-  htmlRefesh,
-  htmlMobileNav,
-  htmlCloseHamburger,
-  htmlhamburger,
-  htmlSlider,
-  htmlRPM,
-  htmlHistoriek,
-  HTMLDropDownHistoriek,
-  htmlHistoriekCO2,
-  htmlTopBarTitle,
-  htmlHistoriekTemp,
-  htmlHistoriekHum,
-  htmlHistoriekPressure,
-  htmlHistoriekIaq,
-  htmlHistoriekPM,
-  htmlHistoriekPmNop,
-  htmlLoading,
-  htmlDropDownHistoriekMobile,
-  htmlReloadPage,
-  htmlChartType,
-  htmlRefeshGraph,
-  htmlIndicatieAll;
 
 // #endregion
 
@@ -72,7 +26,6 @@ const hideAll = function () {
     htmlActueel,
     // htmlHistoriek,
     htmlSettings,
-
     htmlHistoriekCO2,
     htmlHistoriekTemp,
     htmlHistoriekHum,
@@ -114,76 +67,6 @@ const resetGraphOptions = function (type) {
 };
 
 // Listen to the chart selection buttens/ only do run once
-const listenTographOptions = function () {
-  const htmlChartRange = document.querySelectorAll('.js-chartrange');
-  for (let chartRange of htmlChartRange) {
-    chartRange.addEventListener('change', function () {
-      let graph = activeGraph;
-      // console.log(graph, this.value);
-      getGraphData(graph, this.value);
-    });
-  }
-  // const htmlSubmitTime = document.querySelector('.js-submit-date-range');
-  // htmlSubmitTime.addEventListener('click', function () {
-  //   console.log('hey');
-  //   let startDate = document.querySelector('.js-startdate').value;
-  //   let endDate = document.querySelector('.js-enddate').value;
-  //   console.log(startDate, endDate);
-  // });
-};
-
-// updates the graph depending on state
-const getGraphData = function (graph, graphType) {
-  let now = new Date();
-  let dateNow = Math.round(now.getTime() / 1000);
-  let beginDate;
-  activeGraph = graph;
-  selectedRange = graphType;
-  switch (graphType) {
-    case 'DAY':
-      now.setDate(now.getDate() - 1);
-      beginDate = Math.round(now.getTime() / 1000);
-      break;
-    case 'WEEK':
-      now.setDate(now.getDate() - 7);
-      beginDate = Math.round(now.getTime() / 1000);
-      break;
-    case 'YTD':
-      beginDate = 'start';
-      break;
-    default:
-      console.error('Invalid GraphType');
-  }
-  getHistoriek(graph, graphType, beginDate, dateNow);
-  // switch (graph) {
-  //   case 'co2':
-  //     getHistoriekCo2Filtered(graphType, beginDate, dateNow);
-  //     htmlHistoriekCO2.dataset.range = graphType;
-  //     break;
-  //   case 'temperature':
-  //     getHistoriekTemperatureFiltered(graphType, beginDate, dateNow);
-  //     htmlHistoriekTemp.dataset.range = graphType;
-  //     break;
-  //   case 'humidity':
-  //     getHistoriekHumFiltered(graphType, beginDate, dateNow);
-  //     htmlHistoriekHum.dataset.range = graphType;
-  //     break;
-  //   case 'pressure':
-  //     getHistoriekPressureFiltered(graphType, beginDate, dateNow);
-  //     htmlHistoriekPressure.dataset.range = graphType;
-  //     break;
-  //   case 'pm':
-  //     getHistoriekPMFiltered(graphType, beginDate, dateNow);
-  //     htmlHistoriekPM.dataset.range = graphType;
-  //     break;
-  //   case 'pmnop':
-  //     getHistoriekPmNopFiltered(graphType, beginDate, dateNow);
-  //     htmlHistoriekPmNop.dataset.range = graphType;
-  //     break;
-  //   default:
-  //     console.error('Invalid Graph');
-  // }
-};
 
 // #region ***  Callback-Visualisation - show___         ***********
 const showPage = function (type) {
@@ -614,18 +497,24 @@ const showHistoriekGrafiek = function (type) {
     let beginDate = new Date();
     let dateNow = new Date();
     dateNow = Math.round(dateNow.getTime() / 1000);
+    const htmlSelectedRangeTitle = document.querySelector(
+      '.js-Mobile-range-icon'
+    );
     switch (type) {
       case 'DAY':
         beginDate.setDate(beginDate.getDate() - 1);
         beginDate = Math.round(beginDate.getTime() / 1000);
+        htmlSelectedRangeTitle.innerHTML = '1 Day';
         break;
       case 'WEEK':
         beginDate.setDate(beginDate.getDate() - 7);
         beginDate = Math.round(beginDate.getTime() / 1000);
+        htmlSelectedRangeTitle.innerHTML = '7 Days';
         break;
       case 'YTD':
         beginDate.setDate(beginDate.getDate() - 10000);
         beginDate = Math.round(beginDate.getTime() / 1000);
+        htmlSelectedRangeTitle.innerHTML = 'ALL';
     }
     for (let i of [
       'co2',
@@ -774,42 +663,34 @@ const getHistoriek = function (unit, type, begin, end) {
   handleData(url, showHistoriek, callbackError);
 };
 
-const getBrowerSize = function () {
-  const vw = Math.max(
-    document.documentElement.clientWidth || 0,
-    window.innerWidth || 0
-  );
-  const vh = Math.max(
-    document.documentElement.clientHeight || 0,
-    window.innerHeight || 0
-  );
-  console.log(vw, vh);
-  if (600 < vw < 700 && 400 < vh < 500) {
-    console.log('Pi pagina');
-    RPI = true;
+// updates the graph depending on state
+const getGraphData = function (graph, graphType) {
+  let now = new Date();
+  let dateNow = Math.round(now.getTime() / 1000);
+  let beginDate;
+  activeGraph = graph;
+  selectedRange = graphType;
+  switch (graphType) {
+    case 'DAY':
+      now.setDate(now.getDate() - 1);
+      beginDate = Math.round(now.getTime() / 1000);
+      break;
+    case 'WEEK':
+      now.setDate(now.getDate() - 7);
+      beginDate = Math.round(now.getTime() / 1000);
+      break;
+    case 'YTD':
+      beginDate = 'start';
+      break;
+    default:
+      console.error('Invalid GraphType');
   }
+  getHistoriek(graph, graphType, beginDate, dateNow);
 };
+
 // #endregion
 
 // #region ***  Event Listeners - listenTo___            ***********
-const listenToSocket = function () {
-  socketio.on('connect', function () {
-    console.log('Verbonden met socketio');
-  });
-  socketio.on('B2F_PM', function (msg) {
-    console.log(msg);
-    hmtlPM.innerHTML = JSON.stringify(msg);
-  });
-  socketio.on('B2F_Actuele_data', function (msg) {
-    console.log('Alle data: ', msg);
-    let html = `<tr><th>ID</th><th>setwaarde</th><th>eenheid</th><th>typewaarde</th><th>sensor</th></tr>`;
-    for (let data of msg) {
-      html += `<tr><td>${data.gebeurtenisID}</td> <td> ${data.setwaarde}</td> <td> ${data.eenheid} </td> <td> ${data.beschrijving} </td> <td> ${data.devicenaam}</td></tr>`;
-    }
-    htmlOnBoot.innerHTML = html;
-  });
-};
-
 const listenToSocketCharts = function () {
   socketio.on('B2F_CO2', function (data) {
     console.log('New co2 reading');
@@ -1018,6 +899,17 @@ const listenToPowerMenu = function () {
     });
 };
 
+const listenTographOptions = function () {
+  const htmlChartRange = document.querySelectorAll('.js-chartrange');
+  for (let chartRange of htmlChartRange) {
+    chartRange.addEventListener('change', function () {
+      let graph = activeGraph;
+      // console.log(graph, this.value);
+      getGraphData(graph, this.value);
+    });
+  }
+};
+
 const listenToReload = function () {
   htmlReloadPage.addEventListener('click', function () {
     SetReload();
@@ -1032,40 +924,10 @@ const SetReload = function () {
 const init = function () {
   console.log('Timeout');
   // setTimeout(SetReload, 30000)
-  if (document.querySelector('.js-testData')) {
-    console.log('test pagina');
-    hmtlPM = document.querySelector('.js-fijn-stof');
-    htmlOnBoot = document.querySelector('.js-on-boot');
-    listenToSocket();
-  } else if (document.querySelector('.Homepagina')) {
+  if (document.querySelector('.Homepagina')) {
     // getBrowerSize();
     console.log('Homepage');
-    htmlRefesh = document.querySelectorAll('.js-refesh');
-    htmlSettings = document.querySelector('.js-settings');
-    htmlActueel = document.querySelector('.js-actueel');
-    htmlhamburger = document.querySelector('.c-hamburger-menu');
-    htmlCloseHamburger = document.querySelector('.c-close-hamburger');
-    htmlMobileNav = document.querySelector('.js-mobile-nav');
-    htmlSlider = document.querySelector('.js-slider');
-    htmlRPM = document.querySelector('.js-fan-rpm');
-    htmlHistoriek = document.querySelector('.js-historiek');
-    HTMLDropDownHistoriek = document.querySelector('.js-sidebar-historiek');
-    htmlDropDownHistoriekMobile = document.querySelector(
-      '.js-mobile-sidebar-historiek'
-    );
-    htmlHistoriekCO2 = document.querySelector('.js-historiek-co2');
-    htmlTopBarTitle = document.querySelectorAll('.js-topbar-title');
-    htmlHistoriekTemp = document.querySelector('.js-historiek-temperature');
-    htmlHistoriekHum = document.querySelector('.js-historiek-humidity');
-    htmlHistoriekPressure = document.querySelector('.js-historiek-pressure');
-    htmlHistoriekIaq = document.querySelector('.js-historiek-iaq');
-    htmlHistoriekPM = document.querySelector('.js-historiek-pm');
-    htmlHistoriekPmNop = document.querySelector('.js-historiek-pmnop');
-    htmlLoading = document.querySelector('.js-loading');
-    htmlReloadPage = document.querySelector('.js-reload-page');
-    htmlChartType = document.querySelector('.js-chart-type');
-    htmlRefeshGraph = document.querySelector('.js-refesh-chart');
-    htmlIndicatieAll = document.querySelectorAll('.js-indicatie');
+    loadQuerySelectors();
     listenToHistoryDropdown();
     listenToHistoriekDropdownMobile();
     listenToBtnSidebar();
@@ -1081,4 +943,3 @@ const init = function () {
 };
 
 document.addEventListener('DOMContentLoaded', init);
-// #endregion

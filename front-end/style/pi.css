@@ -650,8 +650,8 @@ th{
   .c-mobile-nav .c-sidebar__subtitle{
     width: 100%;
     /* display: block; */
-    margin: 0 0 0 16px;
-    padding: 12px 16px;
+    margin: 0;
+    padding: 12px 24px;
     transition: background  .3s;
     border-bottom: 1px solid var(--line-color);
     /* border-collapse: collapse; */
@@ -665,7 +665,7 @@ th{
 
   .c-sidebar__subtitle:nth-child(2){
     /* padding-top: 24px; */
-    margin-top: 24px;
+    /* margin-top: 24px; */
     border-top: 1px solid var(--line-color);
   }
   .c-sidebar__subtitle:last-child{
