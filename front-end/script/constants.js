@@ -788,6 +788,7 @@ let firstTime = {
   temperature: true,
   pressure: true,
   humidity: true,
+  iaq: true,
   pm: true,
   pmNop: true,
 };
@@ -801,6 +802,7 @@ const chartTitles = {
   temperature: 'temperature [°C]',
   humidity: 'Relative humidity [%]',
   pressure: 'pressure [Pa]',
+  iaq: 'IAQ',
 };
 
 const pageTitles = {
@@ -808,6 +810,7 @@ const pageTitles = {
   temperature: 'Temperature',
   humidity: 'humidity',
   pressure: 'Pressure',
+  iaq: 'Indoor Air Quality',
   pm: 'Particulate Matter',
   pmnop: 'Number of particles / 100ml',
 };

@@ -46,6 +46,7 @@ let htmlActueel,
   htmlHistoriekTemp,
   htmlHistoriekHum,
   htmlHistoriekPressure,
+  htmlHistoriekIaq,
   htmlHistoriekPM,
   htmlHistoriekPmNop,
   htmlLoading,
@@ -76,6 +77,7 @@ const hideAll = function () {
     htmlHistoriekTemp,
     htmlHistoriekHum,
     htmlHistoriekPressure,
+    htmlHistoriekIaq,
     htmlHistoriekPM,
     htmlHistoriekPmNop,
     htmlReloadPage,
@@ -296,6 +298,7 @@ const updateChartData = function (chart, data) {
 };
 
 const showHistoriek = function (historiek) {
+  console.info(historiek);
   const unit = historiek.unit;
   console.log(historiek);
   prepareCharts(
@@ -629,6 +632,7 @@ const showHistoriekGrafiek = function (type) {
       'temperature',
       'humidity',
       'pressure',
+      'iaq',
       'pm',
       'pmnop',
     ]) {
@@ -682,6 +686,11 @@ const showHistoriekGrafiek = function (type) {
           updateTitle('Pressure');
           show(htmlHistoriekPressure);
           resetGraphOptions(htmlHistoriekPressure.dataset.range);
+          break;
+        case 'iaq':
+          updateTitle('Iaq');
+          show(htmlHistoriekIaq);
+          resetGraphOptions(htmlHistoriekIaq.dataset.range);
           break;
         case 'pm':
           updateTitle('Particulate Matter');
@@ -1049,6 +1058,7 @@ const init = function () {
     htmlHistoriekTemp = document.querySelector('.js-historiek-temperature');
     htmlHistoriekHum = document.querySelector('.js-historiek-humidity');
     htmlHistoriekPressure = document.querySelector('.js-historiek-pressure');
+    htmlHistoriekIaq = document.querySelector('.js-historiek-iaq');
     htmlHistoriekPM = document.querySelector('.js-historiek-pm');
     htmlHistoriekPmNop = document.querySelector('.js-historiek-pmnop');
     htmlLoading = document.querySelector('.js-loading');
