@@ -168,7 +168,7 @@ def fan_thread():
     while True:
         socketio.emit("B2F_fan_speed", {"rpm": fan.rpm})
         dt = start - time.time()
-        time.sleep(2)
+        time.sleep(0.3)
         if dt > 60:
             start = time.time()
             # Log fan speed every 60s
@@ -424,7 +424,7 @@ def start_thread():
 
 
 def start_chrome_thread():
-    print("**** Starting CHROME ****")
+    print("**** Starting CHROME IN 10 S ****")
     chromeThread = threading.Thread(target=start_chrome_kiosk, args=(), daemon=True)
     chromeThread.start()
 

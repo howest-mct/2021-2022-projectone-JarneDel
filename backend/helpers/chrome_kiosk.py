@@ -6,6 +6,7 @@ from time import sleep
 def start_chrome_kiosk():
     import os
 
+    sleep(50)
     os.environ["DISPLAY"] = ":0.0"
     options = webdriver.ChromeOptions()
     # options.headless = True
@@ -20,6 +21,7 @@ def start_chrome_kiosk():
     options.add_argument("--proxy-bypass-list=*")
     options.add_argument("--start-maximized")
     options.add_argument("--disable-gpu")
+    options.add_argument("--remote-debugging-port=9222")
     # options.add_argument('--disable-dev-shm-usage')
     options.add_argument("--no-sandbox")
     options.add_argument("--kiosk")
