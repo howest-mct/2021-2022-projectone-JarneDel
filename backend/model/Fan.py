@@ -49,8 +49,10 @@ class Fan:
         sum_val = sum(self.__list_last_vals)
         if sum_val == self.__old_val:
             return 0
-
-        avg_rpm = sum_val / (len(self.__list_last_vals))
+        if len(self.__list_last_vals) != 0:
+            avg_rpm = sum_val / (len(self.__list_last_vals))
+        else:
+            avg_rpm = -1
         self.__old_val = sum_val
         return round(avg_rpm, 0)
 

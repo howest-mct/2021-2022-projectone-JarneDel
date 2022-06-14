@@ -15,7 +15,6 @@ class HistoriekRepository:
                 data = DataRepository.get_historiek_per_5_min(
                     unit, beginTimestamp, endTimeStamp
                 )
-                print(data)
             elif timeType == "DAY":
                 data = DataRepository.get_historiek_per_minute(
                     unit, beginTimestamp, endTimeStamp

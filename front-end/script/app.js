@@ -9,55 +9,6 @@ try {
 } catch {
   console.log('geen socketio');
 }
-let OnlyOneListener = true;
-let onlyOneListenerHistoriek = true;
-let OnlyOneListenersettings = true;
-let firstTimeTemp = true;
-let firstTimeCo2 = true;
-let firstTimeHum = true;
-let firstTimePressure = true;
-let firstTimePM = true;
-let co2Chart,
-  tempChart,
-  humidityChart,
-  pressureChart,
-  PMchart,
-  PMNopChart,
-  VOCchart,
-  areaCO2,
-  areaTemp,
-  areaHum,
-  areaPressure,
-  areaPM;
-
-let selectedRange, activeGraph;
-let RPI = false;
-let selectedPage = 'actueel';
-// #region ***  DOM references                           ***********
-let hmtlPM, htmlOnBoot;
-let htmlActueel,
-  htmlSettings,
-  htmlRefesh,
-  htmlMobileNav,
-  htmlCloseHamburger,
-  htmlhamburger,
-  htmlSlider,
-  htmlRPM,
-  htmlHistoriek,
-  HTMLDropDownHistoriek,
-  htmlHistoriekCO2,
-  htmlTopBarTitle,
-  htmlHistoriekTemp,
-  htmlHistoriekHum,
-  htmlHistoriekPressure,
-  htmlHistoriekPM,
-  htmlLoading,
-  htmlDropDownHistoriekMobile,
-  htmlReloadPage,
-  htmlChartType,
-  htmlRefeshGraph,
-  htmlIndicatieAll
-  ;
 
 // #endregion
 
@@ -75,15 +26,16 @@ const hideAll = function () {
     htmlActueel,
     // htmlHistoriek,
     htmlSettings,
-
     htmlHistoriekCO2,
     htmlHistoriekTemp,
     htmlHistoriekHum,
     htmlHistoriekPressure,
+    htmlHistoriekIaq,
     htmlHistoriekPM,
+    htmlHistoriekPmNop,
     htmlReloadPage,
     htmlChartType,
-    htmlRefeshGraph
+    htmlRefeshGraph,
   ];
   for (let element of htmlRefesh) {
     arrayDomObjects.push(element);
@@ -105,7 +57,7 @@ const resetGraphOptions = function (type) {
   let chartranges = document.querySelectorAll('.js-chartrange');
   for (let chartrange of chartranges) {
     let chartType = chartrange.value;
-    console.log(chartType, type);
+    // console.log(chartType, type);
     if (chartType == type) {
       chartrange.checked = true;
     } else {
@@ -115,72 +67,6 @@ const resetGraphOptions = function (type) {
 };
 
 // Listen to the chart selection buttens/ only do run once
-const listenTographOptions = function () {
-  const htmlChartRange = document.querySelectorAll('.js-chartrange');
-  for (let chartRange of htmlChartRange) {
-    chartRange.addEventListener('change', function () {
-      let graph = activeGraph;
-      console.log(graph, this.value);
-      getGraphData(graph, this.value);
-    });
-  }
-  // const htmlSubmitTime = document.querySelector('.js-submit-date-range');
-  // htmlSubmitTime.addEventListener('click', function () {
-  //   console.log('hey');
-  //   let startDate = document.querySelector('.js-startdate').value;
-  //   let endDate = document.querySelector('.js-enddate').value;
-  //   console.log(startDate, endDate);
-  // });
-};
-
-// updates the graph depending on state
-const getGraphData = function (graph, graphType) {
-  let now = new Date();
-  let dateNow = Math.round(now.getTime() / 1000);
-  let beginDate;
-  activeGraph = graph
-  selectedRange = graphType
-  switch (graphType) {
-    case 'DAY':
-      now.setDate(now.getDate() - 1);
-      beginDate = Math.round(now.getTime() / 1000);
-      break;
-    case 'WEEK':
-      now.setDate(now.getDate() - 7);
-      beginDate = Math.round(now.getTime() / 1000);
-      break;
-    case 'YTD':
-      beginDate = 'start';
-      break;
-    default:
-      console.error('Invalid GraphType');
-  }
-
-  switch (graph) {
-    case 'co2':
-      getHistoriekCo2Filtered(graphType, beginDate, dateNow);
-      htmlHistoriekCO2.dataset.range = graphType;
-      break;
-    case 'temperature':
-      getHistoriekTemperatureFiltered(graphType, beginDate, dateNow);
-      htmlHistoriekTemp.dataset.range = graphType;
-      break;
-    case 'humidity':
-      getHistoriekHumFiltered(graphType, beginDate, dateNow);
-      htmlHistoriekHum.dataset.range = graphType;
-      break;
-    case 'pressure':
-      getHistoriekPressureFiltered(graphType, beginDate, dateNow);
-      htmlHistoriekPressure.dataset.range = graphType;
-      break;
-    case 'pm':
-      getHistoriekPMFiltered(graphType, beginDate, dateNow);
-      htmlHistoriekPM.dataset.range = graphType;
-      break;
-    default:
-      console.error('Invalid Graph');
-  }
-};
 
 // #region ***  Callback-Visualisation - show___         ***********
 const showPage = function (type) {
@@ -223,8 +109,7 @@ const showIP = function (jsonIP) {
   let lanIps = jsonIP.ip.lan;
   let wlanIps = jsonIP.ip.wlan;
   const htmlIP = document.querySelector('.js-ip');
-  let html =
-    '<table><tr><th class ="u-table-title"colspan=2>Device IP Adress</th></tr><tr><th>Interface</th><th>IP</th></tr>';
+  let html = '<table><tr><th>Interface</th><th>IP</th></tr>';
   for (let lanIP of lanIps) {
     html += `<tr><td>LAN</td><td>${lanIP}</td></tr>`;
   }
@@ -255,9 +140,16 @@ const createChart = function (data, name, dom) {
 };
 
 // creates a linechart with 3 rows -- called by showHistoriekPM
-const createStackedChart = function (dom, arrayJsonStacked, arrayNames) {
-  let tempOptions = HistoriekOptionsLineChart;
-  tempOptions.colors = ['#2699FB', '#00E396', '#504DE6'];
+const createLineChart = function (dom, arrayJsonStacked, arrayNames) {
+  let tempOptions = JSON.parse(JSON.stringify(HistoriekOptionsLineChart));
+  tempOptions.colors = [
+    '#2699FB',
+    '#00E396',
+    '#504DE6',
+    '#FA9E0C',
+    '#FA3EDD',
+    '#4FFA19',
+  ];
   console.log(arrayJsonStacked.data.length);
   for (let i = 0; i < arrayJsonStacked.data.length; i++) {
     tempOptions.series[i] = {
@@ -265,125 +157,98 @@ const createStackedChart = function (dom, arrayJsonStacked, arrayNames) {
       name: arrayNames[i],
     };
   }
+  tempOptions.yaxis = {
+    labels: {
+      formatter(value) {
+        return Math.round(value);
+      },
+    },
+  };
   console.log(tempOptions);
   let chart = new ApexCharts(dom, tempOptions);
   return chart;
 };
 
-const showHistoriekCo2 = function (historiek) {
-  updateTitle('CO2 History');
-  show(htmlRefeshGraph)
-  show(htmlHistoriekCO2);
+const prepareCharts = function (domObject, title) {
+  updateTitle(title);
+  show(htmlRefeshGraph);
+  show(domObject);
   show(htmlChartType);
+};
+
+const updateChartData = function (chart, data) {
+  chart.updateSeries([{ data: data }]);
+};
+
+const showHistoriek = function (historiek) {
+  console.info(historiek);
+  const unit = historiek.unit;
   console.log(historiek);
-  if (firstTimeCo2) {
-    console.log('first time historiek');
-    firstTimeCo2 = false;
-    areaCO2 = createChart(
-      historiek.data,
-      'Co2 concentration [ppm]',
-      document.querySelector('.area-chart-co2')
-    );
-    areaCO2.render();
+  prepareCharts(
+    document.querySelector(`.js-historiek-${unit}`),
+    pageTitles[unit]
+  );
+  if (unit == 'pm') {
+    showHistoriekPM(historiek);
+  } else if (unit == 'pmnop') {
+    showHistoriekPmNop(historiek);
   } else {
-    console.log('update');
-    areaCO2.updateSeries([
-      {
-        data: historiek.data,
-      },
-    ]);
-  }
-  hide(htmlLoading);
-};
-const showHistoriekTemperature = function (tempJson) {
-  updateTitle('Temperature');
-  console.log(tempJson);
-  show(htmlHistoriekTemp);
-  show(htmlChartType);
-  show(htmlRefeshGraph)
-  console.log(tempJson);
-  if (firstTimeTemp) {
-    areaTemp = createChart(
-      tempJson.data,
-      'temperature [°C]',
-      document.querySelector('.area-chart-temp')
-    );
-    areaTemp.render();
-    firstTimeTemp = false;
-  } else {
-    areaTemp.updateSeries([
-      {
-        data: tempJson.data,
-      },
-    ]);
-  }
-  hide(htmlLoading);
-};
-const showHistoriekHumidity = function (humJson) {
-  show(htmlHistoriekHum);
-  show(htmlChartType);
-  show(htmlRefeshGraph)
-  updateTitle('Humidity');
-  console.log(humJson);
-
-  if (firstTimeHum) {
-    areaHum = createChart(
-      humJson.data,
-      'Relative humidity [%]',
-      document.querySelector('.area-chart-hum')
-    );
-    areaHum.render();
-    firstTimeHum = false;
-  } else {
-    areaHum.updateSeries([{ data: humJson.data }]);
-  }
-  hide(htmlLoading);
-};
-const showHistoriekPressure = function (pressureJson) {
-  show(htmlHistoriekPressure);
-  show(htmlChartType);
-  show(htmlRefeshGraph)
-  updateTitle('Pressure');
-  console.log(pressureJson);
-
-  if (firstTimePressure) {
-    areaPressure = createChart(
-      pressureJson.data,
-      'pressure [Pa]',
-      document.querySelector('.area-chart-pressure')
-    );
-    areaPressure.render();
-    firstTimePressure = false;
-  } else {
-    areaPressure.updateSeries([{ data: pressureJson.data }]);
+    if (firstTime[unit]) {
+      firstTime[unit] = false;
+      historiekChart[unit] = createChart(
+        historiek.data,
+        chartTitles[unit],
+        document.querySelector(`.area-chart-${unit}`)
+      );
+      historiekChart[unit].render();
+    } else {
+      updateChartData(historiekChart[unit], historiek.data);
+    }
   }
   hide(htmlLoading);
 };
 
 const showHistoriekPM = function (jsonPM) {
-  console.log(jsonPM);
-  show(htmlHistoriekPM);
-  show(htmlChartType);
-  show(htmlRefeshGraph)
-  updateTitle('Particulate Matter');
-  if (firstTimePM) {
-    areaPM = createStackedChart(
-      document.querySelector('.area-chart-pm'),
-      jsonPM,
-      ['pm1', 'pm2.5', 'pm10']
-    );
+  if (firstTime.pm) {
+    areaPM = createLineChart(document.querySelector('.area-chart-pm'), jsonPM, [
+      'pm1',
+      'pm2.5',
+      'pm10',
+    ]);
     areaPM.render();
-    console.log(areaPM);
+    firstTime.pm = false;
   } else {
-    for (let i = 0; i < arrayJsonStacked.data.length; i++) {
-      data = {
-        data: arrayJsonStacked.data[i],
+    const arrayNames = ['pm1', 'pm2.5', 'pm10'];
+    let data = [];
+    for (let i = 0; i < jsonPM.data.length; i++) {
+      data[i] = {
+        data: jsonPM.data[i],
         name: arrayNames[i],
       };
     }
-    areaPM.updateSeries([{ data: data }]);
+    areaPM.updateSeries(data);
   }
-  hide(htmlLoading);
+};
+
+const showHistoriekPmNop = function (jsonPmNop) {
+  if (firstTime.pmNop) {
+    firstTime.pmNop = false;
+    areaPmNop = createLineChart(
+      document.querySelector('.area-chart-pmnop'),
+      jsonPmNop,
+      namesPmnop
+    );
+    areaPmNop.render();
+  } else {
+    let data = [];
+    for (let i = 0; i < jsonPmNop.data.length; i++) {
+      data[i] = {
+        data: jsonPmNop.data[i],
+        name: namesPmnop[i],
+      };
+    }
+    areaPmNop.updateSeries(data);
+  }
 };
 
 // renders the realtime charts
@@ -419,11 +284,11 @@ const showCharts = function () {
     PMNopChartOptions
   );
   PMNopChart.render();
-  VOCchart = new ApexCharts(
-    document.querySelector('.js-voc-chart'),
-    VOCChartOptions
+  iaqchart = new ApexCharts(
+    document.querySelector('.js-iaq-chart'),
+    iaqChartOptions
   );
-  VOCchart.render();
+  iaqchart.render();
   listenToSocketCharts();
   getActueleData();
 };
@@ -431,9 +296,9 @@ const showCharts = function () {
 const showUpdatedCharts = function (jsonObject) {
   // console.log(jsonObject);
   const data = jsonObject.data;
-  console.log(data)
+  console.log(data);
   let PMNop = {};
-  let pm1, pm2_5, pm10
+  let pm1, pm2_5, pm10;
   for (let sensorWaarde of data) {
     const setPoint = sensorWaarde.setwaarde;
     switch (sensorWaarde.beschrijving) {
@@ -449,13 +314,13 @@ const showUpdatedCharts = function (jsonObject) {
       case 'Pressure':
         updateOptionsCharts(setPoint, 'pressure');
         break;
-      case "PM1_AP":
+      case 'PM1_AP':
         pm1 = setPoint;
         break;
-      case "PM2.5_AP":
+      case 'PM2.5_AP':
         pm2_5 = setPoint;
         break;
-      case "PM10_AP1":
+      case 'PM10_AP1':
         pm10 = setPoint;
         break;
     }
@@ -467,7 +332,7 @@ const showUpdatedCharts = function (jsonObject) {
     }
   }
   // console.log(PM);
-  updatePMCharts(pm1, pm2_5, pm10)
+  updatePMCharts(pm1, pm2_5, pm10);
   updatePMNOPcharts(PMNop);
 };
 
@@ -486,29 +351,28 @@ const showFanSetting = function (jsonObject) {
 const showNoNewLiveData = function (type_data) {
   // console.log(type_data, 'noNew')
   for (let indicatie of htmlIndicatieAll) {
-
     if (indicatie.dataset.name === type_data) {
-      indicatie.classList.remove('u-green')
+      indicatie.classList.remove('u-green');
     }
   }
-}
+};
 
 const showNewLiveData = function (type_data) {
   // console.log(type_data, 'New')
   for (let indicatie of htmlIndicatieAll) {
     if (indicatie.dataset.name === type_data) {
       // console.log("Found it")
-      indicatie.classList.add('u-green')
+      indicatie.classList.add('u-green');
     }
   }
-}
+};
 
 const showAcuteleDataOnLoad = function () {
-  let event = new CustomEvent('click')
-  console.log(event)
-  document.querySelector('.js-button-acuteel').dispatchEvent(event)
-  toggleSidebar()
-}
+  let event = new CustomEvent('click');
+  console.log(event);
+  document.querySelector('.js-button-acuteel').dispatchEvent(event);
+  toggleSidebar();
+};
 
 //updates label and data
 const updateOptionsCharts = function (value, type) {
@@ -533,6 +397,12 @@ const updateOptionsCharts = function (value, type) {
       chart = tempChart;
       seriesValue = valueToPercentTemp(value);
       typeLabel = labels.temperature;
+      break;
+    case 'iaq':
+      chart = iaqchart;
+      seriesValue = valueToPercentIaq(value);
+      typeLabel = labels.iaq;
+      console.log(typeLabel, seriesValue);
       break;
   }
   // console.log(seriesValue, typeLabel);
@@ -600,92 +470,88 @@ const updateTitle = function (newTitle) {
   }
 };
 
-
 const showHistoriekGrafiek = function (type) {
-  let typesMobile = ['DAY', 'WEEK', 'YTD']
-  show(htmlHistoriek)
+  console.log('showHisoriekGrafiek');
+  let typesMobile = ['DAY', 'WEEK', 'YTD'];
+  show(htmlHistoriek);
   toggleSidebar();
+  activeGraph = type;
   if (typesMobile.includes(type)) {
-    console.log('mobile')
-    show(htmlLoading)
-    let selectedNav = document.querySelectorAll('.c-selected')
+    console.log('mobile');
+    show(htmlLoading);
+    let selectedNav = document.querySelectorAll('.c-selected');
     for (let i of selectedNav) {
-      i.classList.remove('c-selected')
+      i.classList.remove('c-selected');
     }
-    let dropdown = document.querySelectorAll('.js-dropdown-btn-mobile')
+    let dropdown = document.querySelectorAll('.js-dropdown-btn-mobile');
     for (let btn of dropdown) {
       if (btn.dataset.type === type) {
-        btn.classList.add('c-selected')
+        btn.classList.add('c-selected');
       }
     }
 
-    hideAll()
-    console.log(type, loaded_historiek.mobile[type])
+    hideAll();
+    console.log(type, loaded_historiek.mobile[type]);
 
-    selectedRange = type
+    selectedRange = type;
     let beginDate = new Date();
     let dateNow = new Date();
     dateNow = Math.round(dateNow.getTime() / 1000);
+    const htmlSelectedRangeTitle = document.querySelector(
+      '.js-Mobile-range-icon'
+    );
     switch (type) {
       case 'DAY':
         beginDate.setDate(beginDate.getDate() - 1);
         beginDate = Math.round(beginDate.getTime() / 1000);
-        break
+        htmlSelectedRangeTitle.innerHTML = '1 Day';
+        break;
       case 'WEEK':
         beginDate.setDate(beginDate.getDate() - 7);
         beginDate = Math.round(beginDate.getTime() / 1000);
+        htmlSelectedRangeTitle.innerHTML = '7 Days';
         break;
       case 'YTD':
         beginDate.setDate(beginDate.getDate() - 10000);
         beginDate = Math.round(beginDate.getTime() / 1000);
+        htmlSelectedRangeTitle.innerHTML = 'ALL';
     }
-    getHistoriekCo2Filtered(type, beginDate, dateNow)
-    getHistoriekTemperatureFiltered(type, beginDate, dateNow)
-    getHistoriekHumFiltered(type, beginDate, dateNow)
-    getHistoriekPressureFiltered(type, beginDate, dateNow)
-    getHistoriekPMFiltered(type, beginDate, dateNow)
-
-
+    for (let i of [
+      'co2',
+      'temperature',
+      'humidity',
+      'pressure',
+      'iaq',
+      'pm',
+      'pmnop',
+    ]) {
+      getHistoriek(i, type, beginDate, dateNow);
+    }
   } else {
-    console.log(type)
-    let selectedNav = document.querySelectorAll('.c-selected')
+    console.log('desktop', type);
+    let selectedNav = document.querySelectorAll('.c-selected');
     for (let i of selectedNav) {
-      i.classList.remove('c-selected')
+      i.classList.remove('c-selected');
     }
-    showSelectedSidebar(type)
+    showSelectedSidebar(type);
     show(htmlLoading);
     hideAll();
 
     // this.classList.add('c-selected');
     if (loaded_historiek[type] == false) {
-      console.log("Loading for first time", type)
+      console.log('Loading for first time', type);
       loaded_historiek[type] = true;
       let dateYesterday = new Date();
       let dateNow = new Date();
       dateNow = Math.round(dateNow.getTime() / 1000);
       dateYesterday.setDate(dateYesterday.getDate() - 1);
       dateYesterday = Math.round(dateYesterday.getTime() / 1000);
-      activeGraph = type
-      show(htmlRefeshGraph)
+      activeGraph = type;
+      show(htmlRefeshGraph);
       resetGraphOptions('DAY');
-      selectedRange = 'DAY'
-      switch (type) {
-        case 'co2':
-          getHistoriekCo2Filtered('DAY', dateYesterday, dateNow);
-          break;
-        case 'temperature':
-          getHistoriekTemperatureFiltered('DAY', dateYesterday, dateNow);
-          break;
-        case 'humidity':
-          getHistoriekHumFiltered('DAY', dateYesterday, dateNow);
-          break;
-        case 'pressure':
-          getHistoriekPressureFiltered('DAY', dateYesterday, dateNow);
-          break;
-        case 'pm':
-          getHistoriekPMFiltered('DAY', dateYesterday, dateNow);
-          break;
-      }
+      selectedRange = 'DAY';
+      // console.log(type, 'DAY', dateYesterday, dateNow);
+      getHistoriek(type, 'DAY', dateYesterday, dateNow);
     } else {
       // just show the page and reset the graph options.
       hideAll();
@@ -710,43 +576,47 @@ const showHistoriekGrafiek = function (type) {
           show(htmlHistoriekPressure);
           resetGraphOptions(htmlHistoriekPressure.dataset.range);
           break;
+        case 'iaq':
+          updateTitle('Iaq');
+          show(htmlHistoriekIaq);
+          resetGraphOptions(htmlHistoriekIaq.dataset.range);
+          break;
         case 'pm':
           updateTitle('Particulate Matter');
           show(htmlHistoriekPM);
           resetGraphOptions(htmlHistoriekPM.dataset.range);
           break;
+        case 'pmnop':
+          updateTitle('Particulate Matter: Number of particles');
+          show(htmlHistoriekPmNop);
+          resetGraphOptions(htmlHistoriekPmNop.dataset.range);
       }
 
       hide(htmlLoading);
       show(htmlChartType);
-
     }
-
   }
-
-
-}
+};
 
 const showSelectedSidebar = function (type) {
-  console.log(type)
-  let succes = false
+  console.log(type);
+  let succes = false;
   let dropdown = document.querySelectorAll('.js-dropdown-btn');
   for (let dropdownBtn of dropdown) {
     if (dropdownBtn.dataset.type == type) {
-      dropdownBtn.classList.add('c-selected')
-      succes = true
+      dropdownBtn.classList.add('c-selected');
+      succes = true;
     }
   }
   const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
   for (let btn of btns) {
     if (btn.dataset.type == type) {
-      btn.classList.add('c-selected')
-      succes = true
+      btn.classList.add('c-selected');
+      succes = true;
     }
-
   }
-  return succes
-}
+  return succes;
+};
 // #endregion
 
 // #region ***  Callback-No Visualisation - callback___  ***********
@@ -788,73 +658,46 @@ const getFanSetting = function () {
   handleData(url, showFanSetting, callbackError);
 };
 
-const getHistoriekCo2Filtered = function (type, begin, end) {
-  const url = backend + `/historiek/co2/${type}/${begin}-${end}/`;
-  handleData(url, showHistoriekCo2, callbackError);
+const getHistoriek = function (unit, type, begin, end) {
+  const url = backend + `/historiek/${unit}/${type}/${begin}-${end}/`;
+  handleData(url, showHistoriek, callbackError);
 };
 
-const getHistoriekTemperatureFiltered = function (type, begin, end) {
-  const url = backend + `/historiek/temperature/${type}/${begin}-${end}/`;
-  handleData(url, showHistoriekTemperature, callbackError);
-};
-
-const getHistoriekHumFiltered = function (type, begin, end) {
-  const url = backend + `/historiek/humidity/${type}/${begin}-${end}/`;
-  handleData(url, showHistoriekHumidity, callbackError);
-};
-
-const getHistoriekPressureFiltered = function (type, begin, end) {
-  const url = backend + `/historiek/pressure/${type}/${begin}-${end}/`;
-  handleData(url, showHistoriekPressure, callbackError);
-};
-
-const getHistoriekPMFiltered = function (type, begin, end) {
-  const url = backend + `/historiek/pm/${type}/${begin}-${end}/`;
-  handleData(url, showHistoriekPM, callbackError);
-};
-const getBrowerSize = function () {
-  const vw = Math.max(
-    document.documentElement.clientWidth || 0,
-    window.innerWidth || 0
-  );
-  const vh = Math.max(
-    document.documentElement.clientHeight || 0,
-    window.innerHeight || 0
-  );
-  console.log(vw, vh);
-  if (600 < vw < 700 && 400 < vh < 500) {
-    console.log('Pi pagina');
-    RPI = true;
+// updates the graph depending on state
+const getGraphData = function (graph, graphType) {
+  let now = new Date();
+  let dateNow = Math.round(now.getTime() / 1000);
+  let beginDate;
+  activeGraph = graph;
+  selectedRange = graphType;
+  switch (graphType) {
+    case 'DAY':
+      now.setDate(now.getDate() - 1);
+      beginDate = Math.round(now.getTime() / 1000);
+      break;
+    case 'WEEK':
+      now.setDate(now.getDate() - 7);
+      beginDate = Math.round(now.getTime() / 1000);
+      break;
+    case 'YTD':
+      beginDate = 'start';
+      break;
+    default:
+      console.error('Invalid GraphType');
   }
+  getHistoriek(graph, graphType, beginDate, dateNow);
 };
+
 // #endregion
 
 // #region ***  Event Listeners - listenTo___            ***********
-const listenToSocket = function () {
-  socketio.on('connect', function () {
-    console.log('Verbonden met socketio');
-  });
-  socketio.on('B2F_PM', function (msg) {
-    console.log(msg);
-    hmtlPM.innerHTML = JSON.stringify(msg);
-  });
-  socketio.on('B2F_Actuele_data', function (msg) {
-    console.log('Alle data: ', msg);
-    let html = `<tr><th>ID</th><th>setwaarde</th><th>eenheid</th><th>typewaarde</th><th>sensor</th></tr>`;
-    for (let data of msg) {
-      html += `<tr><td>${data.gebeurtenisID}</td> <td> ${data.setwaarde}</td> <td> ${data.eenheid} </td> <td> ${data.beschrijving} </td> <td> ${data.devicenaam}</td></tr>`;
-    }
-    htmlOnBoot.innerHTML = html;
-  });
-};
-
 const listenToSocketCharts = function () {
   socketio.on('B2F_CO2', function (data) {
     console.log('New co2 reading');
     const co2Reading = data['CO2'];
     updateOptionsCharts(co2Reading, 'CO2');
-    newData.co2 = new Date()
-    showNewLiveData('CO2')
+    newData.co2 = new Date();
+    showNewLiveData('CO2');
   });
   socketio.on('B2F_PM', function (data) {
     // console.log(data);
@@ -863,24 +706,29 @@ const listenToSocketCharts = function () {
     const pm10 = data['PM10_AP1'];
     updatePMCharts(pm1, pm2_5, pm10);
     updatePMNOPcharts(data);
-    newData.pm = new Date()
-    newData.pmNop = new Date()
-    showNewLiveData('pm')
-    showNewLiveData('pmNop')
+    newData.pm = new Date();
+    newData.pmNop = new Date();
+    showNewLiveData('pm');
+    showNewLiveData('pmnop');
   });
   socketio.on('B2F_BME', function (bme_data) {
     let pressureVal = bme_data.pressure / 100;
     let humidityVal = bme_data.humidity;
     let temperatureVal = bme_data.temperature;
+    let iaqVal = bme_data.iaq;
+    let iaq = bme_data.iaq;
+    console.log(bme_data);
     // console.log(pressureVal, humidityVal, temperatureVal);
-    let datum = new Date()
-    newData.temp = newData.hum = newData.pressure = datum
-    showNewLiveData('pressure')
-    showNewLiveData('hum')
-    showNewLiveData('temp')
+    let datum = new Date();
+    newData.temp = newData.hum = newData.pressure = datum;
+    showNewLiveData('pressure');
+    showNewLiveData('hum');
+    showNewLiveData('temp');
+    showNewLiveData('iaq');
     updateOptionsCharts(pressureVal, 'pressure');
     updateOptionsCharts(humidityVal, 'humidity');
     updateOptionsCharts(temperatureVal, 'temperature');
+    updateOptionsCharts(iaq, 'iaq');
   });
 };
 
@@ -898,20 +746,11 @@ const listenToBtnSidebar = function () {
         toggleClass(document.querySelector('.c-mobile-dropup-icon'));
         toggleClass(document.querySelector('.js-sidebar-historiek-mobile'));
       } else {
-        hide(htmlHistoriek)
-        let selectedNav = document.querySelectorAll('.c-selected')
+        hide(htmlHistoriek);
+        let selectedNav = document.querySelectorAll('.c-selected');
         for (let i of selectedNav) {
-          i.classList.remove('c-selected')
+          i.classList.remove('c-selected');
         }
-
-        // const btns = document.querySelectorAll('.js-btn-bg-blue-sidebar');
-        // for (let btn2 of btns) {
-        //   btn2.classList.remove('c-selected');
-        // }
-        // let dropdown = document.querySelectorAll('.js-dropdown-btn');
-        // for (let dropdownBtn of dropdown) {
-        //   dropdownBtn.classList.remove('c-selected');
-        // }
         toggleSidebar();
         this.classList.add('c-selected');
         const type = this.dataset.type;
@@ -976,92 +815,106 @@ const listenToHistoryDropdown = function () {
   let dropdown = document.querySelectorAll('.js-dropdown-btn');
   for (const page of dropdown) {
     page.addEventListener('click', function () {
-      showHistoriekGrafiek(this.dataset.type)
-    })
+      showHistoriekGrafiek(this.dataset.type);
+    });
   }
 };
 
 const listenToHistoriekDropdownMobile = function () {
-  let dropdown = document.querySelectorAll('.js-dropdown-btn-mobile')
+  let dropdown = document.querySelectorAll('.js-dropdown-btn-mobile');
   for (let range of dropdown) {
     range.addEventListener('click', function () {
-      let type = range.dataset.type
-      console.log(type)
-      showHistoriekGrafiek(type)
-    })
+      let type = range.dataset.type;
+      console.log(type);
+      showHistoriekGrafiek(type);
+    });
   }
-}
+};
 
 const listenToRefeshGraphs = function () {
   htmlRefeshGraph.addEventListener('click', function () {
-    getGraphData(activeGraph, selectedRange)
-  })
-}
+    getGraphData(activeGraph, selectedRange);
+  });
+};
 
 const listenToNoNewData = async function () {
-  let datum
+  let datum;
   while (true) {
     // console.log('checking...')
-    datum = new Date() - 120000
+    datum = new Date() - 120000;
     if (datum > newData.co2) {
-      showNoNewLiveData('CO2')
+      showNoNewLiveData('CO2');
       // console.log('no new co2')
     }
     if (datum > newData.temp) {
-      showNoNewLiveData('temp')
+      showNoNewLiveData('temp');
     }
     if (datum > newData.hum) {
-      showNoNewLiveData('hum')
+      showNoNewLiveData('hum');
     }
     if (datum > newData.pressure) {
-      showNoNewLiveData('pressure')
+      showNoNewLiveData('pressure');
     }
-    if (datum > newData.voc) {
-      showNoNewLiveData('voc')
-    } if (datum > newData.pm) {
-      showNoNewLiveData('pm')
-    } if (datum > newData.pmNop) {
-      showNoNewLiveData('pmNop')
+    if (datum > newData.iaq) {
+      showNoNewLiveData('iaq');
+    }
+    if (datum > newData.pm) {
+      showNoNewLiveData('pm');
+    }
+    if (datum > newData.pmNop) {
+      showNoNewLiveData('pmNop');
     } else {
       // console.log('everything up to date')
     }
 
-    await new Promise(done => setTimeout(() => done(), 5000));
+    await new Promise((done) => setTimeout(() => done(), 5000));
   }
-}
+};
 
 const listenToNavigateToHistoriek = function () {
-  const html = document.querySelectorAll('.js-to-historiek')
+  const html = document.querySelectorAll('.js-to-historiek');
   for (let link of html) {
     link.addEventListener('click', function () {
-      console.log(this.dataset.name)
-      showHistoriekGrafiek(this.dataset.name)
-    })
+      // console.log(this.dataset.name);
+      showHistoriekGrafiek(this.dataset.name);
+    });
   }
-}
-
+};
 
 const listenToPowerMenu = function () {
-  document.querySelector('.js-power-management-dropdown-btn').addEventListener('click', function () {
-    toggleClass(document.querySelector('.js-power-management-dropdown'));
-  })
+  document
+    .querySelector('.js-power-management-dropdown-btn')
+    .addEventListener('click', function () {
+      toggleClass(document.querySelector('.js-power-management-dropdown'));
+    });
   document.querySelector('.js-reboot').addEventListener('click', function () {
-    const url = backend + '/reboot/'
-    handleData(url, SetReload, callbackError)
-  })
-  document.querySelector('.js-power-down').addEventListener('click', function () {
-    const url = backend + '/poweroff/'
-    handleData(url, SetReload, callbackError)
-  })
-}
+    const url = backend + '/reboot/';
+    handleData(url, SetReload, callbackError);
+  });
+  document
+    .querySelector('.js-power-down')
+    .addEventListener('click', function () {
+      const url = backend + '/poweroff/';
+      handleData(url, SetReload, callbackError);
+    });
+};
+
+const listenTographOptions = function () {
+  const htmlChartRange = document.querySelectorAll('.js-chartrange');
+  for (let chartRange of htmlChartRange) {
+    chartRange.addEventListener('change', function () {
+      let graph = activeGraph;
+      // console.log(graph, this.value);
+      getGraphData(graph, this.value);
+    });
+  }
+};
 
 const listenToReload = function () {
   htmlReloadPage.addEventListener('click', function () {
     SetReload();
   });
 };
-
-
 
 // #endregion
 const SetReload = function () {
@@ -1071,38 +924,10 @@ const SetReload = function () {
 const init = function () {
   console.log('Timeout');
   // setTimeout(SetReload, 30000)
-  if (document.querySelector('.js-testData')) {
-    console.log('test pagina');
-    hmtlPM = document.querySelector('.js-fijn-stof');
-    htmlOnBoot = document.querySelector('.js-on-boot');
-    listenToSocket();
-  } else if (document.querySelector('.Homepagina')) {
+  if (document.querySelector('.Homepagina')) {
     // getBrowerSize();
     console.log('Homepage');
-    htmlRefesh = document.querySelectorAll('.js-refesh');
-    htmlSettings = document.querySelector('.js-settings');
-    htmlActueel = document.querySelector('.js-actueel');
-    htmlhamburger = document.querySelector('.c-hamburger-menu');
-    htmlCloseHamburger = document.querySelector('.c-close-hamburger');
-    htmlMobileNav = document.querySelector('.js-mobile-nav');
-    htmlSlider = document.querySelector('.js-slider');
-    htmlRPM = document.querySelector('.js-fan-rpm');
-    htmlHistoriek = document.querySelector('.js-historiek');
-    HTMLDropDownHistoriek = document.querySelector('.js-sidebar-historiek');
-    htmlDropDownHistoriekMobile = document.querySelector(
-      '.js-mobile-sidebar-historiek'
-    );
-    htmlHistoriekCO2 = document.querySelector('.js-historiek-co2');
-    htmlTopBarTitle = document.querySelectorAll('.js-topbar-title');
-    htmlHistoriekTemp = document.querySelector('.js-historiek-temp');
-    htmlHistoriekHum = document.querySelector('.js-historiek-hum');
-    htmlHistoriekPressure = document.querySelector('.js-historiek-pressure');
-    htmlHistoriekPM = document.querySelector('.js-historiek-pm');
-    htmlLoading = document.querySelector('.js-loading');
-    htmlReloadPage = document.querySelector('.js-reload-page');
-    htmlChartType = document.querySelector('.js-chart-type');
-    htmlRefeshGraph = document.querySelector('.js-refesh-chart')
-    htmlIndicatieAll = document.querySelectorAll(".js-indicatie")
+    loadQuerySelectors();
     listenToHistoryDropdown();
     listenToHistoriekDropdownMobile();
     listenToBtnSidebar();
@@ -1113,9 +938,8 @@ const init = function () {
     listenToNavigateToHistoriek();
     listenToPowerMenu();
     hideAll();
-    showAcuteleDataOnLoad()
+    showAcuteleDataOnLoad();
   }
 };
 
 document.addEventListener('DOMContentLoaded', init);
-// #endregion

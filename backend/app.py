@@ -69,6 +69,7 @@ fan = Fan(6, 13, 2, initial=fan_pwm)
 # region Main Thread
 def main_thread():
     global sensor_active
+    DataRepository.add_data_point(1, 3, 20)
     while True:
         if not sensor_active:
             sensor_active = True
@@ -98,24 +99,27 @@ def main_thread():
 
 def bme_main():
     print("TESTING FORCED MODE WITHOUT BSEC")
-    bme = BME68X(cst.BME68X_I2C_ADDR_LOW, 1)
+    bme = BME68X(cst.BME68X_I2C_ADDR_HIGH, 1)
     # Configure sensor to measure at 320 degC for 100 millisec
     bme.set_heatr_conf(cst.BME68X_FORCED_MODE, 320, 100, cst.BME68X_ENABLE)
     print(bme.get_data())
     time.sleep(3)
     print("\nTESTING FORCED MODE WITH BSEC")
-    bme = BME68X(cst.BME68X_I2C_ADDR_LOW, 1)
+    bme = BME68X(cst.BME68X_I2C_ADDR_HIGH, 1)
     bme.set_sample_rate(bsec.BSEC_SAMPLE_RATE_LP)
     start = time.time()
     while True:
         bsec_data = get_data(bme)
         if bsec_data is not None:
             print(bsec_data)
-            logging.debug(bsec_data)
+            # logging.debug(bsec_data)
             # print(bsec_data["temperature"], "temp")
             temperature = round(bsec_data["temperature"], 2)
             humidity = round(bsec_data["humidity"], 2)
             raw_pressure = round(bsec_data["raw_pressure"], 1)
+            voc_percentage = int(bsec_data["gas_percentage"])
+            accuracy = bsec_data["iaq_accuracy"]
+            iaq = round(bsec_data["iaq"])
             # print(temperature, humidity, raw_pressure)
             if time.time() - start > 120:
                 start = time.time()
@@ -123,12 +127,18 @@ def bme_main():
                 DataRepository.add_data_point(temperature, 1, 15)
                 DataRepository.add_data_point(humidity, 1, 17)
                 DataRepository.add_data_point(raw_pressure, 1, 16)
+                DataRepository.add_data_point(iaq, 1, 18)
+                DataRepository.add_data_point(voc_percentage, 1, 23)
+                DataRepository.add_data_point(accuracy, 1, 22)
             socketio.emit(
                 "B2F_BME",
                 {
                     "temperature": temperature,
                     "humidity": humidity,
                     "pressure": raw_pressure,
+                    "VOC": voc_percentage,
+                    "iaq": iaq,
+                    "accuracy": accuracy,
                 },
             )
         else:
@@ -244,12 +254,14 @@ def ip():
 @app.route(endpoint + "/poweroff/")
 def power_off():
     msg = CMD.power_off()
+    DataRepository.add_data_point("0", 3, 20)
     return jsonify(msg=msg), 200
 
 
 @app.route(endpoint + "/reboot/")
 def reboot():
     msg = CMD.reboot()
+    DataRepository.add_data_point("0", 3, 20)
     return jsonify(msg=msg), 200
 
 
@@ -342,54 +354,46 @@ def get_historiek_pm():
     return jsonify(data=data), 200
 
 
-@app.route(endpoint + "/historiek/co2/<time_type>/<range>/")
-def get_historiek_co2_filtered(time_type, range):
-    data = HR.get_historiek_filtered(2, time_type, range)
+@app.route(endpoint + "/historiek/<unit_type>/<time_type>/<range>/")
+def get_historiek(unit_type, time_type, range):
+    logging.info(f"{unit_type, time_type, range}")
+    data_list = []
+    data = None
+    if unit_type == "co2":
+        unit = 2
+    elif unit_type == "temperature":
+        unit = 15
+    elif unit_type == "humidity":
+        unit = 17
+    elif unit_type == "pressure":
+        unit = 16
+    elif unit_type == "iaq":
+        unit = 18
+    elif unit_type == "voc":
+        unit = 23
+    elif unit_type == "pm":
+        unit = [6, 7, 8]
+    elif unit_type == "pmnop":
+        unit = [9, 10, 11, 12, 13, 14]
+
+    if isinstance(unit, int):
+        logging.info(unit, "Een waarde")
+        data = HR.get_historiek_filtered(unit, time_type, range)
+
+    if isinstance(unit, list):
+        logging.info(unit, "meerdere waardes")
+        for item in unit:
+            data_list.append(HR.get_historiek_filtered(item, time_type, range))
+
+    logging.info(f"{(unit_type, unit, data, data_list)}")
     if data is not None:
-        return jsonify(data=data), 200
+        return jsonify(data=data, unit=unit_type), 200
+
+    elif data_list is not None:
+        return jsonify(data=data_list, unit=unit_type), 200
+
     else:
-        return jsonify(message="No return data"), 400
-
-
-@app.route(endpoint + "/historiek/temperature/<time_type>/<range>/")
-def get_historiek_temperature_filtered(time_type, range):
-    data = HR.get_historiek_filtered(15, time_type, range)
-    if data is not None:
-        return jsonify(data=data), 200
-    else:
-        return jsonify(message="No return data"), 400
-
-
-@app.route(endpoint + "/historiek/humidity/<time_type>/<range>/")
-def get_historiek_humidity_filtered(time_type, range):
-    data = HR.get_historiek_filtered(17, time_type, range)
-    if data is not None:
-        return jsonify(data=data), 200
-    else:
-        return jsonify(message="No return data"), 400
-
-
-@app.route(endpoint + "/historiek/pressure/<time_type>/<range>/")
-def get_historiek_pressure_filtered(time_type, range):
-    print(f"{time_type}, {range}")
-    data = HR.get_historiek_filtered(16, time_type, range)
-    print(data)
-    if data is not None:
-        return jsonify(data=data), 200
-    else:
-        return jsonify(message="No return data"), 400
-
-
-@app.route(endpoint + "/historiek/pm/<time_type>/<range>/")
-def get_historiek_pm_filtered(time_type, range):
-    pm1 = HR.get_historiek_filtered(6, time_type, range)
-    pm2_5 = HR.get_historiek_filtered(7, time_type, range)
-    pm10 = HR.get_historiek_filtered(8, time_type, range)
-    if (pm1 and pm2_5 and pm10) is not None:
-        data = [pm1, pm2_5, pm10]
-        return jsonify(data=data), 200
-    else:
-        return jsonify(message="No return data"), 400
+        return jsonify(message="error"), 400
 
 
 @socketio.on("connect")
