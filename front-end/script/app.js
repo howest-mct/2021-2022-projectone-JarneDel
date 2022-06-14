@@ -102,6 +102,7 @@ const showPage = function (type) {
     show(htmlSettings);
     getFanSetting();
     if (OnlyOneListenersettings) {
+
       getIP();
       createFanChart();
       // listenToReload();
@@ -110,6 +111,7 @@ const showPage = function (type) {
       listenToSlider();
       OnlyOneListenersettings = false;
     }
+    getFanPWM()
   }
 };
 
@@ -417,6 +419,15 @@ const showAcuteleDataOnLoad = function () {
   hideSidebar();
 };
 
+const showFanProgress = function (jsonObject) {
+  console.log(jsonObject.fan_pwm)
+  let slider = document.querySelector('.js-slider')
+  slider.value = jsonObject.fan_pwm
+  document.querySelector('.js-slider-number').value = jsonObject.fan_pwm
+  slider.style.backgroundSize = jsonObject.fan_pwm + '% 100%'
+
+}
+
 //updates label and data
 const updateOptionsCharts = function (value, type) {
   let seriesValue, typeLabel, chart;
@@ -705,7 +716,10 @@ const getFanSetting = function () {
   const url = backend + '/fan/mode/';
   handleData(url, showFanSetting, callbackError);
 };
-
+const getFanPWM = function () {
+  const url = backend + '/fan/pwm/'
+  handleData(url, showFanProgress, callbackError)
+}
 const getHistoriek = function (unit, type, begin, end) {
   const url = backend + `/historiek/${unit}/${type}/${begin}-${end}/`;
   handleData(url, showHistoriek, callbackError);
@@ -844,13 +858,36 @@ const listenToFanMode = function () {
       }
     });
 };
+const handleInputChange = function (e) {
+  let target = e.target
+  if (e.target.type !== 'range') {
+    target = document.getElementById('range')
+  }
+  console.log(target)
+  const min = target.min
+  const max = target.max
+  const val = target.value
+
+  socketio.emit('F2B_fan_speed', { pwm: val })
+
+  target.style.backgroundSize = (val - min) * 100 / (max - min) + '% 100%'
+}
 const listenToSlider = function () {
-  htmlSlider.addEventListener('change', function () {
-    let val = this.value;
-    if (100 >= val >= 0) {
-      socketio.emit('F2B_fan_speed', { pwm: val });
-    }
-  });
+
+  //#region testing
+  const rangeInputs = document.querySelectorAll('input[type="range"]')
+  const numberInput = document.querySelector('input[type="number"]')
+
+
+  rangeInputs.forEach(input => {
+    input.addEventListener('input', handleInputChange)
+  })
+
+  numberInput.addEventListener('input', handleInputChange)
+
+
+  //#endregion
+
 };
 
 const listenToSocketFan = function () {
@@ -1003,6 +1040,15 @@ const listenToChartNavigation = function () {
   })
 }
 
+
+
+
+
+
+
+
+
+
 // #endregion
 const SetReload = function () {
   document.location.reload(true);
@@ -1031,3 +1077,8 @@ const init = function () {
 };
 
 document.addEventListener('DOMContentLoaded', init);
+
+
+
+
+

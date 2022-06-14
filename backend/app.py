@@ -168,7 +168,7 @@ def fan_thread():
     while True:
         socketio.emit("B2F_fan_speed", {"rpm": fan.rpm})
         dt = start - time.time()
-        time.sleep(0.3)
+        time.sleep(1)
         if dt > 60:
             start = time.time()
             # Log fan speed every 60s

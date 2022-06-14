@@ -288,12 +288,15 @@
 
             <div class="js-fan-slider c-fan-slider-box">
               <input type="range" min="0" max="100" value="2.5" step="1" class="js-slider c-fan-slider-input c-hidden"
-                id="fan-range">
+                id="range" oninput="rangenumber.value=value">
+              <input type="number" id="rangenumber" min="0" max="100" value="2.5" class="js-slider-number"
+                oninput="range.value=value"></input>
+              <label>%</label>
             </div>
-            <div class="c-fan">
+            <!-- <div class="c-fan">
               <div class="js-fan-rpm">3300rpm</div>
               <div class="js-fan-pwm">50%</div>
-            </div>
+            </div> -->
 
           </div>
         </div>
