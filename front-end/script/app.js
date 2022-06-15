@@ -124,8 +124,8 @@ const showIP = function (jsonIP) {
     if (lanip) {
       new QRCode(document.querySelector('.qrCodeLan'), {
         text: lanip,
-        width: 120,
-        height: 120,
+        width: 160,
+        height: 160,
       })
 
     }
@@ -138,8 +138,8 @@ const showIP = function (jsonIP) {
     if (wlanIP) {
       new QRCode(document.querySelector('.qrCodeWlan'), {
         text: wlanIP,
-        width: 120,
-        height: 120,
+        width: 160,
+        height: 160,
       })
 
     }
@@ -690,11 +690,11 @@ const showFanManSlider = function (jsonObject) {
 
   htmlSlider.value = pwm;
   console.log(pwm)
-  show(htmlSlider);
+  show(document.querySelector('.js-fan-slider'));
 };
 
 const hideFanManSlider = function (jsonObject) {
-  hide(htmlSlider);
+  hide(document.querySelector('.js-fan-slider'))
 };
 // #endregion
 
