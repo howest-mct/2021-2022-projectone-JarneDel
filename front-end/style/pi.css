@@ -1042,7 +1042,8 @@ background: var(--hover-background);
   }
   .c-time-till-refesh {
     top: 25px;
-    right: 140px;
+    right: 50%;
+    transform: translatex(50%);
     width: 60px;
   }
   .c-dropdown-icon,
@@ -1050,7 +1051,20 @@ background: var(--hover-background);
     float: right;
     padding-right: 16px;
   }
+  .js-topbar-title{
+    display: none;
 
+  } 
+  .c-topbar--title{
+    left: 16px !important ;
+    transform: none !important;
+  }
+  .c-mobile--logo{
+    display: none;
+  }
+  .c-mobile--topbar{
+    justify-content: flex-end;
+  }
 }
 
 .u-fan-settings{

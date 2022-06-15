@@ -80,6 +80,10 @@ const resetGraphOptions = function (type) {
 // #region ***  Callback-Visualisation - show___         ***********
 const showPage = function (type) {
   console.log(type);
+  document.querySelector(
+    '.js-Mobile-range-icon'
+  ).style.display = 'none';
+  hideAll();
   if (type == 'actueel') {
     console.log('Actuele pagina');
     if (lastPageArray[lastPageArray.length - 1] != 'actueel') {
@@ -624,6 +628,7 @@ const showHistoriekGrafiek = function (type) {
     const htmlSelectedRangeTitle = document.querySelector(
       '.js-Mobile-range-icon'
     );
+    htmlSelectedRangeTitle.style.display = 'unset'
     switch (type) {
       case 'DAY':
         beginDate.setDate(beginDate.getDate() - 1);
