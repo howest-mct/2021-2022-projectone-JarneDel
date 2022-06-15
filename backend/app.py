@@ -77,7 +77,7 @@ def main_thread():
             val = read_mhz19b()
             time.sleep(1)
             list_data, dict_data = read_pms()
-            print(dict_data)
+            # print(dict_data)
             time.sleep(1)
             # steek gelezen waarde in database
             DataRepository.add_data_point(val, 1, 2)
@@ -89,7 +89,7 @@ def main_thread():
                 DataRepository.add_data_point(datapunt, 1, 3 + i)
 
             socketio.emit("B2F_PM", dict_data)
-            print(sensor_active)
+            # print(sensor_active)
             sensor_active = False
             time.sleep(60)
         else:
@@ -272,7 +272,7 @@ def fan_mode():
     elif request.method == "POST":
         val = 2
         data = DataRepository.json_or_formdata(request)
-        logging.info(data)
+        # logging.info(data)
         if "auto" in data.keys():
             val -= bool(data["auto"])
             logging.info("Fan set to auto mode")
@@ -284,7 +284,7 @@ def fan_mode():
             return jsonify(message=f"Wrong Value fanmode: {val}"), 400
         fan.fan_mode = val
         data = DataRepository.set_fan_setting(val)
-        logging.info(data)
+        # logging.info(data)
         if data is not None:
             if data >= 0:
                 last_man_fan_val = DataRepository.get_last_fan_setting()
@@ -356,7 +356,7 @@ def get_historiek_pm():
 
 @app.route(endpoint + "/historiek/<unit_type>/<time_type>/<range>/")
 def get_historiek(unit_type, time_type, range):
-    logging.info(f"{unit_type, time_type, range}")
+    # logging.info(f"{unit_type, time_type, range}")
     data_list = []
     data = None
     if unit_type == "co2":
@@ -377,15 +377,15 @@ def get_historiek(unit_type, time_type, range):
         unit = [9, 10, 11, 12, 13, 14]
 
     if isinstance(unit, int):
-        logging.info(unit, "Een waarde")
+        logging.debug(unit, "Een waarde")
         data = HR.get_historiek_filtered(unit, time_type, range)
 
     if isinstance(unit, list):
-        logging.info(unit, "meerdere waardes")
+        logging.debug(unit, "meerdere waardes")
         for item in unit:
             data_list.append(HR.get_historiek_filtered(item, time_type, range))
 
-    logging.info(f"{(unit_type, unit, data, data_list)}")
+    logging.debug(f"{(unit_type, unit, data, data_list)}")
     if data is not None:
         return jsonify(data=data, unit=unit_type), 200
 

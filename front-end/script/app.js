@@ -593,6 +593,7 @@ const showHistoriekGrafiek = function (type) {
     showSelectedSidebar(type);
     show(htmlLoading);
     hideAll();
+    show(htmlRefeshGraph);
 
     // this.classList.add('c-selected');
     if (loaded_historiek[type] == false) {
@@ -604,7 +605,6 @@ const showHistoriekGrafiek = function (type) {
       dateYesterday.setDate(dateYesterday.getDate() - 1);
       dateYesterday = Math.round(dateYesterday.getTime() / 1000);
       activeGraph = type;
-      show(htmlRefeshGraph);
       resetGraphOptions('DAY');
       selectedRange = 'DAY';
       // console.log(type, 'DAY', dateYesterday, dateNow);
@@ -612,6 +612,7 @@ const showHistoriekGrafiek = function (type) {
     } else {
       // just show the page and reset the graph options.
       hideAll();
+      show(htmlRefeshGraph);
       switch (type) {
         case 'co2':
           updateTitle('CO2');
