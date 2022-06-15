@@ -30,7 +30,7 @@
   <div class="c-app">
     <div class="c-mobile">
       <div class="c-mobile--topbar">
-        <div class="c-mobile--logo ">
+        <a class="c-mobile--logo " href="/">
           <svg class="c-mobile--logo__symbol" xmlns="http://www.w3.org/2000/svg" width="109" height="32"
             viewBox="0 0 109 32">
             <text id="Air_Insight" data-name="Air Insight" transform="translate(0 26)" fill="#2699fb" font-size="24"
@@ -38,8 +38,11 @@
               <tspan x="0" y="0">Air Insight</tspan>
             </text>
           </svg>
+        </a>
+        <div class="c-topbar--title">
+          <span class="js-back-btn material-icons">arrow_back</span>
+          <h2 class="js-topbar-title"> Realtime dashboard</h2>
         </div>
-        <h2 class="js-topbar-title">Realtime dashboard</h2>
         <div class="c-topbar--right">
           <svg class="js-refesh c-hidden c-clickable-icon" xmlns="http://www.w3.org/2000/svg" height="48" width="48">
             <path
@@ -65,6 +68,11 @@
 
     <main class="c-content js-content">
       <div class="js-actueel c-actueel c-hidden">
+        <div class="c-time-till-refesh">
+          <div class="c-progress">
+
+          </div>
+        </div>
         <div class="js-C02 c-box">
           <div class="c-box__header">
             <div class="u-spacing-left-mobile"></div>
@@ -429,6 +437,7 @@
     </svg>
   </a>
   <div class="c-topbar">
+    <span class="js-back-btn material-icons">arrow_back</span>
     <h2 class="js-topbar-title">Realtime dashboard</h2>
     <svg class="js-refesh c-hidden" xmlns="http://www.w3.org/2000/svg" height="48" width="48">
       <path
@@ -438,7 +447,7 @@
   </div>
   <aside class="c-sidebar">
 
-    <h3 class="c-sidebar__subtitle js-btn-bg-blue-sidebar js-button-acuteel" data-type="actueel">
+    <h3 class="c-sidebar__subtitle js-btn-bg-blue-sidebar js-button-acuteel c-selected" data-type="actueel">
       <span class="material-icons">air</span>
       <p>REALTIME DASHBOARD</p>
     </h3>
@@ -497,7 +506,7 @@
   </div>
   <div class="c-mobile-nav js-mobile-nav">
     <h2 class="c-sidebar__title">Administratie</h2>
-    <h3 class="c-sidebar__subtitle js-btn-bg-blue-sidebar" data-type="actueel">
+    <h3 class="c-sidebar__subtitle js-btn-bg-blue-sidebar c-selected" data-type="actueel">
       <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24"
         width="24px" fill="#000000">
         <g>

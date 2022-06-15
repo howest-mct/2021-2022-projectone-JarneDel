@@ -82,6 +82,17 @@ const showPage = function (type) {
   console.log(type);
   if (type == 'actueel') {
     console.log('Actuele pagina');
+    if (lastPageArray[lastPageArray.length - 1] != 'actueel') {
+      if (lastPageArray.length == 1) {
+        htmlbackbtns.forEach(element => {
+          element.classList.add('c-clickable-icon')
+          element.style.color = 'var(--gray-color)'
+        });
+
+      }
+      lastPageArray.push('actueel')
+
+    }
     updateTitle('Realtime dashboard');
     hideAll();
     show(htmlActueel);
@@ -97,6 +108,16 @@ const showPage = function (type) {
     }
   } else if (type == 'settings') {
     console.log('Settings');
+    if (lastPageArray[lastPageArray.length - 1] != 'settings') {
+      if (lastPageArray.length == 1) {
+        htmlbackbtns.forEach(element => {
+          element.classList.add('c-clickable-icon')
+          element.style.color = 'var(--gray-color)'
+        });
+
+      }
+      lastPageArray.push('settings')
+    }
     updateTitle('Settings');
     hideAll();
     show(htmlSettings);
@@ -415,6 +436,7 @@ const showNewLiveData = function (type_data) {
 const showAcuteleDataOnLoad = function () {
   let event = new CustomEvent('click');
   console.log(event);
+
   document.querySelector('.js-button-acuteel').dispatchEvent(event);
   hideSidebar();
 };
@@ -525,6 +547,41 @@ const updateTitle = function (newTitle) {
 };
 
 
+const showLastPage = function () {
+
+  if (lastPageArray.length > 1) {
+    let lastPage = lastPageArray[lastPageArray.length - 2]
+    lastPageArray.pop();
+    if (lastPageArray.length <= 1) {
+      htmlbackbtns.forEach(function (element) {
+        element.classList.remove('c-clickable-icon');
+        element.style.color = '#ddd'
+      })
+    }
+    console.log(lastPage)
+    switch (lastPage) {
+      case 'actueel':
+        console.log("lastpage, actueel")
+        showPage('actueel');
+        break;
+      case 'settings':
+        console.log('lastpage: settings')
+        showPage('settings');
+        break;
+      default:
+        console.log(lastPage, 'laad historiek')
+        showHistoriekGrafiek(lastPage)
+        break;
+
+    }
+  } else {
+    htmlbackbtns.forEach(function (element) {
+      element.classList.remove('c-clickable-icon');
+      element.style.color = '#ddd'
+    })
+  }
+}
+
 
 
 const showHistoriekGrafiek = function (type) {
@@ -533,6 +590,16 @@ const showHistoriekGrafiek = function (type) {
   show(htmlHistoriek);
   hideSidebar();
   activeGraph = type;
+  if (lastPageArray[lastPageArray.length - 1] != type) {
+    if (lastPageArray.length == 1) {
+      htmlbackbtns.forEach(element => {
+        element.classList.add('c-clickable-icon')
+        element.style.color = 'var(--gray-color)'
+      });
+
+    }
+    lastPageArray.push(type)
+  }
   if (typesMobile.includes(type)) {
     console.log('mobile');
     show(htmlLoading);
@@ -761,6 +828,7 @@ const listenToSocketCharts = function () {
     updateOptionsCharts(co2Reading, 'CO2');
     newData.co2 = new Date();
     showNewLiveData('CO2');
+    restartCountdown()
   });
   socketio.on('B2F_PM', function (data) {
     // console.log(data);
@@ -1041,9 +1109,32 @@ const listenToChartNavigation = function () {
   })
 }
 
+const listenToBackBtn = function () {
+  htmlbackbtns.forEach(element => {
+    element.addEventListener('click', function () {
+      showLastPage();
+    })
+  });
+}
 
 
-
+let id
+const restartCountdown = function () {
+  if (id) {
+    clearInterval(id)
+  }
+  let elem = document.querySelector('.c-progress');
+  let width = 100;
+  id = setInterval(frame, 630);
+  function frame() {
+    if (width <= 0) {
+      clearInterval(id);
+    } else {
+      width--;
+      elem.style.width = width + "%";
+    }
+  }
+}
 
 
 
@@ -1074,6 +1165,8 @@ const init = function () {
     hideAll();
     showAcuteleDataOnLoad();
     dontClickWhenScrolling();
+    restartCountdown()
+    listenToBackBtn();
   }
 };
 

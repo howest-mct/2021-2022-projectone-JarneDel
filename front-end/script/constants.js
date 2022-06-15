@@ -21,6 +21,10 @@ let timeout = null
 let selectedRange, activeGraph;
 let RPI = false;
 let selectedPage = 'actueel';
+let lastPageArray = [];
+
+
+
 // #region ***  DOM references                           ***********
 let hmtlPM, htmlOnBoot;
 let htmlActueel,
@@ -46,7 +50,8 @@ let htmlActueel,
   htmlReloadPage,
   htmlChartType,
   htmlRefeshGraph,
-  htmlIndicatieAll;
+  htmlIndicatieAll,
+  htmlbackbtns;
 // #endregion
 
 // #region formatters
@@ -976,6 +981,7 @@ const loadQuerySelectors = function () {
   htmlChartType = document.querySelector('.js-chart-type');
   htmlRefeshGraph = document.querySelector('.js-refesh-chart');
   htmlIndicatieAll = document.querySelectorAll('.js-indicatie');
+  htmlbackbtns = document.querySelectorAll('.js-back-btn')
 };
 
 //# endregion
