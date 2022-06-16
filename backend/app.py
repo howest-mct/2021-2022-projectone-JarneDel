@@ -170,6 +170,7 @@ def fan_thread():
     fan.pwm_speed = 50
     start = time.time()
     while True:
+        rpm = fan.rpm
         if fan.fan_mode == 1:
             # automatic
             base = mhz.co2_percentage
@@ -184,8 +185,7 @@ def fan_thread():
                 base = 100
             fan.pwm_speed = base
             print("fan mode auto", base)
-
-        socketio.emit("B2F_fan_speed", {"rpm": fan.rpm})
+        socketio.emit("B2F_fan_speed", {"rpm": rpm})
         dt = start - time.time()
         time.sleep(1)
         if dt > 60:
