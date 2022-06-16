@@ -66,6 +66,7 @@ global_vars = Globals()
 
 # fan init
 fan_pwm = DataRepository.get_last_fan_setting()["setwaarde"]
+global_vars.__last_fan_pwm = fan_pwm
 fan = Fan(6, 13, 2, initial=fan_pwm)
 
 
@@ -167,7 +168,7 @@ def get_data(sensor):
 def fan_thread():
     print("***starting Fan thread***")
     fan.fan_mode = DataRepository.get_fan_setting()["setwaarde"]
-    fan.pwm_speed = 50
+    fan.pwm_speed = global_vars.__last_fan_pwm
     start = time.time()
     while True:
         rpm = fan.rpm
@@ -185,6 +186,9 @@ def fan_thread():
                 base = 100
             fan.pwm_speed = base
             print("fan mode auto", base)
+        else:
+            fan.pwm_speed = global_vars.last_fan_rpm
+
         socketio.emit("B2F_fan_speed", {"rpm": rpm})
         dt = start - time.time()
         time.sleep(1)
@@ -327,6 +331,7 @@ def fan_pwm():
         if pwm > 100 or pwm < 0:
             return jsonify(message="wrong value"), 400
         fan.pwm_speed = pwm
+        global_vars.last_fan_pwm = pwm
         data = DataRepository.set_fan_pwm(pwm)
         return jsonify(gebeurtenisID=data)
 
@@ -432,6 +437,7 @@ def initial_connection():
 def change_fan_speed(jsonObject):
     pwm = jsonObject["pwm"]
     fan.pwm_speed = pwm
+    global_vars.last_fan_pwm = pwm
     logging.info(f"Changed pwm speed: {pwm}")
     DataRepository.set_fan_pwm(pwm)
 
