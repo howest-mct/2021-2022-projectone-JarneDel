@@ -8,7 +8,7 @@ from repositories.DataRepository import DataRepository
 from bme68x import BME68X
 import bme68xConstants as cst
 import bsecConstants as bsec
-
+from helpers.variables import Globals
 from model.cmd import CMD
 from model.Mhz19B import Mhz19B
 from model.pms5003 import Pms5003
@@ -60,6 +60,9 @@ pms = Pms5003(set=20, reset=21)
 pms.setup()
 trans_pin_PMS = 19
 trans_pin_mhz = 26
+
+mhz = Mhz19B()
+global_vars = Globals()
 
 # fan init
 fan_pwm = DataRepository.get_last_fan_setting()["setwaarde"]
@@ -120,6 +123,7 @@ def bme_main():
             voc_percentage = int(bsec_data["gas_percentage"])
             accuracy = bsec_data["iaq_accuracy"]
             iaq = round(bsec_data["iaq"])
+            global_vars.hum = humidity
             # print(temperature, humidity, raw_pressure)
             if time.time() - start > 120:
                 start = time.time()
@@ -166,6 +170,21 @@ def fan_thread():
     fan.pwm_speed = 50
     start = time.time()
     while True:
+        if fan.fan_mode == 1:
+            # automatic
+            base = mhz.co2_percentage
+            # print(global_vars.hum)
+            if global_vars.hum > 50:
+                base += (global_vars.hum - 50) * 4
+            if global_vars.pm > 20:
+                base += (global_vars.pm - 20) / 2
+            if base > 100:
+                base = 100
+            if mhz.co2 > 2000:
+                base = 100
+            fan.pwm_speed = base
+            print("fan mode auto", base)
+
         socketio.emit("B2F_fan_speed", {"rpm": fan.rpm})
         dt = start - time.time()
         time.sleep(1)
@@ -185,13 +204,16 @@ def read_pms():
     GPIO.output(trans_pin_PMS, 1)
     list_data, dict_data = pms.read()
     GPIO.output(trans_pin_PMS, 0)
+    global_vars.pm = 0
+    for i in list_data[3:6]:
+        global_vars.pm += i
     return list_data, dict_data
 
 
 def read_mhz19b():
     GPIO.output(trans_pin_mhz, 1)
     GPIO.output(trans_pin_PMS, 0)
-    val = Mhz19B.read()
+    val = mhz.read()
     GPIO.output(trans_pin_mhz, 0)
     return val
 
@@ -282,6 +304,7 @@ def fan_mode():
         if val < 0 or val == 2:
             logging.error(f"Wrong Value fanmode: {val}")
             return jsonify(message=f"Wrong Value fanmode: {val}"), 400
+        # Manual mode = 0, auto mode = 1
         fan.fan_mode = val
         data = DataRepository.set_fan_setting(val)
         # logging.info(data)

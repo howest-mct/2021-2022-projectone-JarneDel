@@ -499,6 +499,7 @@ input:checked + .c-switch__slider:before{
     width: 240px;
     height: 240px;
   }
+
 }
 
 .chart{

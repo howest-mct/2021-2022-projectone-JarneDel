@@ -522,29 +522,29 @@ let PMNopChartOptions = {
       ],
     },
   ],
-  xaxis: {
-    title: {
-      show: true,
-      text: 'Particle size [µm]'
-    },
-  },
+  // xaxis: {
+  //   title: {
+  //     show: true,
+  //     text: 'Particle size [µm]'
+  //   },
+  // },
   responsive: [
     {
       breakpoint: 900,
       options: {
         chart: { width: '370px', height: '144px' },
         plotOptions: { bar: { horizontal: true } },
-        xaxis: {
-          title: {
-            show: false,
-            text: ''
-          }
-        },
-        yaxis: {
-          title: {
-            text: 'Particle size [µm]'
-          },
-        },
+        // xaxis: {
+        //   title: {
+        //     show: false,
+        //     text: ''
+        //   }
+        // },
+        // yaxis: {
+        //   title: {
+        //     text: 'Particle size [µm]'
+        //   },
+        // },
       },
     },
   ],

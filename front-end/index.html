@@ -170,26 +170,6 @@
             <div class="js-pressure-chart c-chart"></div>
           </div>
         </div>
-        <div class="js-iaq-box c-box">
-          <div class="c-box__header">
-            <img class='c-icon' src="/img/png/IAQ.png" alt="IAQ">
-            <div class="u-spacing-left-mobile"></div>
-            <p class="c-inhoud-titel">Air Quality</p>
-            <!-- <div class="c-spacing" style="width: 50px"></div> -->
-            <div class="c-right">
-              <svg class='c-historiek js-to-historiek' data-name="iaq" xmlns="http://www.w3.org/2000/svg" height="48px"
-                viewBox="0 0 24 24" width="48px" fill="#7f7f7f">
-                <path d="M0 0h24v24H0V0z" fill="none" />
-                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" />
-              </svg>
-              <div class="c-indicatie js-indicatie" data-name="iaq"></div>
-            </div>
-          </div>
-          <div class="c-box__content">
-            <!-- <div class="c-spacing" style="width: 50px"></div> -->
-            <div class="js-iaq-chart c-chart"></div>
-          </div>
-        </div>
         <div class="js-PM-box c-box">
           <div class="c-box__header">
             <div class="u-spacing-left-mobile"></div>
@@ -218,6 +198,27 @@
             <div class="js-pm-chart c-chart"></div>
           </div>
         </div>
+        <div class="js-iaq-box c-box">
+          <div class="c-box__header">
+            <img class='c-icon' src="/img/png/IAQ.png" alt="IAQ">
+            <div class="u-spacing-left-mobile"></div>
+            <p class="c-inhoud-titel">Air Quality</p>
+            <!-- <div class="c-spacing" style="width: 50px"></div> -->
+            <div class="c-right">
+              <svg class='c-historiek js-to-historiek' data-name="iaq" xmlns="http://www.w3.org/2000/svg" height="48px"
+                viewBox="0 0 24 24" width="48px" fill="#7f7f7f">
+                <path d="M0 0h24v24H0V0z" fill="none" />
+                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" />
+              </svg>
+              <div class="c-indicatie js-indicatie" data-name="iaq"></div>
+            </div>
+          </div>
+          <div class="c-box__content">
+            <!-- <div class="c-spacing" style="width: 50px"></div> -->
+            <div class="js-iaq-chart c-chart"></div>
+          </div>
+        </div>
+
         <div class="js-PM-NOP-box c-box c-box--wide">
           <div class="c-box__header">
             <div class="u-spacing-left-mobile"></div>
@@ -294,9 +295,9 @@
 
             </div>
 
-            <div class="js-fan-slider c-fan-slider-box">
-              <input type="range" min="0" max="100" value="2.5" step="1" class="js-slider c-fan-slider-input c-hidden"
-                id="range" oninput="rangenumber.value=value">
+            <div class="js-fan-slider c-fan-slider-box c-hidden">
+              <input type="range" min="0" max="100" value="2.5" step="1" class="js-slider c-fan-slider-input" id="range"
+                oninput="rangenumber.value=value">
               <input type="number" id="rangenumber" min="0" max="100" value="2.5" class="js-slider-number"
                 oninput="range.value=value"></input>
               <label>%</label>

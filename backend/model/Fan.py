@@ -78,3 +78,13 @@ class Fan:
     @fan_mode.setter
     def fan_mode(self, value):
         self.__fan_mode = value
+
+    # ********** property auto_fan_speed - (setter/getter) ***********
+    @property
+    def auto_fan_speed(self):
+        """The auto_fan_speed property."""
+        return self.__auto_fan_speed
+
+    @auto_fan_speed.setter
+    def auto_fan_speed(self, value):
+        self.__auto_fan_speed = value

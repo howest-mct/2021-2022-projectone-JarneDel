@@ -411,10 +411,11 @@ const showRefesh = function (jsonObject) {
   console.log(jsonObject);
 };
 const showFanSetting = function (jsonObject) {
+  console.warn('showfanslider', jsonObject)
   document.querySelector('.js-toggle-fan-checkbox').checked =
     jsonObject.setting.setwaarde;
-  if (jsonObject.setting.setwaarde) {
-    show(htmlSlider);
+  if (jsonObject.setting.setwaarde == 0) {
+    show(document.querySelector('.js-fan-slider'));
   }
 }
 
@@ -924,11 +925,11 @@ const listenToFanMode = function () {
       if (this.checked) {
         console.log('toggle switch on', this);
         const body = JSON.stringify({ auto: true });
-        handleData(url, showFanManSlider, callbackError, 'POST', body);
+        handleData(url, hideFanManSlider, callbackError, 'POST', body);
       } else {
         console.log('toggle switch off', this);
         const body = JSON.stringify({ manual: true });
-        handleData(url, hideFanManSlider, callbackError, 'POST', body);
+        handleData(url, showFanManSlider, callbackError, 'POST', body);
       }
     });
 };
