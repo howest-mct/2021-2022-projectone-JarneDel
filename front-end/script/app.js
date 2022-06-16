@@ -969,6 +969,7 @@ const listenToSocketFan = function () {
   socketio.on('B2F_fan_speed', function (msg) {
     // htmlRPM.innerHTML = Math.round(msg.rpm) + ' rpm';
     let percentage = valueToPercentFan(msg.rpm)
+    console.log(msg.rpm)
     fanChart.updateSeries([percentage])
   });
 };

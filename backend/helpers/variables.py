@@ -1,6 +1,7 @@
 class Globals:
     def __init__(self) -> None:
         self.hum = 0
+        self.pm = 0
 
     # ********** property hum - (setter/getter) ***********
     @property
