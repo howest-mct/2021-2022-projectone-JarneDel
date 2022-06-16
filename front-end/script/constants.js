@@ -483,6 +483,7 @@ let PMNopChartOptions = {
     height: 280,
     width: 700,
     type: 'bar',
+    fontFamily: 'proxima-nova, Helvetica',
     toolbar: {
       show: false,
     },
@@ -555,6 +556,7 @@ const fanOptions = {
   chart: {
     height: 280,
     type: 'radialBar',
+    fontFamily: 'proxima-nova, Helvetica',
     events: {
       click: function (event, chartContext, config) {
         console.log(event, chartContext, config)
@@ -627,6 +629,7 @@ const HistoriekOptions = {
   chart: {
     height: 360,
     type: 'area',
+    fontFamily: 'proxima-nova, Helvetica',
   },
   dataLabels: {
     enabled: false,
@@ -666,6 +669,7 @@ let HistoriekOptionsLineChart = {
   chart: {
     height: 360,
     type: 'line',
+    fontFamily: 'proxima-nova, Helvetica',
   },
   dataLabels: {
     enabled: false,
