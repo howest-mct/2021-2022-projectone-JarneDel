@@ -7,7 +7,7 @@ import logging
 class Bme:
     # region init
     def __init__(self, temp_offset=0) -> None:
-        self.i2c_address = 0x76
+        self.i2c_address = 0x77
         self.i2c = smbus.SMBus(1)
         self.offset_temp_in_t_fine = 0
         self.chip_id = self.read(0xD0, 1)
