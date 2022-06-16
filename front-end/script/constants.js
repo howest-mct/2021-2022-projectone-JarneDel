@@ -7,6 +7,7 @@ let co2Chart,
   pressureChart,
   PMchart,
   PMNopChart,
+  fanChart,
   iaqchart,
   areaCO2,
   areaTemp,
@@ -15,9 +16,15 @@ let co2Chart,
   areaPM,
   areaPmNop;
 
+
+let timeout = null
 let selectedRange, activeGraph;
 let RPI = false;
 let selectedPage = 'actueel';
+let lastPageArray = [];
+
+
+
 // #region ***  DOM references                           ***********
 let hmtlPM, htmlOnBoot;
 let htmlActueel,
@@ -43,7 +50,8 @@ let htmlActueel,
   htmlReloadPage,
   htmlChartType,
   htmlRefeshGraph,
-  htmlIndicatieAll;
+  htmlIndicatieAll,
+  htmlbackbtns;
 // #endregion
 
 // #region formatters
@@ -61,9 +69,12 @@ const valueToPercentPressure = function (value) {
   return ((value - 940) * 100) / (1060 - 940);
 };
 const valueToPercentIaq = function (value) {
-  return value / 3;
+  return 100 - value / 3;
 };
 
+const valueToPercentFan = function (val) {
+  return val / 5600 * 100
+}
 // #endregion
 
 // # region chartoptions
@@ -172,7 +183,7 @@ let tempChartOptions = {
           color: '#7F7F7F',
         },
         value: {
-          formatter: (val) => ((val * 45) / 100).toFixed(1),
+          formatter: (val) => ((val * 45) / 100).toFixed(0),
           fontSize: '40px',
           fontWeight: 700,
           fontFamily: 'proxima-nova',
@@ -245,7 +256,7 @@ let humidityChartOptions = {
           offsetY: 20,
         },
         value: {
-          formatter: (val) => ((val * 100) / 100).toFixed(2),
+          formatter: (val) => (val).toFixed(0) + '%',
           fontSize: '40px',
           fontWeight: 700,
           fontFamily: 'proxima-nova',
@@ -317,7 +328,7 @@ let PressureChartOptions = {
           offsetY: 20,
         },
         value: {
-          formatter: (val) => ((val * (1060 - 940)) / 100 + 940).toFixed(1),
+          formatter: (val) => ((val * (1060 - 940)) / 100 + 940).toFixed(0),
           fontSize: '40px',
           fontWeight: 700,
           fontFamily: 'proxima-nova',
@@ -357,6 +368,7 @@ let iaqChartOptions = {
   chart: {
     height: 280,
     type: 'radialBar',
+
   },
   series: [0],
   colors: ['#2699FB'],
@@ -384,7 +396,7 @@ let iaqChartOptions = {
           color: '#7F7F7F',
         },
         value: {
-          formatter: (val) => (val * 3).toFixed(0),
+          formatter: (val) => (val).toFixed(0) + "%",
           fontSize: '40px',
           fontWeight: 700,
           fontFamily: 'proxima-nova',
@@ -510,16 +522,107 @@ let PMNopChartOptions = {
       ],
     },
   ],
+  // xaxis: {
+  //   title: {
+  //     show: true,
+  //     text: 'Particle size [µm]'
+  //   },
+  // },
   responsive: [
     {
       breakpoint: 900,
       options: {
         chart: { width: '370px', height: '144px' },
         plotOptions: { bar: { horizontal: true } },
+        // xaxis: {
+        //   title: {
+        //     show: false,
+        //     text: ''
+        //   }
+        // },
+        // yaxis: {
+        //   title: {
+        //     text: 'Particle size [µm]'
+        //   },
+        // },
       },
     },
   ],
 };
+
+
+const fanOptions = {
+  chart: {
+    height: 280,
+    type: 'radialBar',
+    events: {
+      click: function (event, chartContext, config) {
+        console.log(event, chartContext, config)
+      }
+    }
+  },
+  series: [0],
+  colors: ['#2699FB'],
+  plotOptions: {
+    radialBar: {
+      startAngle: -135,
+      endAngle: 135,
+      hollow: {
+        margin: 15,
+        size: '65%',
+      },
+      track: {
+        background: '#BCE0FD',
+        startAngle: -135,
+        endAngle: 135,
+        // strokeWidth: '75%',
+      },
+      dataLabels: {
+        name: {
+          show: true,
+          fontSize: '20px',
+          fontWeight: 400,
+          fontFamily: 'proxima-nova',
+          color: '#7F7F7F',
+          offsetY: 20,
+        },
+        value: {
+          formatter: (val) => (val * 5600 / 100).toFixed(0),
+          fontSize: '40px',
+          fontWeight: 700,
+          fontFamily: 'proxima-nova',
+          color: '#7F7F7F',
+          show: true,
+          offsetY: -20,
+        },
+      },
+    },
+  },
+  fill: {
+    type: 'solid',
+  },
+  stroke: {
+    lineCap: 'round',
+  },
+  labels: ['RPM'],
+  responsive: [
+    {
+      breakpoint: 900,
+      options: {
+        chart: { height: '200px' },
+        plotOptions: {
+          radialBar: {
+            dataLabels: {
+              name: { fontSize: '14px' },
+              value: { fontSize: '30px' },
+            },
+          },
+        },
+      },
+    },
+  ],
+}
+
 const HistoriekOptions = {
   chart: {
     height: 360,
@@ -623,19 +726,19 @@ const labels = {
     {
       min: 0,
       max: 900,
-      val: 'Good!',
+      val: 'Good',
       color: colors.green,
     },
     {
       min: 900,
       max: 1500,
-      val: 'ventilate!',
+      val: 'Ventilate',
       color: colors.orange,
     },
     {
       min: 1500,
       max: 5000,
-      val: 'Very bad!',
+      val: 'Very bad',
       color: colors.red,
     },
   ],
@@ -649,31 +752,31 @@ const labels = {
     {
       min: 14,
       max: 17,
-      val: 'chilly',
+      val: 'Chilly',
       color: '#50a7f9',
     },
     {
       min: 17,
       max: 20,
-      val: 'cool',
+      val: 'Cool',
       color: '#009193',
     },
     {
       min: 20,
       max: 22,
-      val: 'ideal',
+      val: 'Ideal',
       color: '#2699FB',
     },
     {
       min: 22,
       max: 24,
-      val: 'Tepid',
+      val: 'Bit warm',
       color: '#70bf40',
     },
     {
       min: 24,
       max: 28,
-      val: 'warm',
+      val: 'Warm',
       color: '#f5d328',
     },
     {
@@ -693,7 +796,7 @@ const labels = {
     {
       max: 100,
       min: 70,
-      val: 'Too High!',
+      val: 'Too high!',
       color: colors.red,
     },
 
@@ -726,7 +829,7 @@ const labels = {
     {
       min: 1022.689,
       max: 1060,
-      val: 'High Pressure',
+      val: 'High pressure',
       color: '#2699FB',
     },
     {
@@ -746,19 +849,19 @@ const labels = {
     {
       min: 0,
       max: 50,
-      val: 'exellent',
+      val: 'Excellent',
       color: colors.lightGreen,
     },
     {
       min: 50,
       max: 100,
-      val: 'good',
+      val: 'Good',
       color: colors.green,
     },
     {
       min: 100,
       max: 150,
-      val: 'lightly polluted',
+      val: 'Lightly polluted',
       color: colors.yellow,
     },
     {
@@ -874,10 +977,11 @@ const loadQuerySelectors = function () {
   htmlHistoriekPM = document.querySelector('.js-historiek-pm');
   htmlHistoriekPmNop = document.querySelector('.js-historiek-pmnop');
   htmlLoading = document.querySelector('.js-loading');
-  htmlReloadPage = document.querySelector('.js-reload-page');
+  // htmlReloadPage = document.querySelector('.js-reload-page');
   htmlChartType = document.querySelector('.js-chart-type');
   htmlRefeshGraph = document.querySelector('.js-refesh-chart');
   htmlIndicatieAll = document.querySelectorAll('.js-indicatie');
+  htmlbackbtns = document.querySelectorAll('.js-back-btn')
 };
 
 //# endregion
