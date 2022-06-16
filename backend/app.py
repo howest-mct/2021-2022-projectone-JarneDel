@@ -187,7 +187,7 @@ def fan_thread():
             fan.pwm_speed = base
             print("fan mode auto", base)
         else:
-            fan.pwm_speed = global_vars.last_fan_rpm
+            fan.pwm_speed = global_vars.last_fan_pwm
 
         socketio.emit("B2F_fan_speed", {"rpm": rpm})
         dt = start - time.time()
