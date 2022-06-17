@@ -84,7 +84,18 @@ const showPage = function (type) {
     '.js-Mobile-range-icon'
   ).style.display = 'none';
   hideAll();
+  let selectedNav = document.querySelectorAll('.c-selected');
+  for (let i of selectedNav) {
+    i.classList.remove('c-selected');
+  }
+  let sidebar = document.querySelectorAll('.js-btn-bg-blue-sidebar');
+  for (let btn of sidebar) {
+    if (btn.dataset.type === type) {
+      btn.classList.add('c-selected');
+    }
+  }
   if (type == 'actueel') {
+
     console.log('Actuele pagina');
     if (lastPageArray[lastPageArray.length - 1] != 'actueel') {
       if (lastPageArray.length == 1) {

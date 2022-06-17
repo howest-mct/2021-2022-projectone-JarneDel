@@ -493,6 +493,11 @@ let PMNopChartOptions = {
       horizontal: false,
     },
   },
+  // dataLabels: {
+  //   style: {
+  //     fontSize: '20px'
+  //   }
+  // },
   series: [
     {
       data: [
@@ -535,6 +540,12 @@ let PMNopChartOptions = {
       options: {
         chart: { width: '370px', height: '144px' },
         plotOptions: { bar: { horizontal: true } },
+        dataLabels: {
+          style: {
+            fontSize: '9px',
+            fontWeight: 400
+          }
+        },
         // xaxis: {
         //   title: {
         //     show: false,
