@@ -983,6 +983,13 @@ const listenToSocketFan = function () {
     console.log(msg.rpm)
     fanChart.updateSeries([percentage])
   });
+  socketio.on('B2F_fan_pwm', function (pwm) {
+    let pwmVal = pwm.pwm
+    let slider = document.querySelector('.js-slider')
+    slider.value = pwmVal
+    document.querySelector('.js-slider-number').value = pwmVal
+    slider.style.backgroundSize = pwmVal + '% 100%'
+  })
 };
 
 const listenToHistoryDropdown = function () {

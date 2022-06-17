@@ -438,6 +438,7 @@ def change_fan_speed(jsonObject):
     pwm = jsonObject["pwm"]
     fan.pwm_speed = pwm
     global_vars.last_fan_pwm = pwm
+    emit("B2F_fan_pwm", {"pwm": pwm}, broadcast=True)
     logging.info(f"Changed pwm speed: {pwm}")
     DataRepository.set_fan_pwm(pwm)
 
