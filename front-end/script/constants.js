@@ -570,7 +570,7 @@ const fanOptions = {
     fontFamily: 'proxima-nova, Helvetica',
     events: {
       click: function (event, chartContext, config) {
-        console.log(event, chartContext, config)
+
       }
     }
   },

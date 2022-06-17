@@ -6,7 +6,7 @@ from time import sleep
 def start_chrome_kiosk():
     import os
 
-    sleep(50)
+    sleep(20)
     os.environ["DISPLAY"] = ":0.0"
     options = webdriver.ChromeOptions()
     # options.headless = True

@@ -116,7 +116,7 @@ def bme_main():
         bsec_data = get_data(bme)
         if bsec_data is not None:
             print(bsec_data)
-            # logging.debug(bsec_data)
+            logging.info(bsec_data)
             # print(bsec_data["temperature"], "temp")
             temperature = round(bsec_data["temperature"], 2)
             humidity = round(bsec_data["humidity"], 2)
@@ -310,6 +310,7 @@ def fan_mode():
             return jsonify(message=f"Wrong Value fanmode: {val}"), 400
         # Manual mode = 0, auto mode = 1
         fan.fan_mode = val
+        socketio.emit("B2F_fan_setting", {"setting": val, "pwm": fan.pwm_speed})
         data = DataRepository.set_fan_setting(val)
         # logging.info(data)
         if data is not None:

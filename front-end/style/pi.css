@@ -1066,6 +1066,12 @@ background: var(--hover-background);
   .c-mobile--topbar{
     justify-content: flex-end;
   }
+  .c-box__content{
+    max-height: 500px;
+  }
+  .u-fan-settings{
+    height: unset!important;
+  }
 }
 
 .u-fan-settings{
