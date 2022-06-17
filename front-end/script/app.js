@@ -6,9 +6,7 @@ const lanIP = `${window.location.hostname}:5000`;
 let socketio;
 try {
   socketio = io(lanIP);
-} catch {
-
-}
+} catch { }
 
 // #endregion
 
@@ -50,15 +48,15 @@ const toggleSidebar = function () {
   toggleClass(htmlCloseHamburger);
 };
 const hideSidebar = function () {
-  htmlMobileNav.classList.remove('c-show-nav')
-  show(htmlhamburger)
-  hide(htmlCloseHamburger)
-}
+  htmlMobileNav.classList.remove('c-show-nav');
+  show(htmlhamburger);
+  hide(htmlCloseHamburger);
+};
 const showSidebar = function () {
-  htmlMobileNav.classList.add('c-show-nav')
-  hide(htmlhamburger)
-  show(htmlCloseHamburger)
-}
+  htmlMobileNav.classList.add('c-show-nav');
+  hide(htmlhamburger);
+  show(htmlCloseHamburger);
+};
 
 //reset chartoptions on switching graphs
 const resetGraphOptions = function (type) {
@@ -78,10 +76,7 @@ const resetGraphOptions = function (type) {
 
 // #region ***  Callback-Visualisation - show___         ***********
 const showPage = function (type) {
-
-  document.querySelector(
-    '.js-Mobile-range-icon'
-  ).style.display = 'none';
+  document.querySelector('.js-Mobile-range-icon').style.display = 'none';
   hideAll();
   let selectedNav = document.querySelectorAll('.c-selected');
   for (let i of selectedNav) {
@@ -94,18 +89,14 @@ const showPage = function (type) {
     }
   }
   if (type == 'actueel') {
-
-
     if (lastPageArray[lastPageArray.length - 1] != 'actueel') {
       if (lastPageArray.length == 1) {
-        htmlbackbtns.forEach(element => {
-          element.classList.add('c-clickable-icon')
-          element.style.color = 'var(--gray-color)'
+        htmlbackbtns.forEach((element) => {
+          element.classList.add('c-clickable-icon');
+          element.style.color = 'var(--gray-color)';
         });
-
       }
-      lastPageArray.push('actueel')
-
+      lastPageArray.push('actueel');
     }
     updateTitle('Realtime dashboard');
     hideAll();
@@ -121,23 +112,20 @@ const showPage = function (type) {
       OnlyOneListener = false;
     }
   } else if (type == 'settings') {
-
     if (lastPageArray[lastPageArray.length - 1] != 'settings') {
       if (lastPageArray.length == 1) {
-        htmlbackbtns.forEach(element => {
-          element.classList.add('c-clickable-icon')
-          element.style.color = 'var(--gray-color)'
+        htmlbackbtns.forEach((element) => {
+          element.classList.add('c-clickable-icon');
+          element.style.color = 'var(--gray-color)';
         });
-
       }
-      lastPageArray.push('settings')
+      lastPageArray.push('settings');
     }
     updateTitle('Settings');
     hideAll();
     show(htmlSettings);
     getFanSetting();
     if (OnlyOneListenersettings) {
-
       getIP();
       createFanChart();
       // listenToReload();
@@ -146,13 +134,12 @@ const showPage = function (type) {
       listenToSlider();
       OnlyOneListenersettings = false;
     }
-    getFanPWM()
+    getFanPWM();
   }
 };
 
 // shows ip address in settings --  called by getpage
 const showIP = function (jsonIP) {
-
   let lanIps = jsonIP.ip.lan;
   let wlanIps = jsonIP.ip.wlan;
   for (let lanip of lanIps) {
@@ -161,13 +148,12 @@ const showIP = function (jsonIP) {
         text: lanip,
         width: 160,
         height: 160,
-      })
-
+      });
     }
     // new QRCode(document.querySelector('.qrCodeLan'), lanIps[0])
   }
   if (!lanIps[0]) {
-    document.querySelector('.js-box-lan').style.display = 'none'
+    document.querySelector('.js-box-lan').style.display = 'none';
   }
   for (let wlanIP of wlanIps) {
     if (wlanIP) {
@@ -175,11 +161,9 @@ const showIP = function (jsonIP) {
         text: wlanIP,
         width: 160,
         height: 160,
-      })
-
+      });
     }
     // new QRCode(document.querySelector('.qrCodeWlan'), wlanIps[0])
-
   }
   const htmlElementWlan = document.querySelector('.js-wlan');
   const htmlElementLan = document.querySelector('.js-lan');
@@ -215,9 +199,12 @@ const createChart = function (data, name, dom) {
 };
 
 const createFanChart = function () {
-  fanChart = new ApexCharts(document.querySelector('.js-fan-chart'), fanOptions)
+  fanChart = new ApexCharts(
+    document.querySelector('.js-fan-chart'),
+    fanOptions
+  );
   fanChart.render();
-}
+};
 
 // creates a linechart with 3 rows -- called by showHistoriekPM
 const createLineChart = function (dom, arrayJsonStacked, arrayNames) {
@@ -331,7 +318,6 @@ const showHistoriekPmNop = function (jsonPmNop) {
 
 // renders the realtime charts
 const showCharts = function () {
-
   co2Chart = new ApexCharts(
     document.querySelector('.js-co2-chart'),
     CO2ChartOptions
@@ -412,13 +398,13 @@ const showUpdatedCharts = function (jsonObject) {
 };
 
 const showFanSetting = function (jsonObject) {
-  console.warn('showfanslider', jsonObject)
+  console.warn('showfanslider', jsonObject);
   document.querySelector('.js-toggle-fan-checkbox').checked =
     jsonObject.setting.setwaarde;
   if (jsonObject.setting.setwaarde == 0) {
     show(document.querySelector('.js-fan-slider'));
   }
-}
+};
 
 const showNoNewLiveData = function (type_data) {
   for (let indicatie of htmlIndicatieAll) {
@@ -439,19 +425,16 @@ const showNewLiveData = function (type_data) {
 const showAcuteleDataOnLoad = function () {
   let event = new CustomEvent('click');
 
-
   document.querySelector('.js-button-acuteel').dispatchEvent(event);
   hideSidebar();
 };
 
 const showFanProgress = function (jsonObject) {
-
-  let slider = document.querySelector('.js-slider')
-  slider.value = jsonObject.fan_pwm
-  document.querySelector('.js-slider-number').value = jsonObject.fan_pwm
-  slider.style.backgroundSize = jsonObject.fan_pwm + '% 100%'
-
-}
+  let slider = document.querySelector('.js-slider');
+  slider.value = jsonObject.fan_pwm;
+  document.querySelector('.js-slider-number').value = jsonObject.fan_pwm;
+  slider.style.backgroundSize = jsonObject.fan_pwm + '% 100%';
+};
 
 //updates label and data
 const updateOptionsCharts = function (value, type) {
@@ -546,62 +529,51 @@ const updateTitle = function (newTitle) {
   }
 };
 
-
 const showLastPage = function () {
-
   if (lastPageArray.length > 1) {
-    let lastPage = lastPageArray[lastPageArray.length - 2]
+    let lastPage = lastPageArray[lastPageArray.length - 2];
     lastPageArray.pop();
     if (lastPageArray.length <= 1) {
       htmlbackbtns.forEach(function (element) {
         element.classList.remove('c-clickable-icon');
-        element.style.color = '#ddd'
-      })
+        element.style.color = '#ddd';
+      });
     }
 
     switch (lastPage) {
       case 'actueel':
-
         showPage('actueel');
         break;
       case 'settings':
-
         showPage('settings');
         break;
       default:
-
-        showHistoriekGrafiek(lastPage)
+        showHistoriekGrafiek(lastPage);
         break;
-
     }
   } else {
     htmlbackbtns.forEach(function (element) {
       element.classList.remove('c-clickable-icon');
-      element.style.color = '#ddd'
-    })
+      element.style.color = '#ddd';
+    });
   }
-}
-
-
+};
 
 const showHistoriekGrafiek = function (type) {
-
   let typesMobile = ['DAY', 'WEEK', 'YTD'];
   show(htmlHistoriek);
   hideSidebar();
   activeGraph = type;
   if (lastPageArray[lastPageArray.length - 1] != type) {
     if (lastPageArray.length == 1) {
-      htmlbackbtns.forEach(element => {
-        element.classList.add('c-clickable-icon')
-        element.style.color = 'var(--gray-color)'
+      htmlbackbtns.forEach((element) => {
+        element.classList.add('c-clickable-icon');
+        element.style.color = 'var(--gray-color)';
       });
-
     }
-    lastPageArray.push(type)
+    lastPageArray.push(type);
   }
   if (typesMobile.includes(type)) {
-
     show(htmlLoading);
     let selectedNav = document.querySelectorAll('.c-selected');
     for (let i of selectedNav) {
@@ -616,7 +588,6 @@ const showHistoriekGrafiek = function (type) {
 
     hideAll();
 
-
     selectedRange = type;
     let beginDate = new Date();
     let dateNow = new Date();
@@ -624,17 +595,17 @@ const showHistoriekGrafiek = function (type) {
     const htmlSelectedRangeTitle = document.querySelector(
       '.js-Mobile-range-icon'
     );
-    htmlSelectedRangeTitle.style.display = 'unset'
+    htmlSelectedRangeTitle.style.display = 'unset';
     switch (type) {
       case 'DAY':
         beginDate.setDate(beginDate.getDate() - 1);
         beginDate = Math.round(beginDate.getTime() / 1000);
-        htmlSelectedRangeTitle.innerHTML = 'Today\'s air quality';
+        htmlSelectedRangeTitle.innerHTML = "Today's air quality";
         break;
       case 'WEEK':
         beginDate.setDate(beginDate.getDate() - 7);
         beginDate = Math.round(beginDate.getTime() / 1000);
-        htmlSelectedRangeTitle.innerHTML = 'last week\'s air quality';
+        htmlSelectedRangeTitle.innerHTML = "last week's air quality";
         break;
       case 'YTD':
         beginDate.setDate(beginDate.getDate() - 10000);
@@ -653,7 +624,6 @@ const showHistoriekGrafiek = function (type) {
       getHistoriek(i, type, beginDate, dateNow);
     }
   } else {
-
     let selectedNav = document.querySelectorAll('.c-selected');
     for (let i of selectedNav) {
       i.classList.remove('c-selected');
@@ -665,7 +635,6 @@ const showHistoriekGrafiek = function (type) {
 
     // this.classList.add('c-selected');
     if (loaded_historiek[type] == false) {
-
       loaded_historiek[type] = true;
       let dateYesterday = new Date();
       let dateNow = new Date();
@@ -724,7 +693,6 @@ const showHistoriekGrafiek = function (type) {
 };
 
 const showSelectedSidebar = function (type) {
-
   let succes = false;
   let dropdown = document.querySelectorAll('.js-dropdown-btn');
   for (let dropdownBtn of dropdown) {
@@ -746,30 +714,30 @@ const showSelectedSidebar = function (type) {
 
 // #region ***  Callback-No Visualisation - callback___  ***********
 const callbackError = function (jsonObject) {
-
   console.error('Er is een error opgetredenv bij de fetch');
 };
 
+const callbackRefesh = function (jsonObject) { };
 
 const showFanManSlider = function (jsonObject) {
-  let pwm = 0
-  if (typeof (jsonObject) == 'number') {
-    pwm = jsonObject
+  let pwm = 0;
+  if (typeof jsonObject == 'number') {
+    pwm = jsonObject;
   } else {
-
-
     pwm = jsonObject.pwm.setwaarde;
   }
 
   htmlSlider.value = pwm;
-  let slider = document.querySelector('.js-slider')
-  slider.style.backgroundSize = pwm + '% 100%'
+  let slider = document.querySelector('.js-slider');
+  slider.style.backgroundSize = pwm + '% 100%';
+  // document.querySelector('.js-fan-auto').style.display = 'none';
 
   show(document.querySelector('.js-fan-slider'));
 };
 
 const hideFanManSlider = function (jsonObject) {
-  hide(document.querySelector('.js-fan-slider'))
+  hide(document.querySelector('.js-fan-slider'));
+  // document.querySelector('.js-fan-auto').style.display = 'block';
 };
 // #endregion
 
@@ -781,7 +749,7 @@ const getActueleData = function () {
 
 const getRefesh = function () {
   const url = backend + '/data/refesh/';
-  handleData(url, showRefesh, callbackError);
+  handleData(url, callbackRefesh, callbackError);
 };
 
 const getIP = function () {
@@ -793,9 +761,9 @@ const getFanSetting = function () {
   handleData(url, showFanSetting, callbackError);
 };
 const getFanPWM = function () {
-  const url = backend + '/fan/pwm/'
-  handleData(url, showFanProgress, callbackError)
-}
+  const url = backend + '/fan/pwm/';
+  handleData(url, showFanProgress, callbackError);
+};
 const getHistoriek = function (unit, type, begin, end) {
   const url = backend + `/historiek/${unit}/${type}/${begin}-${end}/`;
   handleData(url, showHistoriek, callbackError);
@@ -831,12 +799,11 @@ const getGraphData = function (graph, graphType) {
 // #region ***  Event Listeners - listenTo___            ***********
 const listenToSocketCharts = function () {
   socketio.on('B2F_CO2', function (data) {
-
     const co2Reading = data['CO2'];
     updateOptionsCharts(co2Reading, 'CO2');
     newData.co2 = new Date();
     showNewLiveData('CO2');
-    restartCountdown()
+    restartCountdown();
   });
   socketio.on('B2F_PM', function (data) {
     const pm2_5 = data['PM2.5_AP'];
@@ -887,7 +854,7 @@ const listenToBtnSidebar = function () {
         for (let i of selectedNav) {
           i.classList.remove('c-selected');
         }
-        toggleSidebar();
+        hideSidebar();
         this.classList.add('c-selected');
         const type = this.dataset.type;
 
@@ -900,7 +867,6 @@ const listenToBtnSidebar = function () {
 const listenToRefesh = function () {
   for (let refesh of htmlRefesh) {
     refesh.addEventListener('click', function () {
-
       getRefesh();
     });
   }
@@ -910,7 +876,6 @@ const listenToMobileNav = function () {
   const hamburgermenu = document.querySelectorAll('.js-menu');
   for (let menu of hamburgermenu) {
     menu.addEventListener('click', function () {
-
       toggleSidebar();
     });
   }
@@ -922,76 +887,67 @@ const listenToFanMode = function () {
     .addEventListener('change', function () {
       const url = backend + '/fan/mode/';
       if (this.checked) {
-
         const body = JSON.stringify({ auto: true });
         handleData(url, hideFanManSlider, callbackError, 'POST', body);
       } else {
-
         const body = JSON.stringify({ manual: true });
         handleData(url, showFanManSlider, callbackError, 'POST', body);
       }
     });
 };
 const handleInputChange = function (e) {
-  let target = e.target
+  let target = e.target;
   if (e.target.type !== 'range') {
-    target = document.getElementById('range')
+    target = document.getElementById('range');
   }
 
-  const min = target.min
-  const max = target.max
-  const val = target.value
+  const min = target.min;
+  const max = target.max;
+  const val = target.value;
 
-  socketio.emit('F2B_fan_speed', { pwm: val })
+  socketio.emit('F2B_fan_speed', { pwm: val });
 
-  target.style.backgroundSize = (val - min) * 100 / (max - min) + '% 100%'
-}
+  target.style.backgroundSize = ((val - min) * 100) / (max - min) + '% 100%';
+};
 const listenToSlider = function () {
-
   //#region testing
-  const rangeInputs = document.querySelectorAll('input[type="range"]')
-  const numberInput = document.querySelector('input[type="number"]')
+  const rangeInputs = document.querySelectorAll('input[type="range"]');
+  const numberInput = document.querySelector('input[type="number"]');
 
+  rangeInputs.forEach((input) => {
+    input.addEventListener('input', handleInputChange);
+  });
 
-  rangeInputs.forEach(input => {
-    input.addEventListener('input', handleInputChange)
-  })
-
-  numberInput.addEventListener('input', handleInputChange)
-
+  numberInput.addEventListener('input', handleInputChange);
 
   //#endregion
-
 };
 
 const listenToSocketFan = function () {
   socketio.on('B2F_fan_speed', function (msg) {
     // htmlRPM.innerHTML = Math.round(msg.rpm) + ' rpm';
-    let percentage = valueToPercentFan(msg.rpm)
+    let percentage = valueToPercentFan(msg.rpm);
 
-    fanChart.updateSeries([percentage])
+    fanChart.updateSeries([percentage]);
   });
   socketio.on('B2F_fan_pwm', function (pwm) {
-    let pwmVal = pwm.pwm
-    let slider = document.querySelector('.js-slider')
-    slider.value = pwmVal
-    document.querySelector('.js-slider-number').value = pwmVal
-    slider.style.backgroundSize = pwmVal + '% 100%'
-  })
+    let pwmVal = pwm.pwm;
+    let slider = document.querySelector('.js-slider');
+    slider.value = pwmVal;
+    document.querySelector('.js-slider-number').value = pwmVal;
+    slider.style.backgroundSize = pwmVal + '% 100%';
+  });
   socketio.on('B2F_fan_setting', function (msg) {
-    let setting = msg.setting
-    console.info(msg)
+    let setting = msg.setting;
+    console.info(msg);
     if (setting == 0) {
-      document
-        .querySelector('.js-toggle-fan-checkbox').checked = false
+      document.querySelector('.js-toggle-fan-checkbox').checked = false;
       showFanManSlider(msg.pwm);
     } else if (setting == 1) {
-      document
-        .querySelector('.js-toggle-fan-checkbox').checked = true
+      document.querySelector('.js-toggle-fan-checkbox').checked = true;
       hideFanManSlider(msg.pwm);
     }
-
-  })
+  });
 };
 
 const listenToHistoryDropdown = function () {
@@ -1088,7 +1044,6 @@ const listenTographOptions = function () {
   }
 };
 
-
 let disable_click_flag;
 const dontClickWhenScrolling = function () {
   window.addEventListener('scroll', () => {
@@ -1096,54 +1051,60 @@ const dontClickWhenScrolling = function () {
 
     if (timeout) clearTimeout(timeout);
 
-    timeout = setTimeout(function () { disable_click_flag = false }, 250);
-  })
+    timeout = setTimeout(function () {
+      disable_click_flag = false;
+    }, 250);
+  });
 };
 
 const listenToChartNavigation = function () {
-  document.querySelector('.js-temperature-chart').addEventListener('click', function () {
-
-    showHistoriekGrafiek('temperature')
-  })
-  document.querySelector('.js-co2-chart').addEventListener('click', function () {
-
-    showHistoriekGrafiek('co2')
-  })
-  document.querySelector('.js-humidity-chart').addEventListener('click', function () {
-
-    showHistoriekGrafiek('humidity')
-  })
-  document.querySelector('.js-pressure-chart').addEventListener('click', function () {
-
-    showHistoriekGrafiek('pressure')
-  })
-  document.querySelector('.js-iaq-chart').addEventListener('click', function () {
-
-    showHistoriekGrafiek('iaq')
-  })
+  document
+    .querySelector('.js-temperature-chart')
+    .addEventListener('click', function () {
+      showHistoriekGrafiek('temperature');
+    });
+  document
+    .querySelector('.js-co2-chart')
+    .addEventListener('click', function () {
+      showHistoriekGrafiek('co2');
+    });
+  document
+    .querySelector('.js-humidity-chart')
+    .addEventListener('click', function () {
+      showHistoriekGrafiek('humidity');
+    });
+  document
+    .querySelector('.js-pressure-chart')
+    .addEventListener('click', function () {
+      showHistoriekGrafiek('pressure');
+    });
+  document
+    .querySelector('.js-iaq-chart')
+    .addEventListener('click', function () {
+      showHistoriekGrafiek('iaq');
+    });
   document.querySelector('.js-pm-chart').addEventListener('click', function () {
-
-    showHistoriekGrafiek('pm')
-  })
-  document.querySelector('.js-pm-chart-NOP').addEventListener('click', function () {
-
-    showHistoriekGrafiek('pmnop')
-  })
-}
+    showHistoriekGrafiek('pm');
+  });
+  document
+    .querySelector('.js-pm-chart-NOP')
+    .addEventListener('click', function () {
+      showHistoriekGrafiek('pmnop');
+    });
+};
 
 const listenToBackBtn = function () {
-  htmlbackbtns.forEach(element => {
+  htmlbackbtns.forEach((element) => {
     element.addEventListener('click', function () {
       showLastPage();
-    })
+    });
   });
-}
+};
 
-
-let id
+let id;
 const restartCountdown = function () {
   if (id) {
-    clearInterval(id)
+    clearInterval(id);
   }
   let elem = document.querySelector('.c-progress');
   let width = 100;
@@ -1153,15 +1114,10 @@ const restartCountdown = function () {
       clearInterval(id);
     } else {
       width--;
-      elem.style.width = width + "%";
+      elem.style.width = width + '%';
     }
   }
-}
-
-
-
-
-
+};
 
 // #endregion
 const SetReload = function () {
@@ -1169,17 +1125,16 @@ const SetReload = function () {
 };
 // #region ***  Init / DOMContentLoaded                  ***********
 const init = function () {
-
   // setTimeout(SetReload, 30000)
   if (document.querySelector('.Homepagina')) {
     // getBrowerSize();
-
     loadQuerySelectors();
     listenToHistoryDropdown();
     listenToHistoriekDropdownMobile();
     listenToBtnSidebar();
     listenToMobileNav();
     listenTographOptions();
+    hideSidebar();
     listenToRefeshGraphs();
     listenToNoNewData();
     listenToNavigateToHistoriek();
@@ -1187,14 +1142,9 @@ const init = function () {
     hideAll();
     showAcuteleDataOnLoad();
     dontClickWhenScrolling();
-    restartCountdown()
+    restartCountdown();
     listenToBackBtn();
   }
 };
 
 document.addEventListener('DOMContentLoaded', init);
-
-
-
-
-
