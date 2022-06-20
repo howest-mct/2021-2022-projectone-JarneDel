@@ -165,6 +165,9 @@ const showIP = function (jsonIP) {
     }
     // new QRCode(document.querySelector('.qrCodeWlan'), wlanIps[0])
   }
+  if (!wlanIps[0]) {
+    document.querySelector('.js-box-wlan').style.display = 'none'
+  }
   const htmlElementWlan = document.querySelector('.js-wlan');
   const htmlElementLan = document.querySelector('.js-lan');
   let htmlWlan = '';
