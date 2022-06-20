@@ -1,17 +1,43 @@
 # Project One - AirInsight
 
+
+## table of contents
+- About Air Insight
+- Hardware
+- Features
+- Used frameworks
+- Installation manual
+- Instructables
+
+## About Air Insight
 Air insight is an air quality monitor that monitors co2, particulate matter, indoor air quality, temperature, humidity and atmospheric pressure
 
-## Built with
+It is made for people that want to know more about the air quality in their rooms or home. 
+
+## Hardware
+- Raspberry Pi 4B
+- SD card
+- Winsen MH-Z19B
+- Sensiron PMS5003
+- Bosch BME680
+- Noctua nf-a4x10 5V PWM fan (with tachometer)
+- 5V USB-C power supply 3A or more
+
+## Features
+1. Displaying Realtime Air quality 
+2. Viewing historical data
+3. Setting the fan speed to manual or smart mode
+4. viewing device IP address and fan speed
+
+## Used frameworks
 
 - Flask
 - Socketio
 - Apexcharts
 - Apache
 
-## Getting started
-
-- Clone the repo: `git clone https://github.com/howest-mct/2021-2022-projectone-JarneDel`
+## Installation manual
+- install Raspbian with desktop gui
 - Install apache2: `apt install apache2 -y`
 - Install MariaDB `apt install mariadb-server mariadb-client -y`
 - Secure MariaDB `mysql_secure_installation `
