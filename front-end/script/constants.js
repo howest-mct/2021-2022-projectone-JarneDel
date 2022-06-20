@@ -957,12 +957,12 @@ const chartTitles = {
 };
 
 const pageTitles = {
-  co2: 'CO2 History',
-  temperature: 'Temperature',
-  humidity: 'humidity',
-  pressure: 'Pressure',
-  iaq: 'Indoor Air Quality',
-  pm: 'Particulate Matter',
+  co2: 'CO2 [ppm]',
+  temperature: 'Temperature [°C]',
+  humidity: 'humidity [%]',
+  pressure: 'Pressure [Pa]',
+  iaq: 'Indoor Air Quality [%]',
+  pm: 'Particulate Matter [µg/m³]',
   pmnop: 'Number of particles / 100ml',
 };
 
