@@ -961,7 +961,7 @@ const pageTitles = {
   temperature: 'Temperature [°C]',
   humidity: 'humidity [%]',
   pressure: 'Pressure [Pa]',
-  iaq: 'Indoor Air Quality [%]',
+  iaq: 'Indoor Air Quality',
   pm: 'Particulate Matter [µg/m³]',
   pmnop: 'Number of particles / 100ml',
 };
