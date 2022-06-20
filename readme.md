@@ -141,4 +141,6 @@ WantedBy=multi-user.target
 
 ## Instructables
 
-I documented this project on Instuctables https://www.instructables.com/Air-Insight-Air-Quality-Monitor-With-Raspberry-Pi/
+
+On instructables I documented this project on Instuctables https://www.instructables.com/Air-Insight-Air-Quality-Monitor-With-Raspberry-Pi/
+This way you can recreate the project. The schematics are also available here
